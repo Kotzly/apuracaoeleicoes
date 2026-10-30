@@ -18,6 +18,13 @@ def _int_list(s: str) -> list[int]:
     return [int(x) for x in s.split(",") if x]
 
 
+def _positive_int(s: str) -> int:
+    n = int(s)
+    if n < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return n
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="election_tally", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -33,6 +40,8 @@ def main(argv: list[str] | None = None) -> int:
             sp.add_argument("--dest", type=Path, default=Path("data/raw"))
             sp.add_argument("--package",
                             help="dataset id on the portal, if different from the default")
+            sp.add_argument("--jobs", type=_positive_int, default=4,
+                            help="parallel downloads (default: 4)")
         if load:
             sp.add_argument("--db", type=Path, default=Path("elections.duckdb"))
             sp.add_argument("--offices", type=_int_list,
@@ -61,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
     if a.cmd in ("pipeline", "download"):
         from .download import download
-        files = download(a.year, a.dest, a.round, a.state, a.package)
+        files = download(a.year, a.dest, a.round, a.state, a.package, a.jobs)
         if a.cmd == "pipeline" and files:
             from .load import load
             load(files, a.db, a.year, a.offices)

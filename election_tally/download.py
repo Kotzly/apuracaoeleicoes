@@ -7,6 +7,7 @@ portal's CKAN API. When the TSE publishes the .sha512 next to a file, the downlo
 from __future__ import annotations
 
 import hashlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import requests
@@ -38,6 +39,10 @@ def list_resources(year: int, package: str | None = None) -> list[dict]:
     return [resources[k] for k in sorted(resources)]
 
 
+class DownloadError(RuntimeError):
+    """A file could not be downloaded or did not match its published SHA-512."""
+
+
 def _verify_sha512(target: Path, sha512_url: str) -> None:
     expected = requests.get(sha512_url, timeout=60).text.split()[0].lower()
     h = hashlib.sha512()
@@ -46,33 +51,64 @@ def _verify_sha512(target: Path, sha512_url: str) -> None:
             h.update(chunk)
     if h.hexdigest() != expected:
         target.unlink()
-        raise SystemExit(f"{target.name}: SHA-512 does not match the published one; file removed.")
+        raise DownloadError("SHA-512 does not match the published one; file removed")
+
+
+def _fetch(url: str, target: Path, sha512_url: str | None) -> Path:
+    """Downloads one file to a .part name and renames it only when complete."""
+    partial = target.with_name(target.name + ".part")
+    try:
+        with requests.get(url, stream=True, timeout=120) as r:
+            r.raise_for_status()
+            with open(partial, "wb") as f:
+                for chunk in r.iter_content(1 << 20):
+                    f.write(chunk)
+        partial.rename(target)
+    finally:
+        partial.unlink(missing_ok=True)
+    if sha512_url:
+        _verify_sha512(target, sha512_url)
+    return target
 
 
 def download(year: int, dest: Path, rounds: list[int] | None = None,
-             states: list[str] | None = None, package: str | None = None) -> list[Path]:
+             states: list[str] | None = None, package: str | None = None,
+             jobs: int = 4) -> list[Path]:
+    """Downloads the year's files, `jobs` at a time. Files already on disk are skipped."""
+    if jobs < 1:
+        raise ValueError("jobs must be at least 1")
     dest = dest / str(year)
     dest.mkdir(parents=True, exist_ok=True)
     states = [s.upper() for s in states] if states else None
-    downloaded = []
-    for rec in list_resources(year, package):
-        if (rounds and rec["round"] not in rounds) or (states and rec["state"] not in states):
-            continue
-        target = dest / rec["url"].rsplit("/", 1)[-1]
+    selected = [(rec, dest / rec["url"].rsplit("/", 1)[-1])
+                for rec in list_resources(year, package)
+                if not (rounds and rec["round"] not in rounds)
+                and not (states and rec["state"] not in states)]
+    if not selected:
+        print("No file matched the filters.")
+        return []
+    pending = []
+    for rec, target in selected:
         if target.exists():
             print(f"{target.name}: already exists, skipping")
         else:
-            print(f"downloading {target.name} ...", flush=True)
-            partial = target.with_name(target.name + ".part")
-            with requests.get(rec["url"], stream=True, timeout=120) as r:
-                r.raise_for_status()
-                with open(partial, "wb") as f:
-                    for chunk in r.iter_content(1 << 20):
-                        f.write(chunk)
-            partial.rename(target)
-            if rec["sha512_url"]:
-                _verify_sha512(target, rec["sha512_url"])
-        downloaded.append(target)
-    if not downloaded:
-        print("No file matched the filters.")
-    return downloaded
+            pending.append((rec, target))
+
+    failures = []
+    if pending:
+        print(f"downloading {len(pending)} file(s), {min(jobs, len(pending))} at a time",
+              flush=True)
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            futures = {pool.submit(_fetch, rec["url"], target, rec["sha512_url"]): target
+                       for rec, target in pending}
+            for future in as_completed(futures):
+                target = futures[future]
+                try:
+                    future.result()
+                    print(f"{target.name}: done", flush=True)
+                except Exception as exc:  # noqa: BLE001 - reported below, others keep going
+                    failures.append(f"  {target.name}: {exc}")
+    if failures:
+        raise SystemExit("Some downloads failed (finished files are kept; run again to "
+                         "retry the rest):\n" + "\n".join(sorted(failures)))
+    return [target for _, target in selected]

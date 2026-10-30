@@ -52,6 +52,8 @@ python -m election_tally inspect --year 2018 arquivo.zip      # mapeamento de co
 python -m election_tally validate --cycle ele2022 --election 544 --office 1   # soma dos BUs x oficial
 ```
 
+- Os downloads rodam em paralelo, 4 por vez (`--jobs N` muda isso). Se algum falhar, os
+  outros terminam e o comando lista o que falhou; rodar de novo baixa só o que falta.
 - Recarregar um ano/turno/UF substitui o que havia; anos diferentes convivem no mesmo banco.
 - `--offices` reduz bastante o tamanho (deputados e vereadores são a maior parte das linhas).
 - `validate` compara a soma dos boletins com o JSON oficial da divulgação
