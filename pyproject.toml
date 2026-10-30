@@ -1,7 +1,7 @@
 [project]
-name = "apuracao"
+name = "election-tally"
 version = "0.1.0"
-description = "Evolução da apuração das eleições a partir dos boletins de urna do TSE"
+description = "Evolution of election vote counting from TSE polling-station ballot reports"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["duckdb>=1.1", "requests>=2.28"]
@@ -15,5 +15,4 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["apuracao"]
-
+packages = ["election_tally"]
