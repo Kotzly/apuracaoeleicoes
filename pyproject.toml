@@ -4,11 +4,13 @@ version = "0.1.0"
 description = "Evolution of election vote counting from TSE polling-station ballot reports"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["duckdb>=1.1", "requests>=2.28"]
+# duckdb must match the major version inside the Superset image (docker/superset/Dockerfile):
+# a database file written by DuckDB 2.x cannot be opened by DuckDB 1.x.
+dependencies = ["duckdb>=1.4.2,<2", "requests>=2.28"]
 
 [project.optional-dependencies]
 dev = ["pytest"]
-superset = ["duckdb-engine"]
+superset = ["duckdb-engine>=0.17"]
 
 [build-system]
 requires = ["setuptools>=68"]

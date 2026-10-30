@@ -1,0 +1,33 @@
+slice_name: Sections received (cumulative)
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  datasource: 2__table
+  viz_type: echarts_timeseries_line
+  x_axis: bu_received_at
+  time_grain_sqla: PT1M
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: Sections received
+    optionName: metric_ceeca9c53535
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  rolling_type: cumsum
+  row_limit: 50000
+  show_legend: false
+  x_axis_title: "BU received at (Bras\xEDlia time)"
+  y_axis_format: SMART_NUMBER
+  comparison_type: values
+query_context: null
+cache_timeout: null
+uuid: a5f0ad79-9431-4f40-9cf2-40c50ae0eda1
+version: 1.0.0
+dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6

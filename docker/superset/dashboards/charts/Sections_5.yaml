@@ -1,0 +1,26 @@
+slice_name: Sections
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 2__table
+  viz_type: big_number_total
+  metric:
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: Sections
+    optionName: metric_47ce4acd33d2
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  y_axis_format: SMART_NUMBER
+  subheader: polling stations
+query_context: null
+cache_timeout: null
+uuid: a81f8fad-b50d-4894-bd9d-39d245ade0e0
+version: 1.0.0
+dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6

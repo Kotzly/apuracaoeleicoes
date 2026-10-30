@@ -1,0 +1,36 @@
+# Superset with the election-tally dashboards.
+#
+#   cp .env.example .env            # then set SUPERSET_SECRET_KEY
+#   docker compose up --build       # http://localhost:8088
+#
+# The DuckDB file comes from the pipeline (python -m election_tally pipeline ...).
+services:
+  superset:
+    build: ./superset
+    image: election-tally-superset:6.1.0
+    ports:
+      - "${SUPERSET_PORT:-8088}:8088"
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?set SUPERSET_SECRET_KEY in docker/.env}
+      SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-admin}
+    volumes:
+      # Election data, read-only. Fails fast if the file does not exist yet,
+      # instead of letting Docker create an empty directory in its place.
+      - type: bind
+        source: ${ELECTIONS_DB:-../elections.duckdb}
+        target: /data/elections.duckdb
+        read_only: true
+        bind:
+          create_host_path: false
+      # Dashboards kept in the repo; imported on every start.
+      - type: bind
+        source: ./superset/dashboards
+        target: /app/dashboards
+        read_only: true
+      # Superset's own metadata (users, saved charts), kept across restarts.
+      - superset_home:/app/superset_home
+    restart: unless-stopped
+
+volumes:
+  superset_home:

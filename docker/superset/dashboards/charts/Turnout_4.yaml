@@ -1,0 +1,26 @@
+slice_name: Turnout
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 2__table
+  viz_type: big_number_total
+  metric:
+    expressionType: SQL
+    sqlExpression: SUM(turnout) * 1.0 / NULLIF(SUM(eligible_voters), 0)
+    label: Turnout
+    optionName: metric_84ee79761e0c
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  y_axis_format: .1%
+  subheader: of eligible voters
+query_context: null
+cache_timeout: null
+uuid: fc663df5-0885-4e14-9125-8ca2b093aff9
+version: 1.0.0
+dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6

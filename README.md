@@ -25,7 +25,7 @@ vote-count curve at any level of aggregation.
 ## Usage
 
 ```bash
-pip install -e .            # or: pip install duckdb requests
+pip install -e .            # or: pip install "duckdb>=1.4.2,<2" requests
 
 python -m election_tally pipeline --year 2024                  # downloads and loads the whole year
 python -m election_tally pipeline --year 2022 --state SP,RJ --round 1 --offices 1,3
@@ -67,25 +67,45 @@ Points of attention:
 
 Examples for each level (evolution and consolidated) are in [`queries.sql`](queries.sql).
 
-## Superset
+## Superset (Docker)
+
+`docker/` runs Superset 6.1 with the DuckDB driver and loads the dashboards kept in
+the repo at every start.
 
 ```bash
-pip install duckdb-engine
+python -m election_tally pipeline --year 2024      # builds ./elections.duckdb
+cd docker
+cp .env.example .env                               # set SUPERSET_SECRET_KEY
+docker compose up --build                          # http://localhost:8088 (admin / admin)
 ```
 
-Connection (Settings → Database Connections → Other):
+The **Vote-count evolution** dashboard has filters for year, round, office, state,
+municipality and zone, and shows:
 
+- cumulative votes per candidate over the BU receipt time (the evolution curve);
+- cumulative sections received;
+- consolidated results with percentages, turnout and number of sections.
+
+How it fits together:
+
+- `docker/superset/Dockerfile` adds `duckdb` and `duckdb-engine` to the official image.
+  DuckDB stays on 1.x on both sides: a file written by DuckDB 2.x can't be opened by 1.x.
+- `docker/superset/bootstrap.sh` runs on start: migrations, admin user, then
+  `superset import-dashboards` with the YAML in `docker/superset/dashboards/`.
+- The DuckDB file is mounted **read-only** at `/data/elections.duckdb` (set `ELECTIONS_DB`
+  in `.env` to use another path). Reload data with Superset stopped, then start it again.
+- Superset's own metadata (users, extra charts) lives in the `superset_home` volume.
+
+**Editing dashboards.** The import overwrites the repo dashboards on every start, so
+edits made in the UI are lost unless you save them back:
+
+```bash
+docker/superset/export-dashboards.sh    # writes docker/superset/dashboards/; review and commit
 ```
-duckdb:////absolute/path/elections.duckdb?access_mode=read_only
-```
 
-Open it **read-only**: DuckDB allows only one process to write, and Superset holds
-the connection open. To reload data, stop Superset (or build a new file and swap it in).
-
-For the evolution curve: a time-series chart on `votes`, time axis `bu_received_at`
-(minute granularity), metric `SUM(vote_count)`, dimension `candidate_name`, filters
-on election year, office, state, municipality and zone, and, under *Advanced
-Analytics*, the **cumulative sum** option. This way the same chart works at any level.
+To build charts by hand instead, the evolution curve is a time-series chart on
+`votes`: time axis `bu_received_at` (minute grain), metric `SUM(vote_count)`, dimension
+`candidate_name`, and *Advanced Analytics → Rolling window → cumulative sum*.
 
 ## How to support a new year (or a changed layout)
 
