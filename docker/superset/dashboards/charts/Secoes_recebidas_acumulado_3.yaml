@@ -1,17 +1,17 @@
-slice_name: Sections received (cumulative)
+slice_name: "Se\xE7\xF5es recebidas (acumulado)"
 description: null
 certified_by: null
 certification_details: null
 viz_type: echarts_timeseries_line
 params:
-  datasource: 2__table
+  datasource: 1__table
   viz_type: echarts_timeseries_line
   x_axis: bu_received_at
   time_grain_sqla: PT1M
   metrics:
   - expressionType: SQL
     sqlExpression: COUNT(*)
-    label: Sections received
+    label: "Se\xE7\xF5es recebidas"
     optionName: metric_ceeca9c53535
   groupby: []
   adhoc_filters:
@@ -23,9 +23,10 @@ params:
   rolling_type: cumsum
   row_limit: 50000
   show_legend: false
-  x_axis_title: "BU received at (Bras\xEDlia time)"
+  x_axis_title: "Recebimento do BU (hor\xE1rio de Bras\xEDlia)"
   y_axis_format: SMART_NUMBER
   comparison_type: values
+  annotation_layers: []
 query_context: null
 cache_timeout: null
 uuid: a5f0ad79-9431-4f40-9cf2-40c50ae0eda1

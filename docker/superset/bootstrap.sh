@@ -22,15 +22,7 @@ superset init
 
 if [ -d "${DASHBOARDS_DIR}" ] && [ -f "${DASHBOARDS_DIR}/metadata.yaml" ]; then
     echo "== Importing dashboards from ${DASHBOARDS_DIR} (overwrites earlier imports)"
-    # superset import-dashboards takes a ZIP whose files sit under one top-level folder.
-    python - "${DASHBOARDS_DIR}" /tmp/dashboards.zip <<'EOF'
-import pathlib, sys, zipfile
-src, out = pathlib.Path(sys.argv[1]), sys.argv[2]
-with zipfile.ZipFile(out, "w") as z:
-    for f in sorted(src.rglob("*.yaml")):
-        z.write(f, pathlib.Path("dashboards") / f.relative_to(src))
-EOF
-    superset import-dashboards --path /tmp/dashboards.zip --username "${ADMIN_USERNAME}"
+    python /app/import_assets.py "${DASHBOARDS_DIR}" "${ADMIN_USERNAME}"
 else
     echo "== No dashboards found in ${DASHBOARDS_DIR}; skipping import"
 fi

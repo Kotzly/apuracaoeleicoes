@@ -1,10 +1,10 @@
-slice_name: Results
+slice_name: Resultado consolidado
 description: null
 certified_by: null
 certification_details: null
 viz_type: table
 params:
-  datasource: 1__table
+  datasource: 2__table
   viz_type: table
   query_mode: aggregate
   groupby:
@@ -14,12 +14,12 @@ params:
   metrics:
   - expressionType: SQL
     sqlExpression: SUM(vote_count)
-    label: Votes
+    label: Votos
     optionName: metric_e904f5c8576e
   percent_metrics:
   - expressionType: SQL
     sqlExpression: SUM(vote_count)
-    label: Votes
+    label: Votos
     optionName: metric_e904f5c8576e
   adhoc_filters:
   - clause: WHERE
@@ -31,12 +31,13 @@ params:
   timeseries_limit_metric:
     expressionType: SQL
     sqlExpression: SUM(vote_count)
-    label: Votes
+    label: Votos
     optionName: metric_e904f5c8576e
   row_limit: 1000
   server_page_length: 50
   show_cell_bars: true
   include_search: true
+  annotation_layers: []
 query_context: null
 cache_timeout: null
 uuid: a14a1182-f10f-4a93-924d-b5a8b57907f1

@@ -1,7 +1,7 @@
-dashboard_title: Vote-count evolution
+dashboard_title: "Evolu\xE7\xE3o da apura\xE7\xE3o"
 description: null
 css: null
-slug: vote-count-evolution
+slug: evolucao-da-apuracao
 certified_by: null
 certification_details: null
 published: true
@@ -27,7 +27,7 @@ position:
     type: HEADER
     id: HEADER_ID
     meta:
-      text: Vote-count evolution
+      text: "Evolu\xE7\xE3o da apura\xE7\xE3o"
   ROW-0:
     type: ROW
     id: ROW-0
@@ -49,11 +49,12 @@ position:
     meta:
       width: 12
       height: 18
-      code: "**How to read this dashboard.** Every polling-station ballot report (BU)\
-        \ carries the time it was received by the Electoral Justice. The curves add\
-        \ up the BUs in that order, for the year, round, office and area picked in\
-        \ the filters. Times are in Bras\xEDlia time. 2018 has no receipt time in\
-        \ the TSE files, so its curves stay empty; the totals still work."
+      code: "**Como ler este painel.** Cada boletim de urna (BU) traz o hor\xE1rio\
+        \ em que foi recebido pela Justi\xE7a Eleitoral. As curvas somam os BUs nessa\
+        \ ordem, para o ano, turno, cargo e \xE1rea escolhidos nos filtros. Os hor\xE1\
+        rios est\xE3o no hor\xE1rio de Bras\xEDlia. Em 2018 os arquivos do TSE n\xE3\
+        o trazem o hor\xE1rio de recebimento, ent\xE3o as curvas ficam vazias; os\
+        \ totais continuam valendo."
   ROW-1:
     type: ROW
     id: ROW-1
@@ -79,7 +80,7 @@ position:
       height: 30
       chartId: 4
       uuid: fc663df5-0885-4e14-9125-8ca2b093aff9
-      sliceName: Turnout
+      sliceName: Comparecimento
   CHART-sections_total:
     type: CHART
     id: CHART-sections_total
@@ -91,9 +92,9 @@ position:
     meta:
       width: 3
       height: 30
-      chartId: 5
+      chartId: 2
       uuid: a81f8fad-b50d-4894-bd9d-39d245ade0e0
-      sliceName: Sections
+      sliceName: "Se\xE7\xF5es"
   CHART-sections_curve:
     type: CHART
     id: CHART-sections_curve
@@ -105,9 +106,9 @@ position:
     meta:
       width: 6
       height: 30
-      chartId: 2
+      chartId: 3
       uuid: a5f0ad79-9431-4f40-9cf2-40c50ae0eda1
-      sliceName: Sections received (cumulative)
+      sliceName: "Se\xE7\xF5es recebidas (acumulado)"
   ROW-2:
     type: ROW
     id: ROW-2
@@ -129,9 +130,9 @@ position:
     meta:
       width: 12
       height: 60
-      chartId: 1
+      chartId: 5
       uuid: 4809acc0-4906-490b-9367-3ba204958ea1
-      sliceName: Vote-count evolution (cumulative votes)
+      sliceName: "Evolu\xE7\xE3o da apura\xE7\xE3o (votos acumulados)"
   ROW-3:
     type: ROW
     id: ROW-3
@@ -153,13 +154,13 @@ position:
     meta:
       width: 12
       height: 60
-      chartId: 3
+      chartId: 1
       uuid: a14a1182-f10f-4a93-924d-b5a8b57907f1
-      sliceName: Results
+      sliceName: Resultado consolidado
 metadata:
   native_filter_configuration:
   - id: NATIVE_FILTER-IoAjkTb0o6
-    name: Year
+    name: Ano
     filterType: filter_select
     type: NATIVE_FILTER
     targets:
@@ -191,7 +192,7 @@ metadata:
     - 5
     tabsInScope: []
   - id: NATIVE_FILTER-zjDDce1a8w
-    name: Round
+    name: Turno
     filterType: filter_select
     type: NATIVE_FILTER
     targets:
@@ -223,7 +224,7 @@ metadata:
     - 5
     tabsInScope: []
   - id: NATIVE_FILTER-VzJaZW0gXU
-    name: Office
+    name: Cargo
     filterType: filter_select
     type: NATIVE_FILTER
     targets:
@@ -255,7 +256,7 @@ metadata:
     - 5
     tabsInScope: []
   - id: NATIVE_FILTER-OL2GoDdX9s
-    name: State
+    name: UF
     filterType: filter_select
     type: NATIVE_FILTER
     targets:
@@ -287,7 +288,7 @@ metadata:
     - 5
     tabsInScope: []
   - id: NATIVE_FILTER-K5cj3qDKKm
-    name: Municipality
+    name: "Munic\xEDpio"
     filterType: filter_select
     type: NATIVE_FILTER
     targets:
@@ -320,7 +321,7 @@ metadata:
     - 5
     tabsInScope: []
   - id: NATIVE_FILTER-3lq8B582uN
-    name: Zone
+    name: Zona
     filterType: filter_select
     type: NATIVE_FILTER
     targets:

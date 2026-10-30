@@ -1,17 +1,17 @@
-slice_name: Vote-count evolution (cumulative votes)
+slice_name: "Evolu\xE7\xE3o da apura\xE7\xE3o (votos acumulados)"
 description: null
 certified_by: null
 certification_details: null
 viz_type: echarts_timeseries_line
 params:
-  datasource: 1__table
+  datasource: 2__table
   viz_type: echarts_timeseries_line
   x_axis: bu_received_at
   time_grain_sqla: PT1M
   metrics:
   - expressionType: SQL
     sqlExpression: SUM(vote_count)
-    label: Votes
+    label: Votos
     optionName: metric_e904f5c8576e
   groupby:
   - candidate_name
@@ -31,7 +31,7 @@ params:
   series_limit_metric:
     expressionType: SQL
     sqlExpression: SUM(vote_count)
-    label: Votes
+    label: Votos
     optionName: metric_e904f5c8576e
   order_desc: true
   rolling_type: cumsum
@@ -40,10 +40,11 @@ params:
   show_legend: true
   legendType: scroll
   legendOrientation: top
-  x_axis_title: "BU received at (Bras\xEDlia time)"
+  x_axis_title: "Recebimento do BU (hor\xE1rio de Bras\xEDlia)"
   rich_tooltip: true
   y_axis_format: SMART_NUMBER
   comparison_type: values
+  annotation_layers: []
 query_context: null
 cache_timeout: null
 uuid: 4809acc0-4906-490b-9367-3ba204958ea1

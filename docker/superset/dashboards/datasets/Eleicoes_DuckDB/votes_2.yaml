@@ -19,7 +19,7 @@ folders: null
 uuid: 77bc8f05-1e0f-4821-ab9e-df74c03a66fa
 metrics:
 - metric_name: count
-  verbose_name: COUNT(*)
+  verbose_name: Quantidade
   metric_type: count
   expression: COUNT(*)
   description: null
@@ -29,7 +29,7 @@ metrics:
   warning_text: null
 columns:
 - column_name: bu_received_at
-  verbose_name: BU received at
+  verbose_name: Recebimento do BU
   is_dttm: true
   is_active: true
   type: TIMESTAMP WITHOUT TIME ZONE
@@ -42,127 +42,10 @@ columns:
   datetime_format: null
   extra: null
 - column_name: vote_type
-  verbose_name: Vote type
+  verbose_name: Tipo de voto
   is_dttm: false
   is_active: true
   type: VARCHAR
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: candidate_name
-  verbose_name: Candidate
-  is_dttm: false
-  is_active: true
-  type: VARCHAR
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: municipality_name
-  verbose_name: Municipality
-  is_dttm: false
-  is_active: true
-  type: VARCHAR
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: office_name
-  verbose_name: Office
-  is_dttm: false
-  is_active: true
-  type: VARCHAR
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: party
-  verbose_name: Party
-  is_dttm: false
-  is_active: true
-  type: VARCHAR
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: state
-  verbose_name: State
-  is_dttm: false
-  is_active: true
-  type: VARCHAR
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: election_year
-  verbose_name: Year
-  is_dttm: false
-  is_active: true
-  type: SMALLINT
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: vote_count
-  verbose_name: Votes
-  is_dttm: false
-  is_active: true
-  type: INTEGER
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: zone
-  verbose_name: Zone
-  is_dttm: false
-  is_active: true
-  type: INTEGER
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
-- column_name: round_number
-  verbose_name: Round
-  is_dttm: false
-  is_active: true
-  type: TINYINT
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -172,7 +55,7 @@ columns:
   datetime_format: null
   extra: null
 - column_name: office_code
-  verbose_name: null
+  verbose_name: "C\xF3digo do cargo"
   is_dttm: false
   is_active: true
   type: SMALLINT
@@ -184,21 +67,8 @@ columns:
   python_date_format: null
   datetime_format: null
   extra: null
-- column_name: candidate_number
-  verbose_name: null
-  is_dttm: false
-  is_active: true
-  type: INTEGER
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  datetime_format: null
-  extra: null
 - column_name: municipality_code
-  verbose_name: null
+  verbose_name: "C\xF3digo do munic\xEDpio"
   is_dttm: false
   is_active: true
   type: INTEGER
@@ -211,7 +81,7 @@ columns:
   datetime_format: null
   extra: null
 - column_name: election_code
-  verbose_name: null
+  verbose_name: "C\xF3digo da elei\xE7\xE3o"
   is_dttm: false
   is_active: true
   type: INTEGER
@@ -223,11 +93,141 @@ columns:
   python_date_format: null
   datetime_format: null
   extra: null
-- column_name: section
-  verbose_name: null
+- column_name: candidate_number
+  verbose_name: "N\xFAmero do candidato"
   is_dttm: false
   is_active: true
   type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: candidate_name
+  verbose_name: Candidato
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_name
+  verbose_name: Cargo
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: state
+  verbose_name: UF
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: municipality_name
+  verbose_name: "Munic\xEDpio"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party
+  verbose_name: Partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_year
+  verbose_name: Ano
+  is_dttm: false
+  is_active: true
+  type: SMALLINT
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: section
+  verbose_name: "Se\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: vote_count
+  verbose_name: Votos
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: zone
+  verbose_name: Zona
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: round_number
+  verbose_name: Turno
+  is_dttm: false
+  is_active: true
+  type: TINYINT
   advanced_data_type: null
   groupby: true
   filterable: true

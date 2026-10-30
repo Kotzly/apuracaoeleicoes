@@ -12,6 +12,7 @@ RUN . /app/.venv/bin/activate && \
 
 COPY --chown=superset superset_config.py /app/pythonpath/superset_config.py
 COPY --chown=superset --chmod=755 bootstrap.sh /app/bootstrap.sh
+COPY --chown=superset import_assets.py /app/import_assets.py
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py
 
 USER superset

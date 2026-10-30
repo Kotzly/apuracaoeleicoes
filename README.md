@@ -1,123 +1,127 @@
 # apuracaoeleicoes
 
-Rebuilds the **vote-count evolution** of Brazilian elections (*evolução da
-apuração*) from the polling-station ballot reports (*boletins de urna*, BU)
-published by the TSE, broken down by country, state (UF), municipality and
-electoral zone. Everything is stored in a DuckDB file that is ready for Superset.
+Reconstrói a **evolução da apuração** das eleições brasileiras a partir dos
+boletins de urna (BU) publicados pelo TSE, por Brasil, UF, município e zona
+eleitoral. Tudo fica num arquivo DuckDB, com um painel pronto no Superset.
 
-The idea: each BU carries the time at which it was received by the Electoral
-Justice. Sorting the sections by that time and summing cumulatively gives the
-vote-count curve at any level of aggregation.
+A ideia: cada BU traz o horário em que foi recebido pela Justiça Eleitoral.
+Ordenando as seções por esse horário e somando de forma acumulada, sai a curva
+da apuração em qualquer nível de agregação.
 
-## Supported years
+## Anos suportados
 
-| Year | File | Evolution? | Notes |
-|------|------|------------|-------|
-| 2016 | TXT without header | yes | round comes from the file name; receipt time in local time (converted) |
-| 2018 | CSV | **no** | the TSE did not publish `DT_BU_RECEBIDO` or `DT_EMISSAO_BU`; only the consolidated totals |
-| 2020 | CSV | yes | some names with badly escaped quotes (handled) |
-| 2022 | CSV | yes | same layout as 2020 |
-| 2024 | CSV | yes | dates in ISO format, numbers without quotes |
-| 2026 | CSV | yes | same layout as 2024 |
+Todos conferidos com arquivos reais do TSE.
 
-2014 and earlier: the portal does not publish ballot reports in this format.
+| Ano | Arquivo | Evolução? | Observações |
+|-----|---------|-----------|-------------|
+| 2016 | TXT sem cabeçalho | sim | o turno vem do nome do arquivo; recebimento em horário local (convertido) |
+| 2018 | CSV | **não** | o TSE não publicou `DT_BU_RECEBIDO` nem `DT_EMISSAO_BU`; só o consolidado |
+| 2020 | CSV | sim | alguns nomes com aspas mal escapadas (tratado) |
+| 2022 | CSV | sim | mesmo layout de 2020 |
+| 2024 | CSV | sim | datas em ISO, números sem aspas |
+| 2026 | CSV | sim | mesmo layout de 2024 |
 
-## Usage
+2014 e anteriores: o portal não publica boletins de urna nesse formato.
+
+## Uso
 
 ```bash
-pip install -e .            # or: pip install "duckdb>=1.4.2,<2" requests
+pip install -e .            # ou: pip install "duckdb>=1.4.2,<2" requests
 
-python -m election_tally pipeline --year 2024                  # downloads and loads the whole year
+python -m election_tally pipeline --year 2024                 # baixa e carrega o ano inteiro
 python -m election_tally pipeline --year 2022 --state SP,RJ --round 1 --offices 1,3
 ```
 
-Individual commands:
+Comandos avulsos:
 
 ```bash
-python -m election_tally download --year 2022 --state AC          # download only (checks the SHA-512)
+python -m election_tally download --year 2022 --state AC      # só baixa (confere o SHA-512)
 python -m election_tally load --year 2022 data/raw/2022/*.zip
-python -m election_tally inspect --year 2018 file.zip             # column mapping of the file
-python -m election_tally validate --cycle ele2022 --election 544 --office 1   # sum of BUs x official
+python -m election_tally inspect --year 2018 arquivo.zip      # mapeamento de colunas do arquivo
+python -m election_tally validate --cycle ele2022 --election 544 --office 1   # soma dos BUs x oficial
 ```
 
-- Reloading a year/round/state replaces what was there before; different years coexist in the same database.
-- `--offices` greatly reduces the size of the database (federal and state deputies and city councillors make up most of the rows).
-- `validate` compares the sum of the ballot reports with the official JSON from the results release (`resultados.tse.jus.br`); use `--json` for a file that has already been downloaded.
+- Recarregar um ano/turno/UF substitui o que havia; anos diferentes convivem no mesmo banco.
+- `--offices` reduz bastante o tamanho (deputados e vereadores são a maior parte das linhas).
+- `validate` compara a soma dos boletins com o JSON oficial da divulgação
+  (`resultados.tse.jus.br`); use `--json` para um arquivo já baixado.
 
-## Data model
+## Modelo de dados
 
-Two tables, with no cumulative totals stored:
+Duas tabelas, sem nenhum acumulado gravado:
 
-- **`votes`**: one row per section × office × votable item (`vote_count`, `bu_received_at`, ...).
-- **`sections`**: one row per section × office (`eligible_voters`, `turnout`, ballot box times).
-  It is kept separate because these numbers would otherwise repeat on every row of `votes`.
+- **`votes`**: uma linha por seção × cargo × votável (`vote_count`, `bu_received_at`, ...).
+- **`sections`**: uma linha por seção × cargo (`eligible_voters`, `turnout`, horários da urna).
+  Fica separada porque esses números se repetiriam em toda linha de `votes`.
 
-Points of attention:
+Pontos de atenção:
 
-- **Times in Brasília.** Opening, closing and issuing times come in the ballot box's
-  local time; the receipt time comes in Brasília time (2020+) or local time (2016).
-  On load, everything is converted to Brasília time using the state's timezone
-  (daylight saving time included). Simplification: western Amazonas and Fernando de
-  Noronha use the state's main timezone, and abroad (`state = 'ZZ'`) is not converted.
-- **Zone ≠ municipality subdivision.** A zone can cover several municipalities, and a
-  municipality can have several zones. Group zones by `(state, zone)`.
-- **Abroad** (`state = 'ZZ'`) counts toward the Brazil total and toward no state.
-- **Uninstalled sections** appear with 0 votes and a null `candidate_number`.
-- Receipt ≠ publication: the curve reflects BUs arriving, not the exact curve shown on the TSE website.
+- **Horários em Brasília.** Abertura, encerramento e emissão vêm no horário local da
+  urna; o recebimento vem no horário de Brasília (2020 em diante) ou local (2016). Na
+  carga, tudo é convertido para o horário de Brasília pelo fuso da UF (com horário de
+  verão). Simplificação: oeste do AM e Fernando de Noronha usam o fuso principal da UF,
+  e o exterior (`state = 'ZZ'`) não é convertido.
+- **Zona não é subdivisão de município.** Uma zona pode abranger vários municípios, e um
+  município pode ter várias zonas. Agrupe zonas por `(state, zone)`.
+- **Exterior** (`state = 'ZZ'`) entra no total do Brasil e em nenhuma UF.
+- **Seções não instaladas** aparecem com 0 votos e `candidate_number` nulo.
+- Recebimento não é divulgação: a curva é a dos BUs chegando, não exatamente a que
+  apareceu no site do TSE.
 
-Examples for each level (evolution and consolidated) are in [`queries.sql`](queries.sql).
+Exemplos de consulta para cada nível (evolução e consolidado) em [`queries.sql`](queries.sql).
 
 ## Superset (Docker)
 
-`docker/` runs Superset 6.1 with the DuckDB driver and loads the dashboards kept in
-the repo at every start.
+A pasta `docker/` sobe o Superset 6.1 com o driver do DuckDB e carrega os painéis
+guardados no repositório a cada inicialização.
 
 ```bash
-python -m election_tally pipeline --year 2024      # builds ./elections.duckdb
+python -m election_tally pipeline --year 2024      # gera ./elections.duckdb
 cd docker
-cp .env.example .env                               # set SUPERSET_SECRET_KEY
+cp .env.example .env                               # defina SUPERSET_SECRET_KEY
 docker compose up --build                          # http://localhost:8088 (admin / admin)
 ```
 
-The **Vote-count evolution** dashboard has filters for year, round, office, state,
-municipality and zone, and shows:
+O painel **Evolução da apuração** tem filtros de ano, turno, cargo, UF, município e
+zona, e mostra:
 
-- cumulative votes per candidate over the BU receipt time (the evolution curve);
-- cumulative sections received;
-- consolidated results with percentages, turnout and number of sections.
+- os votos acumulados por candidato ao longo do recebimento dos BUs (a curva da apuração);
+- as seções recebidas, acumuladas;
+- o resultado consolidado com percentuais, o comparecimento e o número de seções.
 
-How it fits together:
+Como as peças se encaixam:
 
-- `docker/superset/Dockerfile` adds `duckdb` and `duckdb-engine` to the official image.
-  DuckDB stays on 1.x on both sides: a file written by DuckDB 2.x can't be opened by 1.x.
-- `docker/superset/bootstrap.sh` runs on start: migrations, admin user, then
-  `superset import-dashboards` with the YAML in `docker/superset/dashboards/`.
-- The DuckDB file is mounted **read-only** at `/data/elections.duckdb` (set `ELECTIONS_DB`
-  in `.env` to use another path). Reload data with Superset stopped, then start it again.
-- Superset's own metadata (users, extra charts) lives in the `superset_home` volume.
+- `docker/superset/Dockerfile` acrescenta `duckdb` e `duckdb-engine` à imagem oficial.
+  O DuckDB fica na versão 1.x dos dois lados: um arquivo gravado pelo DuckDB 2.x não abre no 1.x.
+- `docker/superset/bootstrap.sh` roda a cada inicialização: migrações, usuário admin e
+  importação dos YAML de `docker/superset/dashboards/` (por `import_assets.py`), que
+  sobrescreve conexão, datasets, gráficos e painéis já existentes.
+- O arquivo DuckDB é montado **somente leitura** em `/data/elections.duckdb` (defina
+  `ELECTIONS_DB` no `.env` para outro caminho). Recarregue os dados com o Superset
+  parado e suba de novo.
+- Os metadados do próprio Superset (usuários, gráficos extras) ficam no volume `superset_home`.
 
-**Editing dashboards.** The import overwrites the repo dashboards on every start, so
-edits made in the UI are lost unless you save them back:
+**Editando os painéis.** Como a importação sobrescreve os painéis do repositório a cada
+inicialização, edições feitas na interface se perdem se não forem salvas de volta:
 
 ```bash
-docker/superset/export-dashboards.sh    # writes docker/superset/dashboards/; review and commit
+docker/superset/export-dashboards.sh    # grava em docker/superset/dashboards/; revise e faça commit
 ```
 
-To build charts by hand instead, the evolution curve is a time-series chart on
-`votes`: time axis `bu_received_at` (minute grain), metric `SUM(vote_count)`, dimension
-`candidate_name`, and *Advanced Analytics → Rolling window → cumulative sum*.
+Para montar gráficos à mão, a curva da apuração é um gráfico de série temporal sobre
+`votes`: eixo `bu_received_at` (granularidade de minuto), métrica `SUM(vote_count)`,
+dimensão `candidate_name` e, em *Advanced Analytics → Rolling window*, a soma cumulativa.
 
-## How to support a new year (or a changed layout)
+## Como suportar um ano novo (ou um layout que mudou)
 
-Each year uses a `Format` (`election_tally/formats.py`), which defines where the
-files are, how to read them, and which raw column each column of the canonical
-schema comes from. A column with no match becomes `NULL`; a missing required column
-makes the load fail.
+Cada ano usa um `Format` (`election_tally/formats.py`), que define onde estão os
+arquivos, como lê-los e de que coluna bruta sai cada coluna do schema canônico.
+Coluna sem correspondência vira `NULL`; coluna obrigatória ausente faz a carga falhar.
 
-1. Run `python -m election_tally inspect --year YYYY file.zip` on a file from that year.
-2. If only the name of a column changed, add the alias to the `mapping` of `BwebCSV`.
-3. If the way of reading changed (separator, header, timezone, column derivation),
-   create a subclass that overrides only the difference and register the year:
+1. Rode `python -m election_tally inspect --year AAAA arquivo.zip` num arquivo do ano.
+2. Se só mudou o nome de uma coluna, acrescente o alias no `mapping` de `BwebCSV`.
+3. Se mudou a forma de ler (separador, cabeçalho, fuso, derivação de coluna), crie
+   uma subclasse que sobrescreve só a diferença e registre o ano:
 
 ```python
 @register(2028)
@@ -126,15 +130,15 @@ class Bweb2028(BwebCSV):
     mapping = {**BwebCSV.mapping, "section": ["NUM_SECAO"]}
 ```
 
-Years without their own format inherit the format of the most recent registered
-year before them. A new column in the schema goes into `CANONICAL`; existing tables
-gain the column with `NULL` for the older years.
+Anos sem formato próprio herdam o do ano registrado mais recente anterior a eles.
+Uma coluna nova no schema entra em `CANONICAL`; as tabelas existentes ganham a coluna
+com `NULL` nos anos antigos.
 
-## Tests
+## Testes
 
 ```bash
 pip install pytest && python -m pytest
 ```
 
-The tests use synthetic data and real samples (AC, 1st round) from 2016, 2018, 2020
-and 2024 in `tests/data/`.
+Os testes usam dados sintéticos e amostras reais (AC, 1º turno) de 2016, 2018, 2020,
+2022, 2024 e 2026 em `tests/data/`.

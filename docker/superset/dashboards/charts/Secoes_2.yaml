@@ -1,26 +1,27 @@
-slice_name: Turnout
+slice_name: "Se\xE7\xF5es"
 description: null
 certified_by: null
 certification_details: null
 viz_type: big_number_total
 params:
-  datasource: 2__table
+  datasource: 1__table
   viz_type: big_number_total
   metric:
     expressionType: SQL
-    sqlExpression: SUM(turnout) * 1.0 / NULLIF(SUM(eligible_voters), 0)
-    label: Turnout
-    optionName: metric_84ee79761e0c
+    sqlExpression: COUNT(*)
+    label: "Se\xE7\xF5es"
+    optionName: metric_47ce4acd33d2
   adhoc_filters:
   - clause: WHERE
     expressionType: SIMPLE
     subject: bu_received_at
     operator: TEMPORAL_RANGE
     comparator: No filter
-  y_axis_format: .1%
-  subheader: of eligible voters
+  y_axis_format: SMART_NUMBER
+  subheader: "se\xE7\xF5es eleitorais"
+  annotation_layers: []
 query_context: null
 cache_timeout: null
-uuid: fc663df5-0885-4e14-9125-8ca2b093aff9
+uuid: a81f8fad-b50d-4894-bd9d-39d245ade0e0
 version: 1.0.0
 dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6
