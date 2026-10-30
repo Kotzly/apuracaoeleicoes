@@ -32,6 +32,15 @@ python -m election_tally pipeline --year 2024                 # baixa e carrega 
 python -m election_tally pipeline --year 2022 --state SP,RJ --round 1 --offices 1,3
 ```
 
+Cada execução acrescenta ao mesmo `elections.duckdb` (ou ao arquivo de `--db`). Para
+vários anos, rode uma vez por ano:
+
+```bash
+for ano in 2016 2018 2020 2022 2024 2026; do
+    python -m election_tally pipeline --year $ano
+done
+```
+
 Comandos avulsos:
 
 ```bash
@@ -76,7 +85,7 @@ A pasta `docker/` sobe o Superset 6.1 com o driver do DuckDB e carrega os painé
 guardados no repositório a cada inicialização.
 
 ```bash
-python -m election_tally pipeline --year 2024      # gera ./elections.duckdb
+python -m election_tally pipeline --year 2024      # cria ou atualiza ./elections.duckdb
 cd docker
 cp .env.example .env                               # defina SUPERSET_SECRET_KEY
 docker compose up --build                          # http://localhost:8088 (admin / admin)
