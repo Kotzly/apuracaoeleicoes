@@ -11,6 +11,8 @@ format use the format of the most recent registered year before them.
 
 Layouts checked against real files (AC, 1st round). BU = boletim de urna, the
 polling-station ballot report.
+  2014  Same TXT layout as 2016, but DT_BU_RECEBIDO has only the date (no time), so
+        bu_received_at stays NULL; office names in upper case.
   2016  TXT without header, 31 positional columns (see leia-meArquivo_BU-WEB.pdf),
         without round or vote-type description.
   2018  CSV with header; column "SG_ UF" (with a space); WITHOUT DT_BU_RECEBIDO and
@@ -72,6 +74,13 @@ BRASILIA_TZ = "America/Sao_Paulo"
 
 # Missing-value markers used by the TSE.
 NULL_MARKERS = ("", "#NULO#", "#NE#")
+
+# Office code -> canonical name. Names in the files are matched case-insensitively
+# (2014 writes "PRESIDENTE"); sections that were not installed come with the code but
+# no name, and get it from here.
+OFFICES = {1: "Presidente", 3: "Governador", 5: "Senador", 6: "Deputado Federal",
+           7: "Deputado Estadual", 8: "Deputado Distrital", 11: "Prefeito", 13: "Vereador"}
+OFFICE_NAMES = list(OFFICES.values())
 
 _REGISTRY: dict[int, type[Format]] = {}
 
@@ -171,6 +180,10 @@ class Format:
         if sql_type == "TIMESTAMP":
             attempts = ", ".join(f"try_strptime({value}, '{f}')" for f in self.date_formats)
             return f"coalesce({attempts})"
+        if canonical == "office_name":
+            # Same spelling in every year (2014 writes "PRESIDENTE", later years "Presidente").
+            cases = " ".join(f"WHEN '{o.upper()}' THEN '{o}'" for o in OFFICE_NAMES)
+            return f"CASE upper({value}) {cases} ELSE {value} END"
         if sql_type == "VARCHAR":
             return value
         expr = f"TRY_CAST({value} AS {sql_type})"
@@ -236,7 +249,7 @@ class BwebCSV(Format):
     }
 
 
-# Vote-type codes (same in 2016–2024).
+# Vote-type codes (same in 2014–2026).
 VOTE_TYPES = {1: "Nominal", 2: "Branco", 3: "Nulo", 4: "Legenda"}
 
 
@@ -265,3 +278,14 @@ class BwebTXT2016(BwebCSV):
             cases = " ".join(f"WHEN '{k}' THEN '{v}'" for k, v in VOTE_TYPES.items())
             return f"CASE trim({self._quote(raw)}) {cases} END"
         return super().expression(canonical, raw, constant)
+
+
+@register(2014)
+class BwebTXT2014(BwebTXT2016):
+    """2014: the 2016 TXT layout, but DT_BU_RECEBIDO holds only the date (e.g. "05/10/2014").
+
+    A date without time can't place a BU on the tally curve, so the receipt time is left
+    NULL on purpose: 2014 gives the consolidated totals only.
+    """
+
+    mapping = {k: v for k, v in BwebTXT2016.mapping.items() if k != "bu_received_at"}

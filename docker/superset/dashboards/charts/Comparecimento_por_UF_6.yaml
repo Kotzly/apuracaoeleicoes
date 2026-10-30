@@ -1,0 +1,34 @@
+slice_name: Comparecimento por UF
+description: null
+certified_by: null
+certification_details: null
+viz_type: country_map
+params:
+  datasource: 1__table
+  viz_type: country_map
+  select_country: brazil
+  entity: state_iso
+  metric:
+    expressionType: SQL
+    label: Comparecimento
+    sqlExpression: SUM(turnout) * 1.0 / NULLIF(SUM(eligible_voters), 0)
+    optionName: metric_mapa_comparecimento
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: state
+    operator: '!='
+    comparator: ZZ
+  row_limit: 100
+  number_format: .1%
+  linear_color_scheme: schemeYlGnBu
+query_context: null
+cache_timeout: null
+uuid: 5aa6f75b-8862-4963-9154-fc5048ce3486
+version: 1.0.0
+dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6

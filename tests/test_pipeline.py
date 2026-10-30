@@ -245,3 +245,16 @@ def test_discovery_skips_hash_and_accepts_uppercase(monkeypatch):
     assert [(r["round"], r["state"]) for r in recs] == [(1, "AC"), (2, "SP")]
     assert recs[0]["sha512_url"] == urls[1]
     assert recs[1]["sha512_url"] is None
+
+
+
+def test_unmapped_city_abroad_fails_without_touching_data(tmp_path):
+    from election_tally.countries import UnmappedCityError
+
+    db_path = tmp_path / "zz.duckdb"
+    load([_zip(tmp_path, "ok", SECTIONS)], db_path, 2022)
+    abroad = [("ZZ", 99999, "ATLÂNTIDA", 1, 1, "02/10/2022 20:00:00", 50, 40, {13: 20, 22: 20})]
+    with pytest.raises(UnmappedCityError, match="99999,ATLÂNTIDA"):
+        load([_zip(tmp_path, "zz", abroad)], db_path, 2022)
+    assert _q(db_path, "SELECT count(*) FROM votes") == [(20,)]
+    assert _q(db_path, "SELECT count(*) FROM votes WHERE state = 'ZZ'") == [(0,)]

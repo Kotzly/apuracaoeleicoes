@@ -78,7 +78,7 @@ position:
     meta:
       width: 3
       height: 30
-      chartId: 4
+      chartId: 1
       uuid: fc663df5-0885-4e14-9125-8ca2b093aff9
       sliceName: Comparecimento
   CHART-sections_total:
@@ -92,7 +92,7 @@ position:
     meta:
       width: 3
       height: 30
-      chartId: 2
+      chartId: 4
       uuid: a81f8fad-b50d-4894-bd9d-39d245ade0e0
       sliceName: "Se\xE7\xF5es"
   CHART-sections_curve:
@@ -106,7 +106,7 @@ position:
     meta:
       width: 6
       height: 30
-      chartId: 3
+      chartId: 5
       uuid: a5f0ad79-9431-4f40-9cf2-40c50ae0eda1
       sliceName: "Se\xE7\xF5es recebidas (acumulado)"
   ROW-2:
@@ -130,13 +130,14 @@ position:
     meta:
       width: 12
       height: 60
-      chartId: 5
+      chartId: 2
       uuid: 4809acc0-4906-490b-9367-3ba204958ea1
       sliceName: "Evolu\xE7\xE3o da apura\xE7\xE3o (votos acumulados)"
   ROW-3:
     type: ROW
     id: ROW-3
     children:
+    - CHART-map
     - CHART-results
     parents:
     - ROOT_ID
@@ -152,11 +153,25 @@ position:
     - GRID_ID
     - ROW-3
     meta:
-      width: 12
+      width: 6
       height: 60
-      chartId: 1
+      chartId: 3
       uuid: a14a1182-f10f-4a93-924d-b5a8b57907f1
       sliceName: Resultado consolidado
+  CHART-map:
+    type: CHART
+    id: CHART-map
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-3
+    meta:
+      width: 6
+      height: 60
+      chartId: 6
+      uuid: 5aa6f75b-8862-4963-9154-fc5048ce3486
+      sliceName: Comparecimento por UF
 metadata:
   native_filter_configuration:
   - id: NATIVE_FILTER-IoAjkTb0o6
@@ -190,6 +205,7 @@ metadata:
     - 3
     - 4
     - 5
+    - 6
     tabsInScope: []
   - id: NATIVE_FILTER-zjDDce1a8w
     name: Turno
@@ -222,6 +238,7 @@ metadata:
     - 3
     - 4
     - 5
+    - 6
     tabsInScope: []
   - id: NATIVE_FILTER-VzJaZW0gXU
     name: Cargo
@@ -254,6 +271,7 @@ metadata:
     - 3
     - 4
     - 5
+    - 6
     tabsInScope: []
   - id: NATIVE_FILTER-OL2GoDdX9s
     name: UF
@@ -286,6 +304,7 @@ metadata:
     - 3
     - 4
     - 5
+    - 6
     tabsInScope: []
   - id: NATIVE_FILTER-K5cj3qDKKm
     name: "Munic\xEDpio"
@@ -319,6 +338,7 @@ metadata:
     - 3
     - 4
     - 5
+    - 6
     tabsInScope: []
   - id: NATIVE_FILTER-3lq8B582uN
     name: Zona
@@ -352,6 +372,7 @@ metadata:
     - 3
     - 4
     - 5
+    - 6
     tabsInScope: []
   cross_filters_enabled: false
   color_scheme: supersetColors
@@ -361,5 +382,7 @@ metadata:
   label_colors: {}
   shared_label_colors: []
   chart_configuration: {}
+  map_label_colors: {}
+  color_scheme_domain: []
 theme_uuid: null
 version: 1.0.0

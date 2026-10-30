@@ -36,10 +36,10 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
-  datetime_format: null
+  datetime_format: '%Y-%m-%d %H:%M:%S'
   extra: null
 - column_name: bu_issued_at
   verbose_name: "Emiss\xE3o do BU"
@@ -49,10 +49,10 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
-  datetime_format: null
+  datetime_format: '%Y-%m-%d %H:%M:%S'
   extra: null
 - column_name: bu_received_at
   verbose_name: Recebimento do BU
@@ -62,16 +62,42 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
-  datetime_format: null
+  datetime_format: '%Y-%m-%d %H:%M:%S'
   extra: null
 - column_name: closed_at
   verbose_name: Encerramento da urna
   is_dttm: true
   is_active: true
   type: TIMESTAMP WITHOUT TIME ZONE
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: '%Y-%m-%d %H:%M:%S'
+  extra: null
+- column_name: state_iso
+  verbose_name: "UF (c\xF3digo ISO)"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: false
+  expression: '''BR-'' || state'
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: country_code
+  verbose_name: "C\xF3digo do pa\xEDs (ISO)"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -88,7 +114,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -101,7 +127,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -114,7 +140,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -127,7 +153,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -140,7 +166,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -153,7 +179,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -166,7 +192,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -179,7 +205,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -192,7 +218,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -205,7 +231,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -218,7 +244,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -231,7 +257,7 @@ columns:
   advanced_data_type: null
   groupby: true
   filterable: true
-  expression: null
+  expression: ''
   description: null
   python_date_format: null
   datetime_format: null
@@ -241,6 +267,19 @@ columns:
   is_dttm: false
   is_active: true
   type: TINYINT
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: country
+  verbose_name: "Pa\xEDs"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
   advanced_data_type: null
   groupby: true
   filterable: true
