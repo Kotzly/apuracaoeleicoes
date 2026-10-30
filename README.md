@@ -16,9 +16,9 @@ vote-count curve at any level of aggregation.
 | 2016 | TXT without header | yes | round comes from the file name; receipt time in local time (converted) |
 | 2018 | CSV | **no** | the TSE did not publish `DT_BU_RECEBIDO` or `DT_EMISSAO_BU`; only the consolidated totals |
 | 2020 | CSV | yes | some names with badly escaped quotes (handled) |
-| 2022 | CSV | yes | same layout as 2020 (not checked against a real file) |
+| 2022 | CSV | yes | same layout as 2020 |
 | 2024 | CSV | yes | dates in ISO format, numbers without quotes |
-| 2026 | CSV | yes | assumes the 2024 layout |
+| 2026 | CSV | yes | same layout as 2024 |
 
 2014 and earlier: the portal does not publish ballot reports in this format.
 

@@ -12,7 +12,9 @@ SAMPLES = {
     2016: "bweb_1t_AC_04102016204813.zip",
     2018: "bweb_1t_AC_101020181938.zip",
     2020: "bweb_1t_AC_181120201549.zip",
+    2022: "bweb_1t_AC_051020221321.zip",
     2024: "bweb_1t_AC_091020241636.zip",
+    2026: "bweb_1t_AC_051020261403.zip",
 }
 
 
@@ -31,7 +33,7 @@ def _q(db, sql):
 
 def test_all_years_share_schema(db):
     assert _q(db, "SELECT election_year, count(*) FROM votes GROUP BY 1 ORDER BY 1") == \
-        [(2016, 42), (2018, 40), (2020, 41), (2024, 40)]
+        [(2016, 42), (2018, 40), (2020, 41), (2022, 40), (2024, 40), (2026, 40)]
     nulls = _q(db, """SELECT election_year FROM votes WHERE round_number IS NULL OR state IS NULL
                       OR municipality_code IS NULL OR zone IS NULL OR section IS NULL
                       OR office_code IS NULL OR vote_count IS NULL""")
@@ -74,3 +76,10 @@ def test_times_in_brasilia(db):
 def test_eligible_voters_consistent(db):
     assert _q(db, """SELECT count(*) FROM sections
                      WHERE eligible_voters <> turnout + abstentions""") == [(0,)]
+
+
+
+def test_unified_voting_hours_in_brasilia_time(db):
+    # Since 2022 every state votes 08:00-17:00 Brasília time (06:00-15:00 local in AC).
+    assert _q(db, """SELECT count(*) FROM sections WHERE election_year IN (2022, 2024, 2026)
+                     AND (opened_at::TIME < '07:59' OR closed_at::TIME < '16:59')""") == [(0,)]

@@ -15,12 +15,11 @@ polling-station ballot report.
         without round or vote-type description.
   2018  CSV with header; column "SG_ UF" (with a space); WITHOUT DT_BU_RECEBIDO and
         WITHOUT DT_EMISSAO_BU -> there is no way to rebuild the tally progress.
-  2020  CSV same as 2022; has badly escaped quotes in some names.
-  2024  CSV with unquoted numbers and ISO dates (YYYY-MM-DD hh:mm:ss).
+  2020  CSV; has badly escaped quotes in some names. 2022 has the same layout.
+  2024  CSV with unquoted numbers and ISO dates (YYYY-MM-DD hh:mm:ss). 2026 has the same layout.
 
 Time zones: opening/closing/issuing always come in the ballot box's local time.
-The receipt comes in Brasília time in 2020 and 2024 (and, presumably, 2022),
-but in local time in 2016. Everything is stored in Brasília time.
+The receipt comes in Brasília time from 2020 on, but in local time in 2016. Everything is stored in Brasília time.
 """
 
 from __future__ import annotations
