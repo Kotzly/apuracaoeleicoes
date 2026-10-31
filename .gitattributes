@@ -1,3 +1,5 @@
 # Raw TSE samples (Latin-1, some with CRLF line endings): store the bytes exactly as
 # published, with no line-ending conversion, but still show text diffs.
 tests/data/** -text diff
+# Run inside Linux containers: a CRLF shebang fails with "no such file or directory".
+*.sh text eol=lf
