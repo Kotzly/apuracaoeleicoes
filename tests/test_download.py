@@ -112,3 +112,41 @@ def test_a_failure_keeps_the_others_and_is_reported(portal, tmp_path):
 def test_jobs_must_be_positive(tmp_path):
     with pytest.raises(ValueError):
         download.download(2022, tmp_path, jobs=0)
+
+
+def test_download_municipalities_writes_normalized_table(monkeypatch, tmp_path):
+    import io
+    import zipfile
+
+    from election_tally import municipalities
+
+    raw = ('"DT_GERACAO";"HH_GERACAO";"CD_UF_TSE";"CD_UF_IBGE";"SG_UF";"NM_UF";'
+           '"CD_MUNICIPIO_TSE";"NM_MUNICIPIO_TSE";"CD_MUNICIPIO_IBGE";"NM_MUNICIPIO_IBGE"\n'
+           '"25/10/2026";"09:00:09";24;12;"AC";"Acre";"01392";"Rio Branco";1200401;"Rio Branco"\n'
+           '"25/10/2026";"09:00:09";24;12;"AC";"Acre";"01007";"Bujari";1200138;"Bujari"\n')
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("municipio_tse_ibge.csv", raw.encode("latin-1"))
+
+    class Resp:
+        content = buf.getvalue()
+        def raise_for_status(self): pass
+
+    monkeypatch.setattr(municipalities.requests, "get", lambda url, timeout: Resp())
+    out = municipalities.download(tmp_path / "m.csv")
+    assert out.read_text(encoding="utf-8").splitlines() == [
+        "state,municipality_code,municipality_name,ibge_code",
+        "AC,1007,Bujari,1200138",
+        "AC,1392,Rio Branco,1200401",
+    ]
+
+
+def test_packaged_municipality_table_is_complete():
+    import csv
+
+    from election_tally.municipalities import TABLE_PATH
+
+    rows = list(csv.DictReader(open(TABLE_PATH, encoding="utf-8")))
+    assert len(rows) > 5500
+    assert len({r["municipality_code"] for r in rows}) == len(rows)
+    assert all(r["ibge_code"].isdigit() and len(r["ibge_code"]) == 7 for r in rows)

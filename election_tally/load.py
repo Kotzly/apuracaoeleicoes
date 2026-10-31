@@ -14,23 +14,24 @@ from pathlib import Path
 
 import duckdb
 
-from . import countries
+from . import countries, municipalities
 from .formats import CANONICAL, OFFICES, format_for
 
 # Canonical columns plus the ones derived during the load.
-COLUMN_TYPES = {**CANONICAL, **countries.COLUMNS}
+COLUMN_TYPES = {**CANONICAL, **countries.COLUMNS, "municipality_ibge_code": "INTEGER"}
 
 SECTION_KEY = ["election_year", "round_number", "election_code", "state", "municipality_code",
                "zone", "section", "office_code"]
 VOTES_COLUMNS = ["election_year", "round_number", "election_code", "state", "municipality_code",
                  "municipality_name", "zone", "section", "office_code", "office_name",
                  "vote_type", "candidate_number", "candidate_name", "party", "vote_count",
-                 "bu_received_at", "country", "country_code"]
+                 "bu_received_at", "country", "country_code", "municipality_ibge_code"]
 # Eligible voters and turnout repeat on every votes row of a section; they live here
 # so they are not summed twice.
 SECTIONS_COLUMNS = SECTION_KEY + ["municipality_name", "office_name", "eligible_voters",
                                   "turnout", "abstentions", "opened_at", "closed_at",
-                                  "bu_issued_at", "bu_received_at", "country", "country_code"]
+                                  "bu_issued_at", "bu_received_at", "country", "country_code",
+                                  "municipality_ibge_code"]
 # How each column of `sections` is reduced from the section's votes rows.
 _SECTION_AGGREGATION = {"opened_at": "min", "closed_at": "max",
                         "bu_issued_at": "min", "bu_received_at": "min"}
@@ -70,6 +71,7 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
                 "AND staging.office_code = o.code", [list(OFFICES), list(OFFICES.values())])
     # Fails before anything is replaced if a city abroad has no known country.
     countries.add_country(con, "staging")
+    municipalities.add_ibge_code(con, "staging")
     n = con.execute("SELECT count(*) FROM staging").fetchone()[0]
     missing_time = con.execute(
         "SELECT count(*) FROM staging WHERE bu_received_at IS NULL").fetchone()[0]

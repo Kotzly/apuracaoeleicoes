@@ -92,7 +92,7 @@ position:
     meta:
       width: 3
       height: 30
-      chartId: 4
+      chartId: 5
       uuid: a81f8fad-b50d-4894-bd9d-39d245ade0e0
       sliceName: "Se\xE7\xF5es"
   CHART-sections_curve:
@@ -106,7 +106,7 @@ position:
     meta:
       width: 6
       height: 30
-      chartId: 5
+      chartId: 6
       uuid: a5f0ad79-9431-4f40-9cf2-40c50ae0eda1
       sliceName: "Se\xE7\xF5es recebidas (acumulado)"
   ROW-2:
@@ -130,7 +130,7 @@ position:
     meta:
       width: 12
       height: 60
-      chartId: 2
+      chartId: 3
       uuid: 4809acc0-4906-490b-9367-3ba204958ea1
       sliceName: "Evolu\xE7\xE3o da apura\xE7\xE3o (votos acumulados)"
   ROW-3:
@@ -155,7 +155,7 @@ position:
     meta:
       width: 6
       height: 60
-      chartId: 3
+      chartId: 4
       uuid: a14a1182-f10f-4a93-924d-b5a8b57907f1
       sliceName: Resultado consolidado
   CHART-map:
@@ -169,7 +169,7 @@ position:
     meta:
       width: 6
       height: 60
-      chartId: 6
+      chartId: 2
       uuid: 5aa6f75b-8862-4963-9154-fc5048ce3486
       sliceName: Comparecimento por UF
 metadata:

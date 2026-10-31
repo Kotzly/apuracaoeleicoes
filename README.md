@@ -50,6 +50,7 @@ python -m election_tally download --year 2022 --state AC      # só baixa (confe
 python -m election_tally load --year 2022 data/raw/2022/*.zip
 python -m election_tally inspect --year 2018 arquivo.zip      # mapeamento de colunas do arquivo
 python -m election_tally validate --cycle ele2022 --election 544 --office 1   # soma dos BUs x oficial
+python -m election_tally download-municipalities                # atualiza a tabela TSE -> IBGE
 ```
 
 - Os downloads rodam em paralelo, 4 por vez (`--jobs N` muda isso). Se algum falhar, os
@@ -92,6 +93,13 @@ Pontos de atenção:
   `country_code` (ISO 3166-1 alfa-3) vêm de [`election_tally/data/abroad_cities.csv`](election_tally/data/abroad_cities.csv),
   pelo código da cidade. Seções no Brasil ficam com "Brasil"/"BRA". Se aparecer uma cidade
   que não está na tabela, a carga para e lista o que falta; acrescente a linha e carregue de novo.
+- **Código IBGE do município.** O TSE e o IBGE numeram os municípios de forma diferente, e
+  mapas por município usam a malha do IBGE. Cada seção no Brasil ganha
+  `municipality_ibge_code`, vindo da tabela oficial do TSE "Códigos oficiais de UF e
+  municípios segundo o TSE e o IBGE", guardada em
+  [`election_tally/data/municipalities.csv`](election_tally/data/municipalities.csv) (gerada
+  pelo TSE em 25/10/2026). `download-municipalities` baixa a versão mais nova e regrava essa
+  cópia; recarregue os dados depois. Município sem correspondência gera um aviso na carga.
 - **Seções não instaladas** aparecem com 0 votos e `candidate_number` nulo; o nome do cargo
   é preenchido pelo código. Os nomes de cargo seguem uma grafia só em todos os anos.
 - Recebimento não é divulgação: a curva é a dos BUs chegando, não exatamente a que

@@ -27,6 +27,7 @@ params:
   row_limit: 100
   number_format: .1%
   linear_color_scheme: schemeYlGnBu
+  annotation_layers: []
 query_context: null
 cache_timeout: null
 uuid: 5aa6f75b-8862-4963-9154-fc5048ce3486

@@ -5,6 +5,7 @@
   python -m election_tally load --year 2022 data/raw/2022/*.zip
   python -m election_tally inspect --year 2018 file.zip
   python -m election_tally validate --cycle ele2022 --election 544 --office 1
+  python -m election_tally download-municipalities  refresh the TSE -> IBGE code table
 """
 
 from __future__ import annotations
@@ -58,6 +59,11 @@ def main(argv: list[str] | None = None) -> int:
     add_options(i)
     i.add_argument("file", type=Path)
 
+    mu = sub.add_parser("download-municipalities",
+                        help="refresh the TSE -> IBGE municipality code table from the TSE")
+    mu.add_argument("--output", type=Path,
+                    help="where to write it (default: the copy kept in the package)")
+
     v = sub.add_parser("validate", help="compare the sum of the ballot reports with the official JSON")
     v.add_argument("--db", type=Path, default=Path("elections.duckdb"))
     v.add_argument("--cycle", required=True, help="e.g.: ele2022")
@@ -80,6 +86,9 @@ def main(argv: list[str] | None = None) -> int:
     elif a.cmd == "inspect":
         from .load import inspect
         inspect(a.file, a.year)
+    elif a.cmd == "download-municipalities":
+        from .municipalities import download as download_municipalities
+        download_municipalities(a.output)
     elif a.cmd == "validate":
         from .validate import validate
         return 0 if validate(a.db, a.cycle, a.election, a.office, a.scope, a.json) else 1

@@ -105,3 +105,13 @@ def test_2014_consolidated_only(db):
         [("Presidente",)]
     assert _q(db, """SELECT DISTINCT vote_count FROM votes WHERE election_year = 2014
                      AND candidate_number IS NULL""") == [(0,)]
+
+
+def test_ibge_code_for_every_municipality_in_brazil(db):
+    assert _q(db, "SELECT count(*) FROM sections WHERE state <> 'ZZ' "
+                  "AND municipality_ibge_code IS NULL") == [(0,)]
+    assert _q(db, "SELECT count(*) FROM sections WHERE state = 'ZZ' "
+                  "AND municipality_ibge_code IS NOT NULL") == [(0,)]
+    # Rio Branco: TSE 1392, IBGE 1200401, in every year
+    assert _q(db, """SELECT DISTINCT municipality_ibge_code FROM votes
+                     WHERE state = 'AC' AND municipality_code = 1392""") == [(1200401,)]
