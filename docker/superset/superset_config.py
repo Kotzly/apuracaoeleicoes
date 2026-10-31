@@ -24,5 +24,8 @@ FEATURE_FLAGS = {
 # The evolution chart returns one row per minute per candidate.
 ROW_LIMIT = 50000
 
+# Filter options per dropdown; the default of 1000 cuts off the ~5,700 municipalities.
+NATIVE_FILTER_DEFAULT_ROW_LIMIT = 10000
+
 # Single container: keep rate-limit counters in memory (silences Flask-Limiter's warning).
 RATELIMIT_STORAGE_URI = "memory://"
