@@ -1,0 +1,331 @@
+table_name: coalitions
+main_dttm_col: null
+currency_code_column: null
+description: "Partidos, federa\xE7\xF5es e coliga\xE7\xF5es por cargo e local."
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: main
+sql: null
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: 859b4ffc-1c8a-588f-8516-0525be600a0f
+metrics:
+- metric_name: count
+  verbose_name: Quantidade
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: country_code
+  verbose_name: "C\xF3digo do pa\xEDs"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: federation_name
+  verbose_name: "Nome da federa\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party_name
+  verbose_name: Nome do partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: coalition_parties
+  verbose_name: "Partidos da coliga\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: status
+  verbose_name: "Situa\xE7\xE3o da legenda"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: group_type
+  verbose_name: "Tipo de agremia\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_type
+  verbose_name: "Tipo de elei\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: coalition_id
+  verbose_name: "ID da coliga\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_code
+  verbose_name: "C\xF3digo do cargo"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: municipality_code
+  verbose_name: "C\xF3digo do munic\xEDpio"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_code
+  verbose_name: "C\xF3digo da elei\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party_number
+  verbose_name: "N\xFAmero do partido"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: coalition_name
+  verbose_name: "Coliga\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_name
+  verbose_name: Cargo
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_name
+  verbose_name: "Elei\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: state
+  verbose_name: UF
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: federation
+  verbose_name: "Federa\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: electoral_unit
+  verbose_name: Local
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: municipality_name
+  verbose_name: "Munic\xEDpio"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party
+  verbose_name: Partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: country
+  verbose_name: "Pa\xEDs"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_year
+  verbose_name: Ano
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: round_number
+  verbose_name: Turno
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

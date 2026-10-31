@@ -1,0 +1,27 @@
+slice_name: "Se\xE7\xF5es por candidato mais votado"
+description: null
+certified_by: null
+certification_details: null
+viz_type: sankey_v2
+params:
+  viz_type: sankey_v2
+  source: source
+  target: target
+  metric: unit_count
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: "Se\xE7\xE3o"
+  row_limit: 2000
+  sort_by_metric: true
+  color_scheme: supersetColors
+  datasource: 3__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: e91b7f30-4c26-4a8d-8f15-0d2c6b7a9e52
+version: 1.0.0
+dataset_uuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421

@@ -5,9 +5,32 @@
 #
 # The DuckDB file comes from the pipeline (python -m election_tally pipeline ...).
 services:
+  # Runs once before Superset and exits: builds the tables derived from the loaded data
+  # (quick when they are up to date). Uses Superset's image so both share one DuckDB version.
+  prepare-data:
+    build: ./superset
+    image: election-tally-superset:6.1.0
+    user: root
+    working_dir: /src
+    entrypoint: ["python", "-m", "election_tally", "build-derived", "--db", "/data/elections.duckdb"]
+    volumes:
+      - type: bind
+        source: ${ELECTIONS_DB:-../elections.duckdb}
+        target: /data/elections.duckdb
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../election_tally
+        target: /src/election_tally
+        read_only: true
+    restart: "no"
+
   superset:
     build: ./superset
     image: election-tally-superset:6.1.0
+    depends_on:
+      prepare-data:
+        condition: service_completed_successfully
     ports:
       - "${SUPERSET_PORT:-8088}:8088"
     environment:

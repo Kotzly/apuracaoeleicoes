@@ -18,7 +18,7 @@ CKAN = "https://dadosabertos.tse.jus.br/api/3/action/package_show"
 
 
 def list_resources(year: int, package: str | None = None) -> list[dict]:
-    """[{round, state, url, sha512_url}] for the files of the year."""
+    """[{round, state, url, sha512_url}] for the files of the year, oldest first per state."""
     fmt = format_for(year)
     package = package or fmt.package_name()
     r = requests.get(CKAN, params={"id": package}, timeout=60)
@@ -28,17 +28,18 @@ def list_resources(year: int, package: str | None = None) -> list[dict]:
     r.raise_for_status()
     urls = [res.get("url", "") for res in r.json()["result"]["resources"]]
     hashes = {u[: -len(".sha512")] for u in urls if u.lower().endswith(".sha512")}
-    # If the TSE republished a file, the most recent resource usually comes last.
+    # One state and round can have several files: in 2020, AP has one for the 15 municipalities
+    # that voted in November and another for Macapa, postponed to December. Python's sort is
+    # stable, so a republished file still comes after the original and replaces it on load.
     resources = {}
     # The TSE sometimes lists only a file's hash (2026, 2nd round, RR) though the file exists;
     # those go first so that a listed file takes precedence.
     for url in sorted(hashes.difference(urls)) + urls:
         m = fmt.file_pattern.search(url)
         if m:
-            key = (int(m["round"]), m["state"].upper())
-            resources[key] = {"round": key[0], "state": key[1], "url": url,
-                              "sha512_url": url + ".sha512" if url in hashes else None}
-    return [resources[k] for k in sorted(resources)]
+            resources[url] = {"round": int(m["round"]), "state": m["state"].upper(), "url": url,
+                               "sha512_url": url + ".sha512" if url in hashes else None}
+    return sorted(resources.values(), key=lambda r: (r["round"], r["state"]))
 
 
 class DownloadError(RuntimeError):

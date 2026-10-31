@@ -73,7 +73,7 @@ Como a Justiça Eleitoral organiza o eleitorado:
 Cada seção pertence a exatamente um município e a uma zona, e as duas informações estão em
 toda linha. Por isso o total por município ou UF sai direto das seções, sem passar pela zona.
 
-Duas tabelas, sem nenhum acumulado gravado:
+Duas tabelas principais, sem nenhum acumulado gravado:
 
 - **`votes`**: uma linha por seção × cargo × votável (`vote_count`, `bu_received_at`, ...).
 - **`sections`**: uma linha por seção × cargo (`eligible_voters`, `turnout`, horários da urna).
@@ -104,6 +104,62 @@ Pontos de atenção:
   é preenchido pelo código. Os nomes de cargo seguem uma grafia só em todos os anos.
 - Recebimento não é divulgação: a curva é a dos BUs chegando, não exatamente a que
   apareceu no site do TSE.
+
+### Tabelas derivadas
+
+`python -m election_tally build-derived` gera as tabelas abaixo, e `docker compose up` o executa
+antes do Superset. Prefira estas tabelas em consultas e gráficos: elas evitam varrer `votes`.
+A primeira execução leva cerca de 15 minutos e baixa cerca de 1 GB do TSE. Depois, só refaz o que
+mudou; `--force` refaz tudo, inclusive arquivos que o TSE republicou. Se um download falhar, o
+comando avisa e o Superset sobe mesmo assim.
+
+**Resultados**, calculados a partir de `votes`:
+
+| Tabela | Uma linha por | Para que serve |
+|---|---|---|
+| `national_results` | ano × turno × votável, só presidente | Resultado nacional de presidente |
+| `state_results` | ano × turno × cargo × UF × votável | Resultado por UF de presidente, governador, senador e deputados; o exterior é `ZZ` |
+| `municipality_results` | ano × turno × cargo × município × votável | Resultado por município de todos os cargos e consultas populares |
+| `party_results` | ano × turno × cargo × UF × partido | Votos por partido; some as UFs para o total nacional, como em deputado federal |
+| `leader_flows` | nível × transição × município × mais votado na origem e no destino | Sankey de seções e municípios por candidato mais votado |
+
+`votes` conta linhas com votos; quem teve zero votos em um local não aparece em `*_results`.
+`share_of_valid` é a fração dos votos válidos (nominais e de legenda) naquele local e cargo, e
+fica vazia para branco e nulo. `state_results` não traz prefeito nem vereador, e `national_results`
+só traz presidente, porque o mesmo número pertence a candidatos diferentes em cada local.
+
+**Arquivos do TSE**, além dos boletins:
+
+| Tabela | Uma linha por | Para que serve |
+|---|---|---|
+| `candidates` | candidato × turno | Todos os candidatos, mesmo sem voto: número, nomes, partido, cargo, local, situação final, gênero, cor/raça, escolaridade e ocupação. Eleitos: `result LIKE 'ELEITO%'` |
+| `seats` | eleição × cargo × local | Vagas em disputa |
+| `coalitions` | turno × cargo × local × partido | Partidos, federações e coligações |
+| `electorate_profile` | ano × município × gênero × faixa etária × escolaridade | Eleitorado, somando zonas, estado civil e cor/raça (esta só existe nos anos recentes) |
+
+CPF, e-mail e data de nascimento ficam de fora de propósito. Nas tabelas ligadas a uma disputa,
+`country` só é preenchido em disputas nacionais, `state` nas estaduais e municipais e
+`municipality_*` só nas municipais. Senadores e deputados federais têm `state`, porque concorrem
+por UF. Compare cargos pelo código: a grafia de `office_name` muda entre arquivos.
+
+**Consulta rápida**, calculadas a partir de `sections` e `candidates`:
+
+| Tabela | Uma linha por | Para que serve |
+|---|---|---|
+| `offices` | código × nome do cargo | Cargos, vices, suplentes e perguntas de plebiscito; um código de pergunta (51 em diante) tem vários nomes |
+| `elections` | código da eleição × ano × turno | Descrição de cada eleição; a descrição fica vazia nos códigos sem candidatos, como os de consultas populares |
+| `section_locations` | ano × turno × seção | Município, UF e país de cada zona e seção |
+
+Limites conhecidos:
+
+- **Eleitos nem sempre fecham com as vagas.** Quando o resultado é anulado, a cidade fica sem
+  prefeito eleito na eleição ordinária, e o vencedor aparece na suplementar. Das 5.568 cidades de
+  2016, 5.518 têm eleito na ordinária, 43 só na suplementar e 7 em nenhuma (2020: 5.494, 70 e 4;
+  2024: 5.528 de 5.569, 27 e 14).
+- **Candidatos com votos fora de `candidates`:** conselheiros distritais de Fernando de Noronha
+  não constam nos arquivos do TSE, assim como 3 deputados estaduais de 2014.
+- **Amapá em 2020** tem dois arquivos por turno: novembro, com 15 municípios, e dezembro, com
+  Macapá, cuja eleição foi adiada. Por isso a carga substitui por ano, turno, UF e eleição.
 
 Exemplos de consulta para cada nível (evolução e consolidado) em [`queries.sql`](queries.sql).
 
@@ -138,6 +194,11 @@ Como as peças se encaixam:
 - O arquivo DuckDB é montado **somente leitura** em `/data/elections.duckdb` (defina
   `ELECTIONS_DB` no `.env` para outro caminho). Recarregue os dados com o Superset
   parado e suba de novo.
+- Antes do Superset, o serviço `prepare-data` roda uma vez e termina: ele executa
+  `python -m election_tally build-derived`, que gera as tabelas calculadas a partir dos dados
+  (veja [Tabelas derivadas](#tabelas-derivadas)) e não refaz o que já está em dia.
+  Só esse serviço monta o arquivo com escrita, e novas tabelas derivadas entram nesse comando.
+  Se ele precisar reconstruir algo, pare o Superset antes (`docker compose stop superset`).
 - Os metadados do próprio Superset (usuários, gráficos extras) ficam no volume `superset_home`.
 
 **Editando os painéis.** Como a importação sobrescreve os painéis do repositório a cada
@@ -147,11 +208,20 @@ inicialização, edições feitas na interface se perdem se não forem salvas de
 docker/superset/export-dashboards.sh    # grava em docker/superset/dashboards/; revise e faça commit
 ```
 
+O script salva todos os painéis, gráficos, datasets, conexões e consultas salvas, mesmo os que
+nenhum painel usa. Os nomes dos arquivos carregam ids internos e podem mudar entre exportações.
+
 Para montar gráficos à mão, a curva da apuração é um gráfico de série temporal sobre
 `votes`: eixo `bu_received_at` (granularidade de minuto), métrica `SUM(vote_count)`,
 dimensão `candidate_name` e, em *Advanced Analytics → Rolling window*, a soma cumulativa.
 
 ## Como suportar um ano novo (ou um layout que mudou)
+
+As [tabelas derivadas](#tabelas-derivadas) acompanham sozinhas: depois de carregar o ano, o próximo
+`docker compose up` (ou `build-derived`) as completa, com o Superset parado. Se o TSE ainda não
+tiver publicado um arquivo do ano, o comando avisa e tenta de novo na execução seguinte. Coluna
+renomeada nesses arquivos vira `NULL` sem erro: confira as tabelas após um ano novo. Para ajustar,
+edite `TABLES` em `election_tally/tse_tables.py` e aumente `version`.
 
 Cada ano usa um `Format` (`election_tally/formats.py`), que define onde estão os
 arquivos, como lê-los e de que coluna bruta sai cada coluna do schema canônico.

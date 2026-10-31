@@ -6,12 +6,12 @@ allow_run_async: false
 allow_ctas: false
 allow_cvas: false
 allow_dml: false
-allow_file_upload: false
+allow_csv_upload: false
 extra:
   metadata_params: {}
   engine_params: {}
   metadata_cache_timeout: {}
-  schemas_allowed_for_file_upload: []
+  schemas_allowed_for_csv_upload: []
 impersonate_user: false
 configuration_method: sqlalchemy_form
 uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

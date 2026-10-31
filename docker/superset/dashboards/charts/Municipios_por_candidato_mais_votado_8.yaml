@@ -1,0 +1,27 @@
+slice_name: "Munic\xEDpios por candidato mais votado"
+description: null
+certified_by: null
+certification_details: null
+viz_type: sankey_v2
+params:
+  viz_type: sankey_v2
+  source: source
+  target: target
+  metric: unit_count
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: "Munic\xEDpio"
+  row_limit: 2000
+  sort_by_metric: true
+  color_scheme: supersetColors
+  datasource: 3__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 6d3f8a14-92c7-4e6b-b1d0-58a7e2f4c963
+version: 1.0.0
+dataset_uuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421

@@ -1,0 +1,251 @@
+dashboard_title: Candidatos eleitos
+description: null
+css: null
+slug: candidatos-eleitos
+certified_by: null
+certification_details: null
+published: true
+uuid: 94e6f0a2-b7c1-4d38-a5f9-2d8c3e7b1064
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-note
+    - ROW-table
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: Candidatos eleitos
+  ROW-note:
+    type: ROW
+    id: ROW-note
+    children:
+    - MARKDOWN-elected-note
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-elected-note:
+    type: MARKDOWN
+    id: MARKDOWN-elected-note
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-note
+    meta:
+      width: 12
+      height: 14
+      code: "**Fonte:** situa\xE7\xE3o final dos candidatos publicada pelo TSE, n\xE3\
+        o calculada a partir dos boletins de urna. Inclui vices e suplentes de senador,\
+        \ que s\xE3o eleitos na mesma chapa. Por padr\xE3o mostra s\xF3 as elei\xE7\
+        \xF5es ordin\xE1rias. Quando o TSE anula o resultado, a cidade pode n\xE3\
+        o ter prefeito eleito nessa elei\xE7\xE3o e o vencedor aparece na suplementar:\
+        \ use o filtro de tipo para v\xEA-la."
+  ROW-table:
+    type: ROW
+    id: ROW-table
+    children:
+    - CHART-elected
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-elected:
+    type: CHART
+    id: CHART-elected
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-table
+    meta:
+      width: 12
+      height: 90
+      chartId: 9
+      uuid: 7ab1d3c5-0e68-4f29-93d7-1b4e6c8f2a50
+      sliceName: Candidatos eleitos
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-electedYear
+    name: Ano
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: election_year
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-electedOffice
+    name: Cargo
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: office_name
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-electedState
+    name: UF
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: state
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-electedUnit
+    name: Local
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: electoral_unit
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-electedState
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-electedParty
+    name: Partido
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: party
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-electedType
+    name: "Tipo de elei\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: election_type
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: election_type
+          op: IN
+          val:
+          - "ELEI\xC7\xC3O ORDIN\xC1RIA"
+      filterState:
+        value:
+        - "ELEI\xC7\xC3O ORDIN\xC1RIA"
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  cross_filters_enabled: false
+  color_scheme: supersetColors
+  refresh_frequency: 0
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  label_colors: {}
+  shared_label_colors: []
+  chart_configuration: {}
+  map_label_colors: {}
+  color_scheme_domain: []
+theme_uuid: null
+version: 1.0.0

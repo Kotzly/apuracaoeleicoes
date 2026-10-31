@@ -357,3 +357,31 @@ def test_extracts_to_ram_only_if_it_fits(tmp_path, monkeypatch):
     monkeypatch.setattr(load_module, "_RAM_EXTRACT_LIMIT", 10 ** 6)
     monkeypatch.setattr(load_module, "RAM_DIR", tmp_path / "absent")
     assert load_module._extraction_dir(small, ".csv") is None
+
+
+def test_state_with_two_files_keeps_both(tmp_path, monkeypatch):
+    """2020: AP has one file for November and another for Macapá, postponed to December."""
+    from election_tally import download
+
+    class Listing:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self):
+            base = "https://x/bweb_1t_AP_{}.zip"
+            return {"result": {"resources": [{"url": base.format("181120201549")},
+                                             {"url": base.format("071220201550")}]}}
+    monkeypatch.setattr(download.requests, "get", lambda *a, **k: Listing())
+    assert len(download.list_resources(2020)) == 2
+
+    db_path = tmp_path / "e.duckdb"
+    november = [("AP", 6017, "AMAPÁ", 1, 1, "15/11/2020 18:00:00", 50, 40, {13: 40})]
+    december = [("AP", 6050, "MACAPÁ", 1, 2, "06/12/2020 18:00:00", 50, 40, {13: 40})]
+    load([_zip(tmp_path, "nov", november)], db_path, 2022, offices=[1])
+    con = duckdb.connect(str(db_path))
+    con.execute("UPDATE votes SET election_code = 426; UPDATE sections SET election_code = 426")
+    con.close()
+    load([_zip(tmp_path, "dec", december)], db_path, 2022, offices=[1])
+    con = duckdb.connect(str(db_path), read_only=True)
+    assert sorted(r[0] for r in con.execute(
+        "SELECT DISTINCT municipality_name FROM votes").fetchall()) == ["AMAPÁ", "MACAPÁ"]
+    con.close()

@@ -1,0 +1,97 @@
+table_name: offices
+main_dttm_col: null
+currency_code_column: null
+description: "Cargos e perguntas de plebiscito por c\xF3digo."
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: main
+sql: null
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: f1a7c3e9-6b20-4d85-9c14-7e3a8b5d2f61
+metrics:
+- metric_name: count
+  verbose_name: Quantidade
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: office_code
+  verbose_name: "C\xF3digo do cargo"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: is_question
+  verbose_name: "\xC9 pergunta"
+  is_dttm: false
+  is_active: true
+  type: BOOLEAN
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: first_year
+  verbose_name: Primeiro ano
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: last_year
+  verbose_name: "\xDAltimo ano"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_name
+  verbose_name: Cargo
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

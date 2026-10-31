@@ -1,0 +1,288 @@
+dashboard_title: Fluxo dos mais votados
+description: null
+css: null
+slug: fluxo-dos-mais-votados
+certified_by: null
+certification_details: null
+published: true
+uuid: 0fc2a6d9-8b13-47e5-a2d4-93e7c1b5f806
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-note
+    - TABS-level
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: Fluxo dos mais votados
+  ROW-note:
+    type: ROW
+    id: ROW-note
+    children:
+    - MARKDOWN-leader-note
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-leader-note:
+    type: MARKDOWN
+    id: MARKDOWN-leader-note
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Como ler.** Cada coluna \xE9 um turno, e cada n\xF3 conta as se\xE7\
+        \xF5es ou os munic\xEDpios em que aquele candidato foi o mais votado (s\xF3\
+        \ votos v\xE1lidos; n\xE3o \xE9 necessariamente maioria absoluta). Uma liga\xE7\
+        \xE3o conta se\xE7\xF5es ou munic\xEDpios, n\xE3o eleitores: ela n\xE3o diz\
+        \ quantos votos mudaram, e uma vit\xF3ria por 51% conta igual a uma por 90%.\
+        \ **Por se\xE7\xE3o:** entre turnos a se\xE7\xE3o \xE9 a mesma, mas entre\
+        \ elei\xE7\xF5es o mesmo n\xFAmero pode ter sido redistribu\xEDdo e reunir\
+        \ outros eleitores. **Por munic\xEDpio:** o munic\xEDpio \xE9 est\xE1vel entre\
+        \ elei\xE7\xF5es, mas cada um pesa igual, seja qual for o tamanho, e as cidades\
+        \ do exterior contam como munic\xEDpios (filtre por UF para retir\xE1-las).\
+        \ Os n\xF3s `nova`/`novo` e `encerrada`/`encerrado` existem em apenas um dos\
+        \ lados."
+  TABS-level:
+    type: TABS
+    id: TABS-level
+    children:
+    - TAB-sections
+    - TAB-municipalities
+    parents:
+    - ROOT_ID
+    - GRID_ID
+  TAB-sections:
+    type: TAB
+    id: TAB-sections
+    children:
+    - ROW-sections
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-level
+    meta:
+      text: "Por se\xE7\xE3o"
+  ROW-sections:
+    type: ROW
+    id: ROW-sections
+    children:
+    - CHART-sections
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-level
+    - TAB-sections
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-sections:
+    type: CHART
+    id: CHART-sections
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-level
+    - TAB-sections
+    - ROW-sections
+    meta:
+      width: 12
+      height: 110
+      chartId: 7
+      uuid: e91b7f30-4c26-4a8d-8f15-0d2c6b7a9e52
+      sliceName: "Se\xE7\xF5es por candidato mais votado"
+  TAB-municipalities:
+    type: TAB
+    id: TAB-municipalities
+    children:
+    - ROW-municipalities
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-level
+    meta:
+      text: "Por munic\xEDpio"
+  ROW-municipalities:
+    type: ROW
+    id: ROW-municipalities
+    children:
+    - CHART-municipalities
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-level
+    - TAB-municipalities
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-municipalities:
+    type: CHART
+    id: CHART-municipalities
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-level
+    - TAB-municipalities
+    - ROW-municipalities
+    meta:
+      width: 12
+      height: 110
+      chartId: 8
+      uuid: 6d3f8a14-92c7-4e6b-b1d0-58a7e2f4c963
+      sliceName: "Munic\xEDpios por candidato mais votado"
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-sectionTransition
+    name: "Transi\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: transition
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-sectionState
+    name: UF
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: state
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-sectionCity
+    name: "Munic\xEDpio"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: municipality_name
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-sectionState
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-sectionSource
+    name: Mais votado na origem
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: source_candidate
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-sectionTarget
+    name: Mais votado no destino
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: target_candidate
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  cross_filters_enabled: false
+  color_scheme: supersetColors
+  refresh_frequency: 0
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  label_colors: {}
+  shared_label_colors: []
+  chart_configuration: {}
+  map_label_colors: {}
+  color_scheme_domain: []
+theme_uuid: null
+version: 1.0.0

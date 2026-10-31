@@ -1,0 +1,97 @@
+table_name: elections
+main_dttm_col: null
+currency_code_column: null
+description: "C\xF3digo da elei\xE7\xE3o por ano e turno."
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: main
+sql: null
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: 3e9d6b48-c1f7-4a02-8d35-6a2f1c9e7b84
+metrics:
+- metric_name: count
+  verbose_name: Quantidade
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: election_type
+  verbose_name: "Tipo de elei\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_code
+  verbose_name: "C\xF3digo da elei\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_name
+  verbose_name: "Elei\xE7\xE3o"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_year
+  verbose_name: Ano
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: round_number
+  verbose_name: Turno
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

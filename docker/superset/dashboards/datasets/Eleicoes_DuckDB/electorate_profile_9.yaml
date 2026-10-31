@@ -1,0 +1,145 @@
+table_name: electorate_profile
+main_dttm_col: null
+currency_code_column: null
+description: "Eleitorado por munic\xEDpio, g\xEAnero, faixa et\xE1ria e escolaridade."
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: main
+sql: null
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: 3c9ea45a-aac7-5417-88fb-fe044108fa54
+metrics:
+- metric_name: count
+  verbose_name: Quantidade
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+- metric_name: total_voters
+  verbose_name: Eleitores
+  metric_type: null
+  expression: SUM(voters)
+  description: null
+  d3format: ',.0f'
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: municipality_code
+  verbose_name: "C\xF3digo do munic\xEDpio"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: age_group
+  verbose_name: "Faixa et\xE1ria"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: education
+  verbose_name: Escolaridade
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: state
+  verbose_name: UF
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: gender
+  verbose_name: "G\xEAnero"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: municipality_name
+  verbose_name: "Munic\xEDpio"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: election_year
+  verbose_name: Ano
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: voters
+  verbose_name: Eleitores
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

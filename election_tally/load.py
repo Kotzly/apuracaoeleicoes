@@ -62,7 +62,7 @@ def raw_columns(con: duckdb.DuckDBPyConnection, source: str) -> list[str]:
 
 def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
                offices: list[int] | None = None, check_lines: bool = True) -> int:
-    """Loads already extracted files. Replaces what existed for the same year/round/state."""
+    """Loads already extracted files. Replaces what existed for the same year/round/state/election."""
     fmt = format_for(year)
     source = fmt.source_sql(files)
     select, nulls = fmt.select_sql(source, set(raw_columns(con, source)), files, offices)
@@ -91,7 +91,7 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
         print(f"  warning: {missing_time:,} of {n:,} rows with invalid receipt time")
 
     keys = con.execute(
-        "SELECT DISTINCT election_year, round_number, state FROM staging").fetchall()
+        "SELECT DISTINCT election_year, round_number, state, election_code FROM staging").fetchall()
     count_columns = {"eligible_voters", "turnout", "abstentions"}
     aggregates = ", ".join(
         f"{_SECTION_AGGREGATION.get(c, 'max' if c in count_columns else 'any_value')}({c})"
@@ -101,7 +101,8 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
         for table in ("votes", "sections"):
             for key in keys:
                 con.execute(f"DELETE FROM {table} WHERE election_year IS NOT DISTINCT FROM ? AND "
-                            "round_number IS NOT DISTINCT FROM ? AND state IS NOT DISTINCT FROM ?",
+                            "round_number IS NOT DISTINCT FROM ? AND state IS NOT DISTINCT FROM ? "
+                            "AND election_code IS NOT DISTINCT FROM ?",
                             list(key))
         con.execute(f"INSERT INTO votes ({', '.join(VOTES_COLUMNS)}) "
                     f"SELECT {', '.join(VOTES_COLUMNS)} FROM staging")
