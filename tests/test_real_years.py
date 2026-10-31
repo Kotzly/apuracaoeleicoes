@@ -9,14 +9,14 @@ from election_tally.load import load
 
 DATA_DIR = Path(__file__).parent / "data"
 SAMPLES = [  # (year, file): AC 1st round of each year, plus abroad (ZZ) in 2014 and 2022
-    (2014, "bweb_1t_ZZ_14102014142031.zip"),
-    (2016, "bweb_1t_AC_04102016204813.zip"),
-    (2018, "bweb_1t_AC_101020181938.zip"),
-    (2020, "bweb_1t_AC_181120201549.zip"),
-    (2022, "bweb_1t_AC_051020221321.zip"),
-    (2022, "bweb_1t_ZZ_051020221321.zip"),
-    (2024, "bweb_1t_AC_091020241636.zip"),
-    (2026, "bweb_1t_AC_051020261403.zip"),
+    (2014, "bweb_1t_ZZ_14102014142031.txt"),
+    (2016, "bweb_1t_AC_04102016204813.txt"),
+    (2018, "bweb_1t_AC_101020181938.csv"),
+    (2020, "bweb_1t_AC_181120201549.csv"),
+    (2022, "bweb_1t_AC_051020221321.csv"),
+    (2022, "bweb_1t_ZZ_051020221321.csv"),
+    (2024, "bweb_1t_AC_091020241636.csv"),
+    (2026, "bweb_1t_AC_051020261403.csv"),
 ]
 
 
