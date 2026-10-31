@@ -7,6 +7,7 @@ sum ordered by bu_received_at, grouped by the desired level.
 
 from __future__ import annotations
 
+import re
 import shutil
 import tempfile
 import zipfile
@@ -35,6 +36,15 @@ SECTIONS_COLUMNS = SECTION_KEY + ["municipality_name", "office_name", "eligible_
 # How each column of `sections` is reduced from the section's votes rows.
 _SECTION_AGGREGATION = {"opened_at": "min", "closed_at": "max",
                         "bu_issued_at": "min", "bu_received_at": "min"}
+RAM_DIR = Path("/dev/shm")
+_MEMINFO = Path("/proc/meminfo")
+_RAM_FOR_DUCKDB = 2 * 1024 ** 3  # left free for parsing and inserting
+# Measured on 7.7 GB of RAM: a 2 GB CSV loads faster from RAM, a 3.3 GB one slower than from disk.
+_RAM_EXTRACT_LIMIT = int(2.5 * 1024 ** 3)
+_REPAIR_BLOCK = 1 << 24
+_SEPARATOR = b'";"'
+_C1_BYTES = bytes(range(0x80, 0xA0))
+_UTF8_IN_LATIN1 = re.compile(rb"[\xc2-\xdf][\x80-\x9f]")
 
 
 def create_schema(con: duckdb.DuckDBPyConnection) -> None:
@@ -119,13 +129,68 @@ def _check_line_count(con, parsed_from: str, files: list[Path], header: int) -> 
               "Check quotes/line breaks in the raw file.")
 
 
+def _extraction_dir(file: Path, extension: str) -> str | None:
+    """RAM if the zip's data files fit there (None: the default temp dir, on disk).
+
+    Writing the CSVs to disk is the slowest step on a slow SSD, and they are deleted right after.
+    """
+    if file.suffix.lower() != ".zip" or not RAM_DIR.is_dir() or not _MEMINFO.is_file():
+        return None
+    with zipfile.ZipFile(file) as z:
+        size = sum(i.file_size for i in z.infolist() if i.filename.lower().endswith(extension))
+    disk = shutil.disk_usage(RAM_DIR)
+    available = next(int(line.split()[1]) * 1024 for line in _MEMINFO.read_text().splitlines()
+                     if line.startswith("MemAvailable:"))
+    limit = min(_RAM_EXTRACT_LIMIT, disk.free, available - _RAM_FOR_DUCKDB)
+    return str(RAM_DIR) if size <= limit else None
+
+
+def _repair_line(line: bytes) -> bytes:
+    """Escapes the inner quotes of the fields of a line in which every field is quoted."""
+    body = line.rstrip(b"\r\n")
+    separators = body.count(_SEPARATOR)
+    if body[:1] != b'"' or body[-1:] != b'"' or not separators or body.count(b";") != separators:
+        return line
+    fields = [f.replace(b'""', b'"').replace(b'"', b'""') for f in body[1:-1].split(_SEPARATOR)]
+    return b'"' + _SEPARATOR.join(fields) + b'"' + line[len(body):]
+
+
+def _repair_chunk(chunk: bytes) -> bytes:
+    """Fixes the TSE's defects in whole lines of a Latin-1 file; both would stop the parser.
+
+    Unescaped quotes in names (2018, 2020), and UTF-8 text such as IRMÃO (2016), whose bytes
+    0x80-0x9F DuckDB refuses as Latin-1. Clean chunks cost two counts, not a pass per line.
+    """
+    if len(chunk.translate(None, _C1_BYTES)) != len(chunk):
+        chunk = _UTF8_IN_LATIN1.sub(lambda m: m[0].decode().encode("latin-1"), chunk)
+    if chunk.count(b'"') == 2 * (chunk.count(_SEPARATOR) + chunk.count(b"\n")):
+        return chunk
+    first = chunk[:chunk.find(b"\n") + 1]
+    if first.count(b";") != first.count(_SEPARATOR):  # layout with unquoted numbers (2024 on)
+        return chunk
+    return b"".join(_repair_line(line) for line in chunk.splitlines(keepends=True))
+
+
+def _extract_repaired(z: zipfile.ZipFile, member: str, target: Path) -> Path:
+    with z.open(member) as source, open(target, "wb") as out:
+        rest = b""
+        while block := source.read(_REPAIR_BLOCK):
+            cut = block.rfind(b"\n") + 1
+            if cut:
+                out.write(_repair_chunk(rest + block[:cut]))
+                rest = b""
+            rest += block[cut:]
+        out.write(_repair_chunk(rest))
+    return target
+
+
 def _data_files(file: Path, extension: str, dest: Path) -> list[Path]:
-    """Data files: the ones inside the zip, or the file itself if it is not a zip."""
+    """Data files: the ones inside the zip, repaired, or the file itself if it is not a zip."""
     if file.suffix.lower() != ".zip":
         return [file]
     with zipfile.ZipFile(file) as z:
         members = [m for m in z.namelist() if m.lower().endswith(extension)]
-        return [Path(z.extract(m, dest)) for m in members]
+        return [_extract_repaired(z, m, dest / Path(m).name) for m in members]
 
 
 def load(files: list[Path], db: Path, year: int,
@@ -136,7 +201,8 @@ def load(files: list[Path], db: Path, year: int,
     create_schema(con)
     try:
         for file in files:
-            tmp = Path(tempfile.mkdtemp(prefix="bweb_"))
+            tmp = Path(tempfile.mkdtemp(prefix="bweb_",
+                                        dir=_extraction_dir(file, fmt.data_extension)))
             try:
                 data = _data_files(file, fmt.data_extension, tmp)
                 if not data:

@@ -30,7 +30,9 @@ def list_resources(year: int, package: str | None = None) -> list[dict]:
     hashes = {u[: -len(".sha512")] for u in urls if u.lower().endswith(".sha512")}
     # If the TSE republished a file, the most recent resource usually comes last.
     resources = {}
-    for url in urls:
+    # The TSE sometimes lists only a file's hash (2026, 2nd round, RR) though the file exists;
+    # those go first so that a listed file takes precedence.
+    for url in sorted(hashes.difference(urls)) + urls:
         m = fmt.file_pattern.search(url)
         if m:
             key = (int(m["round"]), m["state"].upper())

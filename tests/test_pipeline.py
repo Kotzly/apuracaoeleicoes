@@ -7,6 +7,7 @@ from pathlib import Path
 import duckdb
 import pytest
 
+from election_tally import load as load_module
 from election_tally.load import load
 from election_tally.validate import validate
 
@@ -276,6 +277,52 @@ def test_discovery_skips_hash_and_accepts_uppercase(monkeypatch):
     assert recs[1]["sha512_url"] is None
 
 
+def test_discovery_finds_file_listed_only_by_its_hash(monkeypatch):
+    from election_tally import download
+
+    base = "https://cdn.tse.jus.br/estatistica/sead/eleicoes/eleicoes2026/buweb/"
+    urls = [base + "bweb_2t_RR_261020260742.zip.sha512", base + "bweb_2t_RR_261020260742.zip.sha512",
+            base + "bweb_2t_SP_1.zip.sha512", base + "bweb_2t_SP_2.zip", base + "bweb_2t_SP_2.zip.sha512"]
+
+    class Resp:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return {"result": {"resources": [{"url": u} for u in urls]}}
+
+    monkeypatch.setattr(download.requests, "get", lambda *a, **k: Resp())
+    recs = {r["state"]: r for r in download.list_resources(2026)}
+    assert recs["RR"]["url"] == base + "bweb_2t_RR_261020260742.zip"
+    assert recs["RR"]["sha512_url"] == urls[0]
+    assert recs["SP"]["url"] == base + "bweb_2t_SP_2.zip"
+
+
+@pytest.mark.parametrize("raw, repaired", [
+    (b'"A";"B "C"";"D"\r\n', b'"A";"B ""C""";"D"\r\n'),
+    (b'"A";"SANT"ANA";"D"\n', b'"A";"SANT""ANA";"D"\n'),
+    (b'"A";"B ""C"" E";"D"', b'"A";"B ""C"" E";"D"'),
+    (b'"A";"IRM\xc3\x83O";"D"\n', b'"A";"IRM\xc3O";"D"\n'),
+    (b'"A";1;"B "C"";2\n', b'"A";1;"B "C"";2\n'),  # not fully quoted: left alone
+    (b'"A";"B"\n"C "D"";"E"\n', b'"A";"B"\n"C ""D""";"E"\n'),
+])
+def test_repair_chunk(raw, repaired):
+    assert load_module._repair_chunk(raw) == repaired
+
+
+def test_load_repairs_tse_defects(tmp_path, monkeypatch):
+    monkeypatch.setattr(load_module, "_REPAIR_BLOCK", 64)  # lines cross block boundaries
+    line = '"05/10/2022";"SP";"{}";"7"\n'
+    text = line.format("JOSÉ").encode("latin-1") * 2000
+    text += b'"05/10/2022";"SP";"SANT"ANA";"7"\n"05/10/2022";"SP";"IRM\xc3\x83O";"7"\n'
+    archive = tmp_path / "dirty.zip"
+    with zipfile.ZipFile(archive, "w") as z:
+        z.writestr("dirty.csv", text)
+    data = load_module._data_files(archive, ".csv", tmp_path)
+    rows = duckdb.sql(f"""SELECT column2, count(*) FROM read_csv('{data[0]}', delim=';', quote='"',
+                          escape='"', header=false, encoding='latin-1', all_varchar=true)
+                          GROUP BY 1 ORDER BY 1""").fetchall()
+    assert rows == [("IRMÃO", 1), ("JOSÉ", 2000), ('SANT"ANA', 1)]
+
+
 
 def test_unmapped_city_abroad_fails_without_touching_data(tmp_path):
     from election_tally.countries import UnmappedCityError
@@ -287,3 +334,26 @@ def test_unmapped_city_abroad_fails_without_touching_data(tmp_path):
         load([_zip(tmp_path, "zz", abroad)], db_path, 2022)
     assert _q(db_path, "SELECT count(*) FROM votes") == [(20,)]
     assert _q(db_path, "SELECT count(*) FROM votes WHERE state = 'ZZ'") == [(0,)]
+
+
+def _zip_of_size(path: Path, size: int) -> Path:
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("data.csv", b"x" * size)
+    return path
+
+
+def test_extracts_to_ram_only_if_it_fits(tmp_path, monkeypatch):
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(f"MemTotal: 1 kB\nMemAvailable: {load_module._RAM_FOR_DUCKDB // 1024 + 2} kB\n")
+    monkeypatch.setattr(load_module, "_MEMINFO", meminfo)
+    monkeypatch.setattr(load_module, "RAM_DIR", tmp_path)
+    small = _zip_of_size(tmp_path / "small.zip", 100)
+    big = _zip_of_size(tmp_path / "big.zip", 5000)
+    assert load_module._extraction_dir(small, ".csv") == str(tmp_path)
+    assert load_module._extraction_dir(big, ".csv") is None
+    assert load_module._extraction_dir(tmp_path / "plain.csv", ".csv") is None
+    monkeypatch.setattr(load_module, "_RAM_EXTRACT_LIMIT", 50)
+    assert load_module._extraction_dir(small, ".csv") is None
+    monkeypatch.setattr(load_module, "_RAM_EXTRACT_LIMIT", 10 ** 6)
+    monkeypatch.setattr(load_module, "RAM_DIR", tmp_path / "absent")
+    assert load_module._extraction_dir(small, ".csv") is None
