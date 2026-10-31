@@ -51,7 +51,7 @@ def raw_columns(con: duckdb.DuckDBPyConnection, source: str) -> list[str]:
 
 
 def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
-               offices: list[int] | None = None) -> int:
+               offices: list[int] | None = None, check_lines: bool = True) -> int:
     """Loads already extracted files. Replaces what existed for the same year/round/state."""
     fmt = format_for(year)
     source = fmt.source_sql(files)
@@ -63,8 +63,10 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
         print(f"  warning: {year} has no receipt time; the evolution is not produced "
               "for this year.")
 
-    _check_line_count(con, source, files, fmt.header_lines())
     con.execute(f"CREATE OR REPLACE TEMP TABLE staging AS {select}")
+    if check_lines:
+        # Staging already holds every parsed row, unless the office filter dropped some.
+        _check_line_count(con, source if offices else "staging", files, fmt.header_lines())
     # Sections that were not installed have the office code but no office name.
     con.execute("UPDATE staging SET office_name = o.name FROM (SELECT unnest(?) AS code, "
                 "unnest(?) AS name) o WHERE staging.office_name IS NULL "
@@ -105,13 +107,13 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
     return n
 
 
-def _check_line_count(con, source: str, files: list[Path], header: int) -> None:
+def _check_line_count(con, parsed_from: str, files: list[Path], header: int) -> None:
     """Makes sure the parser neither dropped nor merged lines (TSE sometimes gets quotes wrong)."""
     physical = 0
     for a in files:
         with open(a, "rb") as f:
             physical += sum(b.count(b"\n") for b in iter(lambda: f.read(1 << 24), b"")) - header
-    parsed = con.execute(f"SELECT count(*) FROM {source}").fetchone()[0]
+    parsed = con.execute(f"SELECT count(*) FROM {parsed_from}").fetchone()[0]
     if parsed != physical:
         print(f"  WARNING: {physical:,} lines in the file, {parsed:,} parsed. "
               "Check quotes/line breaks in the raw file.")
@@ -127,7 +129,7 @@ def _data_files(file: Path, extension: str, dest: Path) -> list[Path]:
 
 
 def load(files: list[Path], db: Path, year: int,
-         offices: list[int] | None = None) -> None:
+         offices: list[int] | None = None, check_lines: bool = True) -> None:
     """Loads .zip files (as they come from the TSE) or already extracted files of a year."""
     fmt = format_for(year)
     con = duckdb.connect(str(db))
@@ -140,7 +142,7 @@ def load(files: list[Path], db: Path, year: int,
                 if not data:
                     print(f"{file.name}: no {fmt.data_extension} file in the zip, skipped")
                     continue
-                n = load_files(con, data, year, offices)
+                n = load_files(con, data, year, offices, check_lines)
                 print(f"{file.name}: {n:,} rows")
             finally:
                 shutil.rmtree(tmp, ignore_errors=True)

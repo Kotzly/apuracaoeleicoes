@@ -47,6 +47,8 @@ def main(argv: list[str] | None = None) -> int:
             sp.add_argument("--db", type=Path, default=Path("elections.duckdb"))
             sp.add_argument("--offices", type=_int_list,
                             help="only these office codes, e.g.: 1,3 (president, governor)")
+            sp.add_argument("--skip-line-check", action="store_true",
+                            help="faster, but no warning if the parser drops or merges lines")
 
     add_options(sub.add_parser("pipeline", help="download and load one year"),
                 load=True, download=True)
@@ -79,10 +81,10 @@ def main(argv: list[str] | None = None) -> int:
         files = download(a.year, a.dest, a.round, a.state, a.package, a.jobs)
         if a.cmd == "pipeline" and files:
             from .load import load
-            load(files, a.db, a.year, a.offices)
+            load(files, a.db, a.year, a.offices, not a.skip_line_check)
     elif a.cmd == "load":
         from .load import load
-        load(a.files, a.db, a.year, a.offices)
+        load(a.files, a.db, a.year, a.offices, not a.skip_line_check)
     elif a.cmd == "inspect":
         from .load import inspect
         inspect(a.file, a.year)

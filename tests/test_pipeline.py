@@ -110,6 +110,35 @@ def test_office_filter(tmp_path):
     assert _q(db_path, "SELECT DISTINCT office_code FROM votes") == [(1,)]
 
 
+def _zip_with_blank_lines(dest: Path) -> Path:
+    """A zip whose file has more physical lines than the parser returns rows."""
+    source = _zip(dest, "bweb_1t_SP_x", SECTIONS)
+    with zipfile.ZipFile(source) as z:
+        text = z.read("bweb_1t_SP_x.csv")
+    archive = dest / "bweb_1t_SP_blank.zip"
+    with zipfile.ZipFile(archive, "w") as z:
+        z.writestr("bweb_1t_SP_blank.csv", text + b"\n\n")
+    return archive
+
+
+@pytest.mark.parametrize("offices", [None, [1]])
+def test_line_count_mismatch_warns(tmp_path, capsys, offices):
+    load([_zip_with_blank_lines(tmp_path)], tmp_path / "w.duckdb", 2022, offices)
+    assert "WARNING" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("offices", [None, [1]])
+def test_matching_line_count_does_not_warn(tmp_path, capsys, offices):
+    zp = _zip(tmp_path, "bweb_1t_SP_x", SECTIONS)
+    load([zp], tmp_path / "w.duckdb", 2022, offices)
+    assert "WARNING" not in capsys.readouterr().out
+
+
+def test_line_check_can_be_skipped(tmp_path, capsys):
+    load([_zip_with_blank_lines(tmp_path)], tmp_path / "w.duckdb", 2022, check_lines=False)
+    assert "WARNING" not in capsys.readouterr().out
+
+
 def test_evolution_ends_at_consolidated_total(db):
     db_path, _ = db
     sql = """
