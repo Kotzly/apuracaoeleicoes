@@ -54,7 +54,7 @@ def _scoped_chart_ids(flt: dict) -> set:
 def test_old_dashboard_is_gone_and_its_table_moved_to_the_first_tab_with_the_same_uuid():
     assert not (DASHBOARDS / "dashboards" / "Candidatos_eleitos_3.yaml").exists()
     tabs = _tab_charts()
-    assert list(tabs) == ["Eleitos", "Prefeitos", "Bancadas", "Votos × cadeiras"]
+    assert list(tabs) == ["Eleitos", "Prefeitos", "Bancadas", "Senado", "Votos × cadeiras"]
     first = tabs["Eleitos"].values()
     table = next(c for c in first if c["viz_type"] == "table")
     assert table["uuid"] == "7ab1d3c5-0e68-4f29-93d7-1b4e6c8f2a50"
@@ -66,7 +66,8 @@ def test_every_chart_of_a_tab_reads_the_expected_dataset_and_viz():
     tabs = _tab_charts()
     tables = {t: {datasets[c["dataset_uuid"]]["table_name"] for c in cs.values()} for t, cs in tabs.items()}
     assert tables == {"Eleitos": {"elected_party", "candidates"}, "Prefeitos": {"mayor_flows"},
-                      "Bancadas": {"elected_party"}, "Votos × cadeiras": {"elected_party"}}
+                      "Bancadas": {"elected_party"}, "Votos × cadeiras": {"elected_party"},
+                      "Senado": {"elected_party", "senate_seats", "candidates"}}
     sankey = next(c for c in tabs["Prefeitos"].values() if c["viz_type"] == "sankey_v2")["params"]
     assert (sankey["source"], sankey["target"]) == ("source", "target")
     assert sankey["metric"]["aggregate"] == "SUM" and sankey["metric"]["column"]["column_name"] == "units"
@@ -133,13 +134,14 @@ def test_filters_reach_exactly_the_tabs_where_their_column_makes_sense():
                                                                       for ids in by_tab.values())
 
     assert tabs_of("Cargo")[0] == {"Eleitos"}
-    assert tabs_of("Ano")[0] == {"Eleitos", "Bancadas"}
+    assert tabs_of("Ano")[0] == {"Eleitos", "Bancadas", "Senado"}
     assert tabs_of("Cargo (proporcional)")[0] == {"Bancadas", "Votos × cadeiras"}
     assert tabs_of("Ano da comparação")[0] == {"Votos × cadeiras"}
     assert tabs_of("UF")[0] == set(by_tab)
     assert tabs_of("Município")[0] == tabs_of("Transição")[0] == {"Prefeitos"}
     # Shares need every party: a party filter in that tab would distort them.
     assert "Votos × cadeiras" not in tabs_of("Partido")[0] and "Prefeitos" not in tabs_of("Partido")[0]
+    assert "Senado" in tabs_of("Partido")[0]
     assert _scoped_chart_ids(filters["Local"]) == _scoped_chart_ids(filters["Tipo de eleição"])
     assert len(_scoped_chart_ids(filters["Local"])) == 1  # the candidates table only
 
@@ -179,6 +181,19 @@ def test_calculated_columns_align_the_candidates_table_with_elected_party():
     elected = {c["column_name"]: c["expression"] for c in
                next(d for d in _datasets().values() if d["table_name"] == "elected_party")["columns"]}
     assert (elected["office_label"], elected["uf"], elected["party_current"]) == ("office_name", "state", "party")
+
+
+def test_senate_tab_keeps_only_senators_and_says_seats_are_not_the_official_caucus():
+    charts = _tab_charts()["Senado"].values()
+    for chart in charts:
+        wheres = [f.get("sqlExpression") for f in chart["params"]["adhoc_filters"]]
+        if _datasets()[chart["dataset_uuid"]]["table_name"] != "senate_seats":
+            assert "office_code = 5" in wheres
+    assert {c["slice_name"] for c in charts} == {"Senadores eleitos por partido e ano", "Senadores eleitos",
+                                                 "Cadeiras por partido de eleição"}
+    note = _dashboard()["position"]["MARKDOWN-TAB-senate"]["meta"]["code"]
+    for phrase in ("81 cadeiras", "Não é a bancada oficial", "DEM e PSL contam como UNIÃO", "2010"):
+        assert phrase in note
 
 
 def test_notes_explain_the_caveats():

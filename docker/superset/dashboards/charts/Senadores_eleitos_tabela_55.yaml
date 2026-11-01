@@ -1,0 +1,40 @@
+slice_name: Senadores eleitos
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  query_mode: raw
+  all_columns:
+  - election_year
+  - uf
+  - candidate_name
+  - party_current
+  - candidate_number
+  - full_name
+  order_by_cols:
+  - '["election_year", false]'
+  - '["uf", true]'
+  - '["candidate_name", true]'
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: office_code = 5
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: result
+    operator: LIKE
+    operatorId: LIKE
+    comparator: ELEITO%
+  row_limit: 50000
+  server_pagination: true
+  server_page_length: 50
+  include_search: true
+  annotation_layers: []
+  datasource: 4__table
+query_context: null
+cache_timeout: null
+uuid: 33d5e6dc-4f3a-51ad-9e8e-21d516d28281
+version: 1.0.0
+dataset_uuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36

@@ -8,6 +8,8 @@ then the highest election code and round). The president has `state` = 'BR'.
 `mayor_flows` follows the party of each city's mayor from one election to the next, for Sankey
 charts: a city without an elected mayor on one side goes to the node `Sem eleito`, and parties
 outside the 12 with most mayors in the three elections are grouped as `Outros`.
+`senate_seats` adds each Senate election to the previous one, the two that fill the 81 seats. It
+counts the party a senator was elected by: later party switches and alternates are not in the data.
 Party names are the current ones (see `parties.py`).
 """
 
@@ -18,7 +20,7 @@ from pathlib import Path
 import duckdb
 
 from . import parties
-from .parties import MUNICIPAL_YEARS, OFFICES, canonical_party_sql
+from .parties import FEDERAL_YEARS, MUNICIPAL_YEARS, OFFICES, canonical_party_sql
 
 NO_MAYOR = "Sem eleito"
 OTHERS = "Outros"
@@ -27,6 +29,11 @@ _STATE_TABLE = "elected_party"
 _MAYOR = 11
 _SINGLE_SEAT = (3, _MAYOR)  # one seat per state or city: only the latest election counts
 _NATIONAL = "BR"
+_SENATOR = 5
+# Elected before the merger, but sitting in UNIÃO afterwards. Only `senate_seats` joins them: a
+# seat lasts two elections, and everywhere else a merger stays a change of party.
+_SENATE_MERGERS = {"DEM": "UNIÃO", "PSL": "UNIÃO"}
+_MERGER_YEAR = 2022
 
 
 def _create_elected_tables(con: duckdb.DuckDBPyConnection) -> None:
@@ -113,12 +120,42 @@ def _create_mayor_flows(con: duckdb.DuckDBPyConnection) -> None:
     print(f"mayor_flows: {n:,} rows")
 
 
+def _create_senate_seats(con: duckdb.DuckDBPyConnection) -> None:
+    """Seats after each election, for the years whose previous election is also loaded."""
+    loaded = {row[0] for row in con.execute(f"""SELECT DISTINCT election_year FROM elected_party
+                                                WHERE office_code = {_SENATOR} AND elected > 0""").fetchall()}
+    pairs = [(a, b) for a, b in zip(FEDERAL_YEARS, FEDERAL_YEARS[1:]) if a in loaded and b in loaded]
+    merged = " ".join(f"WHEN '{old}' THEN '{new}'" for old, new in _SENATE_MERGERS.items())
+    selects = [f"""
+        SELECT {year}::SMALLINT AS election_year, state,
+               {f"CASE party {merged} ELSE party END" if year >= _MERGER_YEAR else "party"} AS party,
+               (sum(elected) FILTER (WHERE election_year = {year}))::INTEGER AS seats_this_election,
+               (sum(elected) FILTER (WHERE election_year = {previous}))::INTEGER AS seats_previous_election
+        FROM elected_party
+        WHERE office_code = {_SENATOR} AND elected > 0 AND election_year IN ({previous}, {year})
+        GROUP BY ALL""" for previous, year in pairs]
+    # Typed even when empty, because the dataset expects these columns.
+    empty = """SELECT NULL::SMALLINT AS election_year, NULL::VARCHAR AS state, NULL::VARCHAR AS party,
+                      NULL::INTEGER AS seats_this_election, NULL::INTEGER AS seats_previous_election
+               WHERE false"""
+    con.execute(f"""
+        CREATE OR REPLACE TABLE senate_seats AS
+        SELECT election_year, state, party, coalesce(seats_this_election, 0) AS seats_this_election,
+               coalesce(seats_previous_election, 0) AS seats_previous_election,
+               coalesce(seats_this_election, 0) + coalesce(seats_previous_election, 0) AS seats
+        FROM ({' UNION ALL '.join(selects + [empty])})
+        ORDER BY election_year, state, party""")
+    n = con.execute("SELECT count(*) FROM senate_seats").fetchone()[0]
+    print(f"senate_seats: {n:,} rows")
+
+
 def build(db: Path, force: bool = False) -> None:
-    """Rebuilds `elected_party` and `mayor_flows`, unless results, candidates and renames are unchanged."""
+    """Rebuilds `elected_party`, `mayor_flows` and `senate_seats`, unless results, candidates and renames are unchanged."""
     if not parties.has_tables(db, "national_results", "party_results", "candidates"):
         print("warning: elected_party not built: the results or `candidates` could not be loaded")
         return
-    if not force and parties.is_current(db, _STATE_TABLE, uses_candidates=True):
+    if (not force and parties.is_current(db, _STATE_TABLE, uses_candidates=True)
+            and parties.has_tables(db, "senate_seats")):
         print("elected_party: up to date")
         return
     con = duckdb.connect(str(db))
@@ -126,6 +163,7 @@ def build(db: Path, force: bool = False) -> None:
         con.begin()
         _create_elected_tables(con)
         _create_mayor_flows(con)
+        _create_senate_seats(con)
         con.execute(f"COMMENT ON TABLE elected_party IS '{parties.source_state(con, True)}'")
         con.commit()
         con.execute("CHECKPOINT")

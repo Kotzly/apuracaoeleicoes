@@ -1,0 +1,50 @@
+slice_name: "Senadores eleitos por partido e ano"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  orientation: vertical
+  row_limit: 10000
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  color_scheme: supersetColors
+  rich_tooltip: true
+  truncate_metric: true
+  zoomable: false
+  xAxisForceCategorical: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: Eleitos
+  y_axis_title_margin: 40
+  x_axis_title_margin: 30
+  x_axis: election_year
+  groupby:
+  - party_current
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: elected
+    aggregate: SUM
+    label: Eleitos
+    hasCustomLabel: true
+    optionName: metric_elected_sum
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: office_code = 5
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: elected > 0
+  stack: Stack
+  show_value: true
+  y_axis_format: ',d'
+  datasource: 0__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: fbf72c00-6cd7-5dd4-83ff-6b825b8aac4f
+version: 1.0.0
+dataset_uuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b

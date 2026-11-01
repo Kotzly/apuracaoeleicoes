@@ -55,10 +55,10 @@ position:
         \ PSL continuam separados de UNI\xC3O, ent\xE3o somem do gr\xE1fico a partir\
         \ de 2022 sem que isso signifique perda de cadeiras. Os filtros valem s\xF3\
         \ para as abas em que a coluna existe: **Cargo** e **Ano** na aba Eleitos,\
-        \ **Cargo (proporcional)** e **Ano** em Bancadas, **Cargo (proporcional)**\
+        \ **Cargo (proporcional)** e **Ano** em Bancadas, **Ano** em Senado, **Cargo (proporcional)**\
         \ e **Ano da compara\xE7\xE3o** em Votos \xD7 cadeiras, **Munic\xEDpio** e\
         \ **Transi\xE7\xE3o** em Prefeitos; **UF** vale para todas, e **Partido**\
-        \ para Eleitos e Bancadas. Em Governador e Prefeito, onde h\xE1 uma vaga s\xF3\
+        \ para Eleitos, Bancadas e Senado. Em Governador e Prefeito, onde h\xE1 uma vaga s\xF3\
         , quem assumiu por \xFAltimo na elei\xE7\xE3o (inclusive em elei\xE7\xE3o\
         \ suplementar) \xE9 o eleito contado. A tabela de candidatos eleitos vem direto\
         \ da situa\xE7\xE3o final do TSE e, por padr\xE3o, s\xF3 mostra as elei\xE7\
@@ -70,6 +70,7 @@ position:
     - TAB-elected
     - TAB-mayors
     - TAB-seats
+    - TAB-senate
     - TAB-votes
     parents:
     - ROOT_ID
@@ -424,6 +425,130 @@ position:
     - TABS-main
     meta:
       text: "Votos \xD7 cadeiras"
+  ROW-TAB-senate-note:
+    type: ROW
+    id: ROW-TAB-senate-note
+    children:
+    - MARKDOWN-TAB-senate
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-senate:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-senate
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    - ROW-TAB-senate-note
+    meta:
+      width: 12
+      height: 34
+      code: "**Como ler.** O Senado tem 81 cadeiras, 3 por UF, com mandatos de 8 anos: cada elei\xe7\xe3o renova 27 ou 54 delas, alternadamente. Por isso **Senadores eleitos** alterna entre 27 e 54 sem que isso seja ganho ou perda. **Cadeiras por partido de elei\xe7\xe3o** soma os eleitos do ano com os da elei\xe7\xe3o anterior e chega \xe0s 81 cadeiras, de 2018 em diante (2014 dependeria de 2010, que n\xe3o foi carregada). **N\xe3o \xe9 a bancada oficial do Senado:** conta o partido pelo qual cada senador foi eleito, sem trocas de partido nem suplentes. A partir de 2022, eleitos por DEM e PSL contam como UNI\xc3O nesse gr\xe1fico; as outras fus\xf5es n\xe3o s\xe3o unificadas, ent\xe3o um eleito em 2018 por PHS, PRP, PROS, PTB ou PSC segue com a sigla antiga. **Ano**, **UF** e **Partido** valem nesta aba."
+  ROW-senate-elected:
+    type: ROW
+    id: ROW-senate-elected
+    children:
+    - CHART-senate-elected
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-senate-elected:
+    type: CHART
+    id: CHART-senate-elected
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    - ROW-senate-elected
+    meta:
+      width: 12
+      height: 70
+      chartId: 9
+      uuid: fbf72c00-6cd7-5dd4-83ff-6b825b8aac4f
+      sliceName: "Senadores eleitos por partido e ano"
+  ROW-senate-seats:
+    type: ROW
+    id: ROW-senate-seats
+    children:
+    - CHART-senate-seats
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-senate-seats:
+    type: CHART
+    id: CHART-senate-seats
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    - ROW-senate-seats
+    meta:
+      width: 12
+      height: 70
+      chartId: 10
+      uuid: cc747974-ad06-549a-bf24-8f2bd9a720e3
+      sliceName: "Cadeiras por partido de elei\xe7\xe3o"
+  ROW-senate-table:
+    type: ROW
+    id: ROW-senate-table
+    children:
+    - CHART-senate-table
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-senate-table:
+    type: CHART
+    id: CHART-senate-table
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-senate
+    - ROW-senate-table
+    meta:
+      width: 12
+      height: 90
+      chartId: 11
+      uuid: 33d5e6dc-4f3a-51ad-9e8e-21d516d28281
+      sliceName: "Senadores eleitos"
+  TAB-senate:
+    type: TAB
+    id: TAB-senate
+    children:
+    - ROW-TAB-senate-note
+    - ROW-senate-elected
+    - ROW-senate-seats
+    - ROW-senate-table
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Senado
 metadata:
   native_filter_configuration:
   - id: NATIVE_FILTER-office
@@ -462,6 +587,9 @@ metadata:
       - 6
       - 7
       - 8
+      - 9
+      - 10
+      - 11
     description: ''
   - id: NATIVE_FILTER-year
     name: Ano
@@ -526,6 +654,9 @@ metadata:
       - 2
       - 3
       - 4
+      - 9
+      - 10
+      - 11
     description: ''
     adhoc_filters:
     - expressionType: SIMPLE
@@ -575,6 +706,9 @@ metadata:
       - 4
       - 5
       - 6
+      - 9
+      - 10
+      - 11
     description: ''
   - id: NATIVE_FILTER-state
     name: UF
@@ -661,6 +795,9 @@ metadata:
       - 6
       - 7
       - 8
+      - 9
+      - 10
+      - 11
     description: ''
   - id: NATIVE_FILTER-transition
     name: "Transi\xE7\xE3o"
@@ -692,6 +829,9 @@ metadata:
       - 6
       - 7
       - 8
+      - 9
+      - 10
+      - 11
     description: ''
   - id: NATIVE_FILTER-unit
     name: Local
@@ -725,6 +865,9 @@ metadata:
       - 6
       - 7
       - 8
+      - 9
+      - 10
+      - 11
     description: "S\xF3 vale para a tabela de candidatos eleitos."
   - id: NATIVE_FILTER-type
     name: "Tipo de elei\xE7\xE3o"
@@ -763,6 +906,9 @@ metadata:
       - 6
       - 7
       - 8
+      - 9
+      - 10
+      - 11
     description: ''
   cross_filters_enabled: false
   color_scheme: supersetColors

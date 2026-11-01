@@ -140,6 +140,7 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 | `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
 | `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
 | `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
+| `senate_seats` | ano × UF × partido | Cadeiras do Senado após cada eleição: os eleitos do ano e os da eleição anterior, pelo partido de eleição |
 | `mayor_flows` | transição × município × partido do prefeito na origem e no destino | Sankey do partido dos prefeitos entre 2016, 2020 e 2024 |
 | `municipality_shapes` | município × parte do contorno | Contorno de cada município (lista JSON de pares `[longitude, latitude]`) para o mapa por cidade; sem o exterior |
 
@@ -166,6 +167,9 @@ eleição e do turno). O presidente tem `state = 'BR'`. `vote_share` e `seat_sha
 então **não os some nem os tire a média entre UFs**. Para o total nacional, some `elected` e `votes`
 e divida pelo total (`seats_total` e `votes_total` se repetem em todos os partidos da UF), ou use no
 Superset a visão de contribuição sobre `elected`.
+
+`senate_seats`: não é a bancada oficial, porque não traz trocas de partido nem suplentes. Começa em 2018,
+já que 2014 dependeria de 2010. A partir de 2022, DEM e PSL contam como UNIÃO só nesta tabela.
 
 `mayor_flows`: cidade sem prefeito eleito de um lado vai para o nó `Sem eleito`. Os partidos fora dos
 12 com mais prefeitos nas três eleições viram `Outros` em `source` e `target`; `source_party` e
@@ -240,7 +244,7 @@ Os painéis são quatro:
 
 - **Evolução da apuração**: votos por candidato e por partido, com filtro de recebimento do BU;
 - **Entre turnos**: cidades, UFs e zonas em que cada finalista à presidência mais mudou, em % e em votos;
-- **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas e votos × cadeiras;
+- **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas, Senado e votos × cadeiras;
 - **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados.
 
 A importação nunca apaga: os antigos painéis **Candidatos eleitos** e **Fluxo dos mais votados**, hoje dentro

@@ -146,3 +146,61 @@ def test_parties_outside_the_top_are_grouped_as_others(tmp_path, monkeypatch):
     others = {party for party, node in sides if node.endswith("· Outros")}
     assert others == {"PSDB", "PSB", "PL"}                 # the real party stays in *_party
     assert all(node.endswith(party) for party, node in sides if party in ("PT", "MDB", "Sem eleito"))
+
+
+def _senate_db(tmp_path, rows):
+    """rows: (year, state, party) of each elected senator."""
+    path = tmp_path / "s.duckdb"
+    con = duckdb.connect(str(path))
+    create_schema(con)
+    con.execute("""CREATE TABLE candidates (election_year INTEGER, round_number INTEGER,
+        election_code INTEGER, election_type VARCHAR, state VARCHAR, municipality_code INTEGER,
+        municipality_name VARCHAR, office_code INTEGER, candidate_number INTEGER, party VARCHAR,
+        result VARCHAR)""")
+    for number, (year, state, party) in enumerate(rows):
+        con.execute("INSERT INTO candidates VALUES (?, 1, 1, ?, ?, NULL, NULL, 5, ?, ?, 'ELEITO')",
+                    [year, ORDINARY, state, number, party])
+    # A loser never takes a seat.
+    con.execute("INSERT INTO candidates VALUES (2022, 1, 1, ?, 'SP', NULL, NULL, 5, 99, 'NOVO', 'NÃO ELEITO')",
+                [ORDINARY])
+    con.execute("""INSERT INTO votes (election_year, round_number, state, municipality_code,
+                   municipality_name, zone, section, office_code, vote_type, candidate_number,
+                   candidate_name, party, vote_count)
+                   VALUES (2022, 1, 'SP', 1, 'X', 1, 1, 1, 'Nominal', 13, 'N', 'PT', 10)""")
+    con.close()
+    results.build(path)
+    elected.build(path)
+    return path
+
+
+def test_senate_seats_add_each_election_to_the_previous_one(tmp_path):
+    path = _senate_db(tmp_path, [(2014, "SP", "PT"),
+                                 (2018, "SP", "PT"), (2018, "SP", "PMDB"),
+                                 (2022, "SP", "PT"), (2026, "SP", "PL"), (2026, "SP", "PT")])
+    got = _rows(path, """SELECT election_year, party, seats_this_election, seats_previous_election, seats
+                         FROM senate_seats ORDER BY 1, 2""")
+    assert got == [(2018, "MDB", 1, 0, 1), (2018, "PT", 1, 1, 2),      # 2014 has no previous election
+                   (2022, "MDB", 0, 1, 1), (2022, "PT", 1, 1, 2),
+                   (2026, "PL", 1, 0, 1), (2026, "PT", 1, 1, 2)]       # 2018 no longer counts in 2026
+
+
+def test_senate_seats_join_dem_and_psl_into_uniao_only_after_the_merger(tmp_path):
+    path = _senate_db(tmp_path, [(2014, "BA", "DEM"), (2018, "BA", "DEM"), (2018, "RJ", "PSL"),
+                                 (2022, "BA", "UNIÃO"), (2022, "RJ", "PTB")])
+    got = _rows(path, "SELECT election_year, state, party, seats FROM senate_seats ORDER BY 1, 2, 3")
+    assert got == [(2018, "BA", "DEM", 2), (2018, "RJ", "PSL", 1),     # before it, they are separate
+                   (2022, "BA", "UNIÃO", 2), (2022, "RJ", "PTB", 1), (2022, "RJ", "UNIÃO", 1)]
+    # Only this table joins them.
+    assert _rows(path, """SELECT elected FROM elected_party WHERE office_code = 5
+                          AND election_year = 2018 AND party = 'DEM'""") == [(1,)]
+
+
+def test_senate_seats_exist_without_senators_and_when_only_they_are_missing(tmp_path, capsys):
+    path = _db(tmp_path)
+    assert _rows(path, "SELECT count(*) FROM senate_seats") == [(0,)]
+    con = duckdb.connect(str(path))
+    con.execute("DROP TABLE senate_seats")
+    con.close()
+    capsys.readouterr()
+    elected.build(path)
+    assert "senate_seats:" in capsys.readouterr().out
