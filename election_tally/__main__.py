@@ -108,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         download_shapes(a.output)
     elif a.cmd == "build-derived":
         # docker compose runs this before Superset starts; add new derived tables here.
-        from . import elected, leader_flows, lookups, parties, results, shapes, shifts, tse_tables
+        from . import blank_votes, elected, leader_flows, lookups, parties, results, shapes, shifts, tse_tables
         leader_flows.build(a.db, force=a.force)
         tse_tables.build(a.db, force=a.force)
         lookups.build(a.db, force=a.force)
@@ -116,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         shapes.build(a.db, force=a.force)
         # These depend on the results (and on candidates), so they come last.
         parties.build(a.db, force=a.force)
+        blank_votes.build(a.db, force=a.force)
         shifts.build(a.db, force=a.force)
         elected.build(a.db, force=a.force)
     elif a.cmd == "validate":

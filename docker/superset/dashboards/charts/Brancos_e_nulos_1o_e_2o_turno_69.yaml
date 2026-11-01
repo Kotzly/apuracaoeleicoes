@@ -1,0 +1,43 @@
+slice_name: "1\xBA e 2\xBA turno por ano"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  row_limit: 50000
+  color_scheme: supersetColors
+  annotation_layers: []
+  rich_tooltip: true
+  truncate_metric: true
+  zoomable: false
+  comparison_type: values
+  datasource: 0__table
+  x_axis: election_year
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) / NULLIF(SUM(votes_total), 0)
+    label: Brancos e nulos
+    hasCustomLabel: true
+    optionName: metric_41a2bd8bfd69
+  groupby:
+  - round_label
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: has_second_round
+  orientation: vertical
+  show_legend: true
+  legendOrientation: top
+  show_value: true
+  y_axis_format: .2f
+  y_axis_title: '% de todos os votos'
+  y_axis_title_margin: 40
+  x_axis_title: ''
+  order_desc: true
+query_context: null
+cache_timeout: null
+uuid: ba324de1-deef-5c50-a42c-a077424d4a24
+version: 1.0.0
+dataset_uuid: 7b1fb97d-cf0e-5804-a2b4-d533ebc3146e

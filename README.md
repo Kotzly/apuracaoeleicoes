@@ -137,6 +137,7 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 | `round_shifts` | ano × município × finalista, só presidente | Votos e percentual de cada finalista no 1º e no 2º turno; o exterior é `ZZ` |
 | `state_round_shifts` | ano × UF × finalista, só presidente | O mesmo por UF, com o percentual calculado sobre os totais da UF |
 | `zone_round_shifts` | ano × UF × zona × finalista, só presidente | O mesmo por zona; o número da zona só é único dentro da UF |
+| `blank_null_votes` | ano × turno × cargo × município | Brancos, nulos, válidos e o total, em contagens; `has_second_round` marca quem votou nos dois turnos |
 | `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
 | `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
 | `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
@@ -247,6 +248,7 @@ Os painéis são quatro:
 - **Evolução da apuração**: votos por candidato e por partido, com filtro de recebimento do BU;
 - **Entre turnos**: cidades, UFs e zonas em que cada finalista à presidência mais mudou, em % e em votos;
 - **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas, Senado e votos × cadeiras;
+- **Brancos e nulos**: evolução deles entre anos e entre turnos, por cargo, UF e município;
 - **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados.
 
 A importação nunca apaga: os antigos painéis **Candidatos eleitos** e **Fluxo dos mais votados**, hoje dentro
