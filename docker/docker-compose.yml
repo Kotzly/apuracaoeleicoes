@@ -32,7 +32,9 @@ services:
       prepare-data:
         condition: service_completed_successfully
     ports:
-      - "${SUPERSET_PORT:-8088}:8088"
+      # Local only by default: the default login is admin/admin, it opens SQL Lab, and DuckDB can
+      # read files. Set SUPERSET_BIND=0.0.0.0 only with a real password.
+      - "${SUPERSET_BIND:-127.0.0.1}:${SUPERSET_PORT:-8088}:8088"
     environment:
       SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?set SUPERSET_SECRET_KEY in docker/.env}
       SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
