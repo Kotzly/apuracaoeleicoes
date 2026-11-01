@@ -6,7 +6,8 @@ the party's votes over the unit's valid votes (Nominal and Legenda) for that off
 A unit enters a pair only if it has valid votes on both sides, so a new section or a municipality
 that was created has no previous share to compare. `unit_volatility` is the Pedersen index of each
 unit, half the sum of the absolute changes in share. `round_shifts` follows the presidential
-candidates between the two rounds of a year, in each municipality.
+candidates between the two rounds of a year, in each municipality; `state_round_shifts` and
+`zone_round_shifts` do the same in each state and zone.
 
 Party names are the current ones (see `parties.py`). The same section number may have been redrawn
 between elections; the data keeps them as numbered. Seção covers only some offices, because
@@ -23,6 +24,7 @@ from . import parties
 from .parties import OFFICES, canonical_party_sql, years_of
 
 _STATE_TABLE = "party_shifts"
+_ROUND_TABLES = ("round_shifts", "state_round_shifts", "zone_round_shifts")
 _PRESIDENT = 1
 _VALID = "vote_type IN ('Nominal', 'Legenda')"
 SECTION_OFFICES = (1, 3, 5, 11)  # majoritarian offices; the others stop at Zona
@@ -201,19 +203,95 @@ def _build_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
     print(f"round_shifts: {n:,} rows")
 
 
+def _build_place_round_shifts(con: duckdb.DuckDBPyConnection, table: str, rows: str, keys: list[str]) -> None:
+    """Each finalist's votes in the two rounds, in every place (`keys`) that voted in both.
+
+    `rows` has the year, round, keys, candidate number, votes and share of the place's own valid
+    votes, so a share is never the mean of smaller units, which would weigh a village like a capital.
+    """
+    party = canonical_party_sql()
+    columns = ", ".join(f"p.{k}" for k in keys)
+    same_place = " AND ".join(f"{{0}}.{k} = p.{k}" for k in keys)
+    con.execute(f"""
+        CREATE OR REPLACE TABLE {table} AS
+        WITH finalists AS (
+            SELECT election_year, candidate_number, any_value(candidate_name) AS candidate_name,
+                   any_value({party}) AS party
+            FROM national_results WHERE round_number = 2 AND vote_type = 'Nominal'
+            GROUP BY ALL),
+        r AS ({rows}),
+        places AS (
+            SELECT election_year, {', '.join(keys)} FROM r GROUP BY ALL
+            HAVING count(DISTINCT round_number) = 2)
+        SELECT p.election_year::SMALLINT AS election_year, {columns}, f.candidate_number,
+               f.candidate_name, f.party,
+               coalesce(a.votes, 0)::BIGINT AS votes_round1, coalesce(b.votes, 0)::BIGINT AS votes_round2,
+               coalesce(a.share_of_valid, 0) AS share_round1,
+               coalesce(b.share_of_valid, 0) AS share_round2,
+               coalesce(b.share_of_valid, 0) - coalesce(a.share_of_valid, 0) AS share_change,
+               (coalesce(b.votes, 0) - coalesce(a.votes, 0))::BIGINT AS votes_change
+        FROM places p JOIN finalists f USING (election_year)
+        LEFT JOIN r a ON a.election_year = p.election_year AND a.round_number = 1
+                     AND {same_place.format('a')} AND a.candidate_number = f.candidate_number
+        LEFT JOIN r b ON b.election_year = p.election_year AND b.round_number = 2
+                     AND {same_place.format('b')} AND b.candidate_number = f.candidate_number
+        ORDER BY election_year, {', '.join(keys)}, candidate_number""")
+    n = con.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+    print(f"{table}: {n:,} rows")
+
+
+def _build_state_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
+    """Municipalities that voted in only one round still count, so a state's votes may differ
+    slightly from the sum of its rows in `round_shifts`."""
+    _build_place_round_shifts(con, "state_round_shifts", f"""
+        SELECT election_year, round_number, state, candidate_number, votes, share_of_valid
+        FROM state_results WHERE office_code = {_PRESIDENT} AND vote_type = 'Nominal'""", ["state"])
+
+
+def _build_zone_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
+    """A zone is (state, zone), since numbers repeat between states. Rounds of a year share one map."""
+    _build_place_round_shifts(con, "zone_round_shifts", f"""
+        SELECT * FROM (
+            SELECT election_year, round_number, state, zone::INTEGER AS zone, candidate_number,
+                   votes, votes * 1.0 / sum(votes) OVER (
+                       PARTITION BY election_year, round_number, state, zone) AS share_of_valid,
+                   vote_type
+            FROM (SELECT election_year, round_number, state, zone, vote_type, candidate_number,
+                         sum(vote_count)::BIGINT AS votes
+                  FROM votes
+                  WHERE office_code = {_PRESIDENT} AND vote_count > 0 AND {_VALID}
+                  GROUP BY ALL))
+        WHERE vote_type = 'Nominal'""", ["state", "zone"])
+
+
+def _build_round_tables(con: duckdb.DuckDBPyConnection) -> None:
+    _build_round_shifts(con)
+    _build_state_round_shifts(con)
+    _build_zone_round_shifts(con)
+
+
 def build(db: Path, force: bool = False) -> None:
-    """Rebuilds `party_shifts` and `unit_volatility`, unless the results and renames are unchanged."""
+    """Rebuilds these tables, unless the results and renames are unchanged.
+
+    When those are unchanged and only a round table is missing, only the round tables are built:
+    `party_shifts` takes minutes.
+    """
     if not parties.has_tables(db, "national_results", "municipality_results"):
         print("warning: party_shifts not built: the results tables are missing")
         return
-    if not force and parties.is_current(db, _STATE_TABLE):
+    current = not force and parties.is_current(db, _STATE_TABLE)
+    if current and parties.has_tables(db, *_ROUND_TABLES):
         print("party_shifts: up to date")
         return
     con = duckdb.connect(str(db))
     try:
         con.execute("SET memory_limit = '4GB'")
         con.begin()
-        _build_round_shifts(con)
+        _build_round_tables(con)
+        if current:
+            con.commit()
+            con.execute("CHECKPOINT")
+            return
         _create_bases(con)
         _create_tables(con)
         for level in _UNIT_COLUMNS:

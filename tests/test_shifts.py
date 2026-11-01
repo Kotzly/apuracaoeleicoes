@@ -181,6 +181,80 @@ def test_round_shifts_follow_finalists_between_rounds(tmp_path):
     assert rows[3][5:8] == (0.0, pytest.approx(0.5), pytest.approx(0.5))
 
 
+def test_state_round_shifts_use_the_state_totals(tmp_path):
+    path = tmp_path / "s.duckdb"
+    con = duckdb.connect(str(path))
+    create_schema(con)
+    # (state, municipality, round, candidate, party, votes)
+    rows = [("SP", 100, 1, 13, "PT", 90), ("SP", 100, 1, 12, "PDT", 10),  # big city
+            ("SP", 100, 2, 13, "PT", 80), ("SP", 100, 2, 15, "PMDB", 20),
+            ("SP", 200, 1, 15, "PMDB", 10),                               # small city, 13 had no votes
+            ("SP", 200, 2, 13, "PT", 5), ("SP", 200, 2, 15, "PMDB", 5),
+            ("RJ", 300, 1, 13, "PT", 9),                                  # state with one round only
+            ("AM", 400, 1, 13, "PT", 10), ("AM", 400, 2, 15, "PMDB", 10)]  # each finalist in one round
+    for state, mun, rnd, number, party, count in rows:
+        con.execute("""INSERT INTO votes (election_year, round_number, state, municipality_code,
+                       municipality_name, zone, section, office_code, vote_type, candidate_number,
+                       candidate_name, party, vote_count)
+                       VALUES (2022, ?, ?, ?, ?, 1, 1, 1, 'Nominal', ?, ?, ?, ?)""",
+                    [rnd, state, mun, f"CIDADE {mun}", number, f"C{number}", party, count])
+    con.close()
+    results.build(path)
+    shifts.build(path)
+    got = {r[:2]: r[2:] for r in _rows(path, """SELECT state, candidate_number, party, votes_round1,
+           votes_round2, share_round1, share_round2, share_change, votes_change
+           FROM state_round_shifts""")}
+    assert set(got) == {("SP", 13), ("SP", 15), ("AM", 13), ("AM", 15)}  # 12 and RJ are out
+    # SP round 1: 13 has 90 of 110 votes; the mean of its cities' shares would be 45%
+    assert got["SP", 13] == ("PT", 90, 85, pytest.approx(90 / 110), pytest.approx(85 / 110),
+                             pytest.approx(85 / 110 - 90 / 110), -5)
+    assert got["SP", 15][:3] == ("MDB", 10, 25)                  # the party under its current name
+    assert got["AM", 15][1:5] == (0, 10, 0.0, 1.0)               # no votes in a round: 0, not missing
+
+
+def test_zone_round_shifts_keep_equal_zone_numbers_of_two_states_apart(tmp_path):
+    path = tmp_path / "z.duckdb"
+    con = duckdb.connect(str(path))
+    create_schema(con)
+    # (state, zone, section, round, vote type, candidate, party, votes)
+    rows = [("SP", 1, 1, 1, "Nominal", 13, "PT", 60), ("SP", 1, 2, 1, "Nominal", 13, "PT", 20),
+            ("SP", 1, 1, 1, "Nominal", 12, "PDT", 20),
+            ("SP", 1, 1, 1, "Branco", 95, None, 500),               # not a valid vote
+            ("SP", 1, 1, 2, "Nominal", 13, "PT", 75), ("SP", 1, 1, 2, "Nominal", 15, "PMDB", 25),
+            ("RJ", 1, 1, 1, "Nominal", 15, "PMDB", 10),             # same number, other state
+            ("RJ", 1, 1, 2, "Nominal", 15, "PMDB", 8), ("RJ", 1, 1, 2, "Nominal", 13, "PT", 2),
+            ("RJ", 2, 1, 1, "Nominal", 13, "PT", 9)]                # one round only
+    for state, zone, section, rnd, kind, number, party, count in rows:
+        con.execute("""INSERT INTO votes (election_year, round_number, state, municipality_code,
+                       municipality_name, zone, section, office_code, vote_type, candidate_number,
+                       candidate_name, party, vote_count)
+                       VALUES (2022, ?, ?, 1, 'X', ?, ?, 1, ?, ?, ?, ?, ?)""",
+                    [rnd, state, zone, section, kind, number, f"C{number}", party, count])
+    con.close()
+    results.build(path)
+    shifts.build(path)
+    got = {r[:3]: r[3:] for r in _rows(path, """SELECT state, zone, candidate_number, party, votes_round1,
+           votes_round2, share_round1, share_round2, votes_change FROM zone_round_shifts""")}
+    assert set(got) == {("SP", 1, 13), ("SP", 1, 15), ("RJ", 1, 13), ("RJ", 1, 15)}
+    assert got["SP", 1, 13] == ("PT", 80, 75, pytest.approx(0.8), pytest.approx(0.75), -5)
+    assert got["RJ", 1, 13][1:] == (0, 2, 0.0, pytest.approx(0.2), 2)   # no votes in a round: 0
+    assert got["SP", 1, 15][0] == "MDB"
+
+
+def test_missing_round_table_is_built_without_redoing_party_shifts(tmp_path, capsys):
+    path = _db(tmp_path)
+    con = duckdb.connect(str(path))
+    con.execute("DROP TABLE zone_round_shifts")
+    con.close()
+    capsys.readouterr()
+    shifts.build(path)
+    out = capsys.readouterr().out
+    assert "zone_round_shifts:" in out and "party_shifts:" not in out
+    capsys.readouterr()
+    shifts.build(path)
+    assert "up to date" in capsys.readouterr().out
+
+
 def test_a_change_in_the_renames_file_rebuilds(tmp_path, monkeypatch, capsys):
     from election_tally import parties
     path = _db(tmp_path)

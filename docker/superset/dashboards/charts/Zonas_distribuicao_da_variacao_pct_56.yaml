@@ -1,0 +1,28 @@
+slice_name: "Zonas: distribui\xe7\xe3o da varia\xe7\xe3o (p.p.)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: histogram_v2
+params:
+  viz_type: histogram_v2
+  column: share_change_pp
+  groupby: []
+  adhoc_filters: []
+  bins: 60
+  normalize: false
+  cumulative: false
+  color_scheme: supersetColors
+  show_value: false
+  show_legend: false
+  x_axis_title: "Varia\xE7\xE3o da participa\xE7\xE3o do candidato, T2 menos T1 (p.p.)"
+  y_axis_title: Zonas
+  x_axis_title_margin: 30
+  y_axis_title_margin: 30
+  row_limit: 50000
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: 481f040f-f73e-538f-8214-01f62025b34a
+version: 1.0.0
+dataset_uuid: 8a2f6612-5975-5e0a-9100-a324982c2dd4

@@ -34,16 +34,75 @@ def test_dataset_calculated_columns_compute_what_their_names_say():
     assert result["abs_votes_change"] == 7
 
 
-def test_dashboard_has_two_tabs_each_with_histogram_gains_drops_and_table():
-    dashboard = _dashboard()
-    position = dashboard["position"]
+def test_state_dataset_calculated_columns_match_the_city_ones():
+    def calculated(relative):
+        return {c["column_name"]: c["expression"] for c in _load(relative)["columns"] if c["expression"]}
+    city = calculated("datasets/Eleicoes_DuckDB/round_shifts_15.yaml")
+    del city["label"]  # only cities need the state next to the name
+    assert calculated("datasets/Eleicoes_DuckDB/state_round_shifts_21.yaml") == city
+
+
+def test_dashboard_has_city_state_and_zone_tabs_each_with_histogram_gains_drops_and_table():
+    position = _dashboard()["position"]
     tabs = [position[t]["meta"]["text"] for t in position["TABS-main"]["children"]]
-    assert tabs == ["Em porcentagem", "Em números absolutos"]
-    for tab_id, column in (("TAB-pct", "share_change_pp"), ("TAB-abs", "votes_change")):
+    assert tabs == ["Cidades, em porcentagem", "Cidades, em números absolutos",
+                    "UF, em porcentagem", "UF, em números absolutos",
+                    "Zonas, em porcentagem", "Zonas, em números absolutos"]
+    for tab_id in position["TABS-main"]["children"]:
         charts = [position[c]["meta"]["sliceName"] for row in position[tab_id]["children"]
                   for c in position[row]["children"]]
         assert len(charts) == 4 and any("quedas" in n for n in charts) and any("altas" in n for n in charts)
     assert "Como ler" in position["MARKDOWN-note"]["meta"]["code"]
+
+
+def test_state_tabs_only_use_state_charts_grouped_by_state():
+    position = _dashboard()["position"]
+    by_uuid = {c["uuid"]: c for c in map(lambda p: yaml.safe_load(p.read_text(encoding="utf-8")),
+                                         (DASHBOARDS / "charts").glob("*.yaml"))}
+    dataset = _load("datasets/Eleicoes_DuckDB/state_round_shifts_21.yaml")["uuid"]
+    for tab_id in ("TAB-uf-pct", "TAB-uf-abs"):
+        for row in position[tab_id]["children"]:
+            for chart_id in position[row]["children"]:
+                chart = by_uuid[position[chart_id]["meta"]["uuid"]]
+                assert chart["dataset_uuid"] == dataset
+                params = chart["params"]
+                assert params.get("x_axis", "state") == "state"
+                assert "label" not in params.get("all_columns", [])
+
+
+def test_zone_tabs_only_use_zone_charts_and_zone_labels_tell_states_apart():
+    position = _dashboard()["position"]
+    by_uuid = {c["uuid"]: c for c in map(lambda p: yaml.safe_load(p.read_text(encoding="utf-8")),
+                                         (DASHBOARDS / "charts").glob("*.yaml"))}
+    dataset = _load("datasets/Eleicoes_DuckDB/zone_round_shifts_23.yaml")
+    for tab_id in ("TAB-zone-pct", "TAB-zone-abs"):
+        for row in position[tab_id]["children"]:
+            for chart_id in position[row]["children"]:
+                assert by_uuid[position[chart_id]["meta"]["uuid"]]["dataset_uuid"] == dataset["uuid"]
+    expr = {c["column_name"]: c["expression"] for c in dataset["columns"] if c["expression"]}
+    selects = ", ".join(f"{e} AS {n}" for n, e in expr.items())
+    got = duckdb.sql(f"""SELECT {selects} FROM (VALUES (7, 'CE', 0.5, 0.6, 0.1, -7))
+                         t(zone, state, share_round1, share_round2, share_change, votes_change)""").fetchone()
+    assert dict(zip(expr, got))["label"] == "Zona 7 (CE)"
+
+
+def test_filters_of_cities_stay_out_of_the_tabs_without_their_column():
+    filters = _filters()
+    assert filters["Município"]["scope"]["rootPath"] == ["TAB-pct", "TAB-abs"]
+    assert filters["Mínimo de votos no 1º turno"]["scope"]["rootPath"] == ["TAB-pct", "TAB-abs",
+                                                                           "TAB-zone-pct", "TAB-zone-abs"]
+    for name in ("Ano", "Candidato", "UF"):
+        assert filters[name]["scope"]["rootPath"] == ["ROOT_ID"]
+
+
+def test_position_ids_are_consistent():
+    position = _dashboard()["position"]
+    chart_ids = [v["meta"]["chartId"] for v in position.values()
+                 if isinstance(v, dict) and v.get("type") == "CHART"]
+    assert len(chart_ids) == len(set(chart_ids)) == 24
+    for key, node in position.items():
+        if isinstance(node, dict) and "children" in node:
+            assert node["id"] == key and all(child in position for child in node["children"])
 
 
 def test_ranked_bars_pick_the_top_30_cities_by_label_in_opposite_directions():

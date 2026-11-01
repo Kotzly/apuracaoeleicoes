@@ -135,6 +135,8 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 |---|---|---|
 | `party_names` | nome antigo | Renomeações de partidos (o CSV); `final_name` segue a cadeia até o nome atual |
 | `round_shifts` | ano × município × finalista, só presidente | Votos e percentual de cada finalista no 1º e no 2º turno; o exterior é `ZZ` |
+| `state_round_shifts` | ano × UF × finalista, só presidente | O mesmo por UF, com o percentual calculado sobre os totais da UF |
+| `zone_round_shifts` | ano × UF × zona × finalista, só presidente | O mesmo por zona; o número da zona só é único dentro da UF |
 | `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
 | `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
 | `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
@@ -237,7 +239,7 @@ docker compose up --build                          # http://localhost:8088 (admi
 Os painéis são quatro:
 
 - **Evolução da apuração**: votos por candidato e por partido, com filtro de recebimento do BU;
-- **Entre turnos**: cidades em que cada finalista à presidência mais mudou, em % e em votos;
+- **Entre turnos**: cidades, UFs e zonas em que cada finalista à presidência mais mudou, em % e em votos;
 - **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas e votos × cadeiras;
 - **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados.
 

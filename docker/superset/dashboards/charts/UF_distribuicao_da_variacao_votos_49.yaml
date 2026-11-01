@@ -1,0 +1,28 @@
+slice_name: "UF: distribui\xE7\xE3o da varia\xE7\xE3o (votos)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: histogram_v2
+params:
+  viz_type: histogram_v2
+  column: votes_change
+  groupby: []
+  adhoc_filters: []
+  bins: 12
+  normalize: false
+  cumulative: false
+  color_scheme: supersetColors
+  show_value: false
+  show_legend: false
+  x_axis_title: "Varia\xE7\xE3o de votos do candidato, T2 menos T1"
+  y_axis_title: UFs
+  x_axis_title_margin: 30
+  y_axis_title_margin: 30
+  row_limit: 50000
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: 89b8a0e6-9a4b-5917-bdd5-0e4e96e016bc
+version: 1.0.0
+dataset_uuid: 29be6563-5047-53d5-9b2e-853c37e0a428

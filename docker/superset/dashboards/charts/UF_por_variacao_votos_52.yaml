@@ -1,0 +1,41 @@
+slice_name: "UF por varia\xE7\xE3o (votos)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  query_mode: raw
+  all_columns:
+  - state
+  - candidate_name
+  - votes_round1
+  - votes_round2
+  - pct_round1
+  - pct_round2
+  - share_change_pp
+  - votes_change
+  order_by_cols:
+  - '["abs_votes_change", false]'
+  adhoc_filters: []
+  row_limit: 50000
+  server_pagination: true
+  server_page_length: 30
+  include_search: true
+  column_config:
+    pct_round1:
+      d3NumberFormat: .1f
+      d3SmallNumberFormat: .1f
+    pct_round2:
+      d3NumberFormat: .1f
+      d3SmallNumberFormat: .1f
+    share_change_pp:
+      d3NumberFormat: +.1f
+      d3SmallNumberFormat: +.1f
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: def48ace-4a96-56dd-9006-0f5705023137
+version: 1.0.0
+dataset_uuid: 29be6563-5047-53d5-9b2e-853c37e0a428

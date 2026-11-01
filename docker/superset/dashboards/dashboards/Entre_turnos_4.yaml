@@ -46,26 +46,18 @@ position:
     - ROW-note
     meta:
       width: 12
-      height: 34
-      code: "**Como ler.** Cada linha \xE9 uma cidade e um finalista da elei\xE7\xE3o presidencial; os\
-        \ gr\xE1ficos mostram o finalista escolhido no filtro **Candidato**, e a varia\xE7\xE3o \xE9 o\
-        \ 2\xBA turno menos o 1\xBA, na pr\xF3pria cidade (nada \xE9 somado entre cidades). No 1\xBA turno\
-        \ h\xE1 muitos candidatos e no 2\xBA s\xF3 dois, ent\xE3o os finalistas quase sempre ganham participa\xE7\
-        \xE3o ao herdar votos dos eliminados: a alta m\xE9dia medida \xE9 de 3 a 10 pontos percentuais\
-        \ por ano, e \xE9 essa a refer\xEAncia para julgar uma cidade, n\xE3o o zero. Cidades pequenas\
-        \ dominam a varia\xE7\xE3o em pontos percentuais e cidades grandes dominam a varia\xE7\xE3o em\
-        \ votos; por isso h\xE1 o filtro **M\xEDnimo de votos no 1\xBA turno**, j\xE1 que cidades min\xFA\
-        sculas e o exterior costumam encabe\xE7ar o ranking em %. A participa\xE7\xE3o \xE9 sobre votos\
-        \ v\xE1lidos. O exterior \xE9 a UF `ZZ`: para tirar estados (inclusive `ZZ`), use o filtro **UF**\
-        \ com a op\xE7\xE3o de excluir selecionados (\"Inverse selection\"). N\xE3o h\xE1 ajuste pela\
-        \ m\xE9dia nacional. \"Maiores quedas\" s\xF3 lista cidades em que o candidato realmente perdeu\
-        \ (pode ficar vazio)."
+      height: 38
+      code: "**Como ler.** Cada aba mostra um finalista da elei\xe7\xe3o presidencial, escolhido no filtro **Candidato**, por cidade, por UF ou por zona eleitoral. A varia\xe7\xe3o \xe9 o 2\xba turno menos o 1\xba, dentro do pr\xf3prio local. A participa\xe7\xe3o \xe9 sobre os votos v\xe1lidos do local, ent\xe3o a de uma UF ou zona \xe9 recalculada com os totais dela, e n\xe3o \xe9 a m\xe9dia das partes. No 1\xba turno h\xe1 muitos candidatos e no 2\xba s\xf3 dois, ent\xe3o os finalistas quase sempre ganham participa\xe7\xe3o ao herdar votos dos eliminados: a alta m\xe9dia medida nas cidades \xe9 de 3 a 10 pontos percentuais por ano, e \xe9 essa a refer\xeancia para julgar um local, n\xe3o o zero. Locais pequenos dominam a varia\xe7\xe3o em pontos percentuais e locais grandes dominam a varia\xe7\xe3o em votos; por isso h\xe1 o filtro **M\xednimo de votos no 1\xba turno**, j\xe1 que cidades min\xfasculas e o exterior costumam encabe\xe7ar o ranking em %. **Munic\xedpio** s\xf3 vale nas abas de cidades, e **M\xednimo de votos**, nas de cidades e zonas. Uma zona pode cobrir v\xe1rios munic\xedpios, e uma cidade grande, v\xe1rias zonas; o n\xfamero da zona s\xf3 \xe9 \xfanico dentro da UF. O exterior \xe9 a UF `ZZ`: para tirar estados (inclusive `ZZ`), use o filtro **UF** com a op\xe7\xe3o de excluir selecionados (\"Inverse selection\"). N\xe3o h\xe1 ajuste pela m\xe9dia nacional. \"Maiores quedas\" s\xf3 lista locais em que o candidato realmente perdeu (pode ficar vazio)."
   TABS-main:
     type: TABS
     id: TABS-main
     children:
     - TAB-pct
     - TAB-abs
+    - TAB-uf-pct
+    - TAB-uf-abs
+    - TAB-zone-pct
+    - TAB-zone-abs
     parents:
     - ROOT_ID
     - GRID_ID
@@ -81,7 +73,7 @@ position:
     - GRID_ID
     - TABS-main
     meta:
-      text: Em porcentagem
+      text: Cidades, em porcentagem
   ROW-P1:
     type: ROW
     id: ROW-P1
@@ -187,7 +179,7 @@ position:
     - GRID_ID
     - TABS-main
     meta:
-      text: "Em n\xFAmeros absolutos"
+      text: "Cidades, em n\xFAmeros absolutos"
   ROW-A1:
     type: ROW
     id: ROW-A1
@@ -281,6 +273,462 @@ position:
       chartId: 8
       uuid: 63ffbd26-8553-421d-be5d-cd86f7205dc9
       sliceName: "Cidades por varia\xE7\xE3o (votos)"
+  TAB-uf-pct:
+    type: TAB
+    id: TAB-uf-pct
+    children:
+    - ROW-UP1
+    - ROW-UP2
+    - ROW-UP3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: UF, em porcentagem
+  ROW-UP1:
+    type: ROW
+    id: ROW-UP1
+    children:
+    - CHART-UP0
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UP0:
+    type: CHART
+    id: CHART-UP0
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    - ROW-UP1
+    meta:
+      width: 12
+      height: 70
+      chartId: 9
+      uuid: bb6485db-777d-54e5-8ab6-3246937e71f6
+      sliceName: "UF: distribui\xE7\xE3o da varia\xE7\xE3o (p.p.)"
+  ROW-UP2:
+    type: ROW
+    id: ROW-UP2
+    children:
+    - CHART-UP1
+    - CHART-UP2
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UP1:
+    type: CHART
+    id: CHART-UP1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    - ROW-UP2
+    meta:
+      width: 6
+      height: 100
+      chartId: 10
+      uuid: ad6e484a-3aa7-51fd-ac77-1821da5472e6
+      sliceName: "UF: maiores altas (p.p.)"
+  CHART-UP2:
+    type: CHART
+    id: CHART-UP2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    - ROW-UP2
+    meta:
+      width: 6
+      height: 100
+      chartId: 11
+      uuid: 4b02dab1-6d08-5cbc-909c-c5d98e5e4eb6
+      sliceName: "UF: maiores quedas (p.p.)"
+  ROW-UP3:
+    type: ROW
+    id: ROW-UP3
+    children:
+    - CHART-UP3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UP3:
+    type: CHART
+    id: CHART-UP3
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-pct
+    - ROW-UP3
+    meta:
+      width: 12
+      height: 70
+      chartId: 12
+      uuid: 32c1ce98-2cd5-5d89-9c53-e4049b5127e4
+      sliceName: "UF por varia\xE7\xE3o (p.p.)"
+  TAB-uf-abs:
+    type: TAB
+    id: TAB-uf-abs
+    children:
+    - ROW-UA1
+    - ROW-UA2
+    - ROW-UA3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: "UF, em n\xFAmeros absolutos"
+  ROW-UA1:
+    type: ROW
+    id: ROW-UA1
+    children:
+    - CHART-UA0
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UA0:
+    type: CHART
+    id: CHART-UA0
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    - ROW-UA1
+    meta:
+      width: 12
+      height: 70
+      chartId: 13
+      uuid: 89b8a0e6-9a4b-5917-bdd5-0e4e96e016bc
+      sliceName: "UF: distribui\xE7\xE3o da varia\xE7\xE3o (votos)"
+  ROW-UA2:
+    type: ROW
+    id: ROW-UA2
+    children:
+    - CHART-UA1
+    - CHART-UA2
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UA1:
+    type: CHART
+    id: CHART-UA1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    - ROW-UA2
+    meta:
+      width: 6
+      height: 100
+      chartId: 14
+      uuid: 60f19dfe-9fe9-5d1f-bd29-d8e6a9b4d2d8
+      sliceName: "UF: maiores altas (votos)"
+  CHART-UA2:
+    type: CHART
+    id: CHART-UA2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    - ROW-UA2
+    meta:
+      width: 6
+      height: 100
+      chartId: 15
+      uuid: f8806324-a328-5fd5-b193-2f1d8f185120
+      sliceName: "UF: maiores quedas (votos)"
+  ROW-UA3:
+    type: ROW
+    id: ROW-UA3
+    children:
+    - CHART-UA3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UA3:
+    type: CHART
+    id: CHART-UA3
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-abs
+    - ROW-UA3
+    meta:
+      width: 12
+      height: 70
+      chartId: 16
+      uuid: def48ace-4a96-56dd-9006-0f5705023137
+      sliceName: "UF por varia\xE7\xE3o (votos)"
+  TAB-zone-pct:
+    type: TAB
+    id: TAB-zone-pct
+    children:
+    - ROW-ZP1
+    - ROW-ZP2
+    - ROW-ZP3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: "Zonas, em porcentagem"
+  ROW-ZP1:
+    type: ROW
+    id: ROW-ZP1
+    children:
+    - CHART-ZP0
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ZP0:
+    type: CHART
+    id: CHART-ZP0
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    - ROW-ZP1
+    meta:
+      width: 12
+      height: 70
+      chartId: 17
+      uuid: 481f040f-f73e-538f-8214-01f62025b34a
+      sliceName: "Zonas: distribui\xe7\xe3o da varia\xe7\xe3o (p.p.)"
+  ROW-ZP2:
+    type: ROW
+    id: ROW-ZP2
+    children:
+    - CHART-ZP1
+    - CHART-ZP2
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ZP1:
+    type: CHART
+    id: CHART-ZP1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    - ROW-ZP2
+    meta:
+      width: 6
+      height: 100
+      chartId: 18
+      uuid: 8ca90a0c-5c35-51a1-97d2-81edb55405d8
+      sliceName: "Zonas: maiores altas (p.p.)"
+  CHART-ZP2:
+    type: CHART
+    id: CHART-ZP2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    - ROW-ZP2
+    meta:
+      width: 6
+      height: 100
+      chartId: 19
+      uuid: b2bf1217-0035-5a99-8af7-ef66b22e7233
+      sliceName: "Zonas: maiores quedas (p.p.)"
+  ROW-ZP3:
+    type: ROW
+    id: ROW-ZP3
+    children:
+    - CHART-ZP3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ZP3:
+    type: CHART
+    id: CHART-ZP3
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-pct
+    - ROW-ZP3
+    meta:
+      width: 12
+      height: 70
+      chartId: 20
+      uuid: 74e0c3fd-d5da-581a-b754-25a1ec2ea516
+      sliceName: "Zonas por varia\xe7\xe3o (p.p.)"
+  TAB-zone-abs:
+    type: TAB
+    id: TAB-zone-abs
+    children:
+    - ROW-ZA1
+    - ROW-ZA2
+    - ROW-ZA3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: "Zonas, em n\xfameros absolutos"
+  ROW-ZA1:
+    type: ROW
+    id: ROW-ZA1
+    children:
+    - CHART-ZA0
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ZA0:
+    type: CHART
+    id: CHART-ZA0
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    - ROW-ZA1
+    meta:
+      width: 12
+      height: 70
+      chartId: 21
+      uuid: 8d61ca33-da6f-5e90-9a02-64aaf41b6264
+      sliceName: "Zonas: distribui\xe7\xe3o da varia\xe7\xe3o (votos)"
+  ROW-ZA2:
+    type: ROW
+    id: ROW-ZA2
+    children:
+    - CHART-ZA1
+    - CHART-ZA2
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ZA1:
+    type: CHART
+    id: CHART-ZA1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    - ROW-ZA2
+    meta:
+      width: 6
+      height: 100
+      chartId: 22
+      uuid: c00fcb05-1301-57d7-9622-5c2945de6c89
+      sliceName: "Zonas: maiores altas (votos)"
+  CHART-ZA2:
+    type: CHART
+    id: CHART-ZA2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    - ROW-ZA2
+    meta:
+      width: 6
+      height: 100
+      chartId: 23
+      uuid: 9fff02e4-f129-5ccc-b3e4-fcb9ec24cd8f
+      sliceName: "Zonas: maiores quedas (votos)"
+  ROW-ZA3:
+    type: ROW
+    id: ROW-ZA3
+    children:
+    - CHART-ZA3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ZA3:
+    type: CHART
+    id: CHART-ZA3
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-abs
+    - ROW-ZA3
+    meta:
+      width: 12
+      height: 70
+      chartId: 24
+      uuid: db1029ed-7547-51f5-91ba-381be355b8f6
+      sliceName: "Zonas por varia\xe7\xe3o (votos)"
 metadata:
   native_filter_configuration:
   - id: NATIVE_FILTER-shiftYear
@@ -392,7 +840,8 @@ metadata:
     - NATIVE_FILTER-shiftState
     scope:
       rootPath:
-      - ROOT_ID
+      - TAB-pct
+      - TAB-abs
       excluded: []
     description: ''
   - id: NATIVE_FILTER-shiftMinVotes
@@ -413,7 +862,10 @@ metadata:
     cascadeParentIds: []
     scope:
       rootPath:
-      - ROOT_ID
+      - TAB-pct
+      - TAB-abs
+      - TAB-zone-pct
+      - TAB-zone-abs
       excluded: []
     description: ''
   cross_filters_enabled: false

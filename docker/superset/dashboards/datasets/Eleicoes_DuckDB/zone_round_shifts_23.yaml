@@ -1,0 +1,257 @@
+table_name: zone_round_shifts
+main_dttm_col: null
+currency_code_column: null
+description: "Votos de cada finalista presidencial nos dois turnos, por zona eleitoral."
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: main
+sql: null
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: 8a2f6612-5975-5e0a-9100-a324982c2dd4
+metrics: []
+columns:
+- column_name: election_year
+  verbose_name: Ano
+  is_dttm: false
+  is_active: true
+  type: SMALLINT
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: state
+  verbose_name: UF
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: zone
+  verbose_name: Zona
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: candidate_number
+  verbose_name: "N\xFAmero"
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: candidate_name
+  verbose_name: Candidato
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party
+  verbose_name: Partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: votes_round1
+  verbose_name: "Votos no 1\xBA turno"
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: votes_round2
+  verbose_name: "Votos no 2\xBA turno"
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: share_round1
+  verbose_name: "Fra\xE7\xE3o no 1\xBA turno"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: share_round2
+  verbose_name: "Fra\xE7\xE3o no 2\xBA turno"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: share_change
+  verbose_name: "Varia\xE7\xE3o (fra\xE7\xE3o)"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: votes_change
+  verbose_name: "Varia\xE7\xE3o em votos"
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: label
+  verbose_name: Zona (UF)
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: "'Zona ' || zone || ' (' || state || ')'"
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: pct_round1
+  verbose_name: "% no 1\xBA turno"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: share_round1 * 100
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: pct_round2
+  verbose_name: "% no 2\xBA turno"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: share_round2 * 100
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: share_change_pp
+  verbose_name: "Varia\xE7\xE3o (p.p.)"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: share_change * 100
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: abs_share_change_pp
+  verbose_name: "|Varia\xE7\xE3o| (p.p.)"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: abs(share_change) * 100
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: abs_votes_change
+  verbose_name: "|Varia\xE7\xE3o em votos|"
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: abs(votes_change)
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41
