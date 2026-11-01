@@ -167,7 +167,7 @@ def test_city_map_is_a_polygon_chart_over_the_shapes_joined_to_municipality_shif
 
 def test_city_map_is_in_scope_of_the_party_filters_and_has_a_legend_note():
     position = _dashboard()["position"]
-    chart = next(c for c in _charts().values() if c["viz_type"] == "deck_polygon")
+    chart = next(c for c in _charts().values() if c["viz_type"] == "deck_polygon" and " · " not in c["slice_name"])
     meta = next(v["meta"] for v in position.values()
                 if isinstance(v, dict) and v.get("meta", {}).get("uuid") == chart["uuid"])
     filters = _filters()

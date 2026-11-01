@@ -2,6 +2,7 @@
 # Save every asset of the running Superset back into the repo: dashboards, charts, datasets,
 # connections and saved queries, even the ones no dashboard uses. They survive the next start
 # because bootstrap.sh re-imports superset/dashboards/, overwriting edits made in the interface.
+# The Cargos dashboard and its charts stay out: bootstrap.sh generates them from office_specs/.
 #
 # Run from anywhere:  docker/superset/export-dashboards.sh
 set -e
@@ -10,7 +11,8 @@ cd "$(dirname "$0")/.."
 docker compose exec -T superset sh -c '
 rm -rf /tmp/export
 python - <<EOF
-import os, pathlib
+import os, pathlib, sys
+import yaml
 from flask import g
 from superset.app import create_app
 
@@ -22,6 +24,12 @@ with app.app_context():
     g.user = security_manager.find_user(username=os.environ["SUPERSET_ADMIN_USERNAME"])
     files = [(name, content() if callable(content) else content)
              for name, content in ExportAssetsCommand().run()]
+sys.path.insert(0, "/app")
+from build_office_dashboard import generated_uuids
+generated = generated_uuids()
+kept = [(name, content) for name, content in files if yaml.safe_load(content).get("uuid") not in generated]
+print(f"Leaving out {len(files) - len(kept)} generated files of the Cargos dashboard")
+files = kept
 out = pathlib.Path("/tmp/export")
 for name, content in files:
     target = out / name

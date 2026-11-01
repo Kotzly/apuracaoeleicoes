@@ -143,6 +143,10 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 | `state_round_shifts` | ano × UF × finalista, só presidente | O mesmo por UF, com o percentual calculado sobre os totais da UF |
 | `zone_round_shifts` | ano × UF × zona × finalista, só presidente | O mesmo por zona; o número da zona só é único dentro da UF |
 | `blank_null_votes` | ano × turno × cargo × município | Brancos, nulos, válidos e o total, em contagens; `has_second_round` marca quem votou nos dois turnos |
+| `candidate_results` | ano × turno × cargo × candidatura | Votos, perfil, se foi eleita e `elected_before` (mesmo nome, cargo e local um mandato antes; aproximado, pois não há CPF) |
+| `unit_winners` | ano × cargo × UF ou município, só presidente, governador e prefeito | Mais votado, margem, líder do 1º turno, viradas, continuidade do partido e porte do município |
+| `runoff_shifts` | ano × cargo × nível × unidade × finalista, só governador e prefeito | Votos e percentual de cada finalista nos dois turnos, por UF, município e zona |
+| `office_seats` | ano × cargo × unidade | Vagas e candidatos da eleição ordinária, sem as suplementares |
 | `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
 | `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
 | `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
@@ -256,13 +260,20 @@ O Superset responde só em `127.0.0.1`. Para abrir na rede local, defina uma sen
 `SUPERSET_BIND=0.0.0.0` no `.env`: o login padrão é público, ele dá acesso ao SQL Lab, e o DuckDB sabe ler
 arquivos, então trate o acesso ao Superset como acesso ao contêiner.
 
-Os painéis são cinco:
+Os painéis são seis:
 
 - **Evolução da apuração**: votos por candidato e por partido, com filtro de recebimento do BU;
 - **Entre turnos**: cidades, UFs e zonas em que cada finalista à presidência mais mudou, em % e em votos;
 - **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas, Senado e votos × cadeiras;
 - **Brancos e nulos**: evolução deles entre anos e entre turnos, por cargo, UF e município;
-- **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados.
+- **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados;
+- **Cargos**: uma aba por cargo, com resultado, território, mudança e candidatos, mais as análises específicas de cada um.
+
+O painel **Cargos** é gerado e seus YAML não são versionados: `office_specs/` descreve cada aba e `bootstrap.sh` roda
+`build_office_dashboard.py` a cada inicialização, então uma mudança num spec vale no próximo `docker compose up`.
+`python docker/superset/build_office_dashboard.py --check --office governador --db elections.duckdb` só valida, rodando
+cada gráfico nos dados. `export-dashboards.sh` deixa esse painel e seus gráficos de fora: um ajuste neles feito na
+interface se perde na próxima inicialização, se não for levado para o spec.
 
 A importação nunca apaga: os antigos painéis **Candidatos eleitos** e **Fluxo dos mais votados**, hoje dentro
 dos painéis acima, continuam numa instalação existente até serem excluídos na interface. Antes disso,
@@ -299,6 +310,25 @@ Como as peças se encaixam:
   Só esse serviço monta o arquivo com escrita, e novas tabelas derivadas entram nesse comando.
   Se ele precisar reconstruir algo, pare o Superset antes (`docker compose stop superset`).
 - Os metadados do próprio Superset (usuários, gráficos extras) ficam no volume `superset_home`.
+
+**Testando com dados sintéticos.** Para testar os painéis e o `build-derived` sem o banco real, há um
+dataset inventado, centenas de vezes menor (cerca de 760 mil linhas em `votes` e 30 MB):
+
+```bash
+python -m election_tally load --synthetic      # ou: pipeline --synthetic; grava em ./synthetic.duckdb
+python -m election_tally build-derived --db synthetic.duckdb
+cd docker && ELECTIONS_DB=../synthetic.duckdb docker compose up
+```
+
+Os lugares são reais, para os mapas funcionarem: as 27 UFs, cerca de 70 municípios e 5 cidades do exterior. Os
+anos (2206 a 2218), os candidatos (`CANDIDATO 13`), os partidos (`P-A` a `P-O`) e todos os votos são inventados.
+Cargos, turnos, zonas, seções e tipos de voto seguem a estrutura real. A mesma `--seed` gera os mesmos dados.
+
+- Os dados reais e os sintéticos não se misturam: `--synthetic` recusa um arquivo com outros dados, e a carga real
+  recusa um arquivo sintético. Rodar `--synthetic` de novo apaga as tabelas do arquivo e recria tudo.
+- O gerador grava direto nas tabelas, então não testa o download nem a leitura dos arquivos do TSE.
+- Os painéis abrem vazios onde o filtro padrão aponta para dados reais (`2026`, `LULA`, `PT`, `2022 → 2026`): troque
+  o filtro. Os textos fixos dos painéis continuam citando anos e partidos reais.
 
 **Editando os painéis.** Como a importação sobrescreve os painéis do repositório a cada
 inicialização, edições feitas na interface se perdem se não forem salvas de volta:

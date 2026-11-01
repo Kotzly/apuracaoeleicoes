@@ -11,6 +11,7 @@ MAYOR = 11
 # the TSE files, with a capital in "Deputado Federal" (see formats.py): compare offices by code.
 OFFICES = {PRESIDENT: "Presidente", 3: "Governador", SENATOR: "Senador", 6: "Deputado federal",
            7: "Deputado estadual", 8: "Deputado distrital", MAYOR: "Prefeito", 13: "Vereador"}
+MUNICIPAL_OFFICES = (MAYOR, 13)
 OFFICE_LIST = ", ".join(map(str, OFFICES))  # for an SQL `IN`
 OFFICE_NAME_CASE = "CASE office_code " + " ".join(
     f"WHEN {code} THEN '{name}'" for code, name in OFFICES.items()) + " END"

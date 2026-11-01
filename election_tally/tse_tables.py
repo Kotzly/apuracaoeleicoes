@@ -18,7 +18,7 @@ from pathlib import Path
 import duckdb
 import requests
 
-from . import derived
+from . import derived, parties
 from .domain import sql_string
 from .repair import extract_repaired
 
@@ -205,5 +205,8 @@ def build_table(db: Path, table: Table, force: bool = False) -> list[int]:
 
 
 def build(db: Path, force: bool = False) -> None:
+    if derived.has_tables(db, parties.SYNTHETIC_TABLE):
+        print("TSE tables: synthetic dataset, nothing to download")
+        return
     for table in TABLES:
         build_table(db, table, force)

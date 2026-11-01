@@ -19,6 +19,16 @@ RENAMES_PATH = files("election_tally").joinpath("data/party_renames.csv")
 _METHOD_VERSION = 3  # raise when a table changes, so existing ones get rebuilt
 _STATE_TABLE = "party_names"
 
+# A database with this table holds the made-up dataset (see `synthetic.py`), with these cycles.
+SYNTHETIC_TABLE = "synthetic_dataset"
+SYNTHETIC_FEDERAL_YEARS = (2206, 2210, 2214, 2218)
+SYNTHETIC_MUNICIPAL_YEARS = (2208, 2212, 2216)
+
+
+def is_synthetic(con: derived.Connection) -> bool:
+    return bool(con.execute("SELECT count(*) FROM duckdb_tables() WHERE table_name = ?",
+                            [SYNTHETIC_TABLE]).fetchone()[0])
+
 
 def read_renames(text: str | None = None) -> list[dict]:
     """Rows of the CSV (or of `text`, for tests)."""
