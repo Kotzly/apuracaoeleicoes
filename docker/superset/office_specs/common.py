@@ -20,6 +20,7 @@ CANDIDATES = "2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36"
 CANDIDATE_RESULTS = "806e47fb-121a-5d49-85e6-05e638197cc5"
 ELECTED_PARTY = "b92a5725-3a7e-425c-a7d4-c3352c23b05b"
 MUNICIPALITY_RESULTS = "7a450a29-0b17-5534-b2c0-6527a4863b93"
+MUNICIPAL_PARTY = "d1f0a6c4-7b3e-5e92-a8d1-4c6b2f9e0a17"  # elected_party's columns, city by city
 OFFICE_SEATS = "ea1a05d0-442b-570d-93b1-cc535aab20b1"
 RUNOFF_SHIFTS = "74708069-0d64-5a36-8660-da0cb48b46e5"
 SENATE_SEATS = "c5a2813a-0a69-552d-92cc-aad1b8aa9be8"
@@ -29,6 +30,7 @@ UNIT_WINNERS = "9cdb4b61-6e63-5675-8d23-7a0ebca406ff"
 # Offices that come with the office holder's running mates in the ticket table.
 _TICKET = {1: (1, 2), 3: (3, 4), 5: (5, 9, 10), 11: (11, 12)}
 _RUNOFF_LEVELS = {"Município": ("Cidades", ""), "UF": ("UF", "UF_entre_turnos_"), "Zona": ("Zonas", "Zonas_entre_turnos_")}
+_MUNICIPAL_CODES = (11, 13)
 
 
 @dataclass
@@ -172,16 +174,29 @@ ELECTED = metric("COUNT(*) FILTER (WHERE elected)", "Eleitos")
 CANDIDACIES = metric("COUNT(*)", "Candidaturas")
 
 
+def _elected_table(municipal: bool) -> Chart:
+    """In a municipal office, on the table whose city names match the Município filter."""
+    options = {}
+    if municipal:
+        options = dict(dataset=CANDIDATE_RESULTS, params={
+            "all_columns": ["election_year", "round_number", "office_name", "state", "label", "candidate_name", "party",
+                            "result", "candidate_number", "full_name", "election_type"],
+            "order_by_cols": ['["election_year", false]', '["office_name", true]', '["state", true]', '["label", true]']})
+    return clone("elected_table", "Candidatos_eleitos", width=12, height=70, ignore=("turno",), **options)
+
+
 def result_block(code: int) -> list:
+    municipal = code in _MUNICIPAL_CODES
     rows = [
         [clone("turnout", "Comparecimento", width=3, height=25), clone("sections", "Secoes", width=3, height=25)],
-        [bar("party_votes", "Votos no 1º turno por partido", ELECTED_PARTY, "party_current", [metric("SUM(votes)", "Votos")],
-             filters=[where("votes > 0")], row_limit=35, ignore=("partido",)),
-         clone("elected_by_party", "Eleitos_por_partido_e_ano", history=True)],
+        [bar("party_votes", "Votos no 1º turno por partido", MUNICIPALITY_RESULTS, "party_current", [metric("SUM(votes)", "Votos")],
+             filters=[equals("round_number", 1), where("party IS NOT NULL AND votes > 0")], row_limit=35,
+             ignore=("partido", "turno")),
+         clone("elected_by_party", "Eleitos_por_partido_e_ano", history=True, dataset=MUNICIPAL_PARTY if municipal else None)],
         [table("candidates_table", "Resultado por candidato", CANDIDATE_RESULTS,
                ["election_year", "round_number", "uf", "label", "candidate_name", "party_current", "votes", "pct_of_valid", "result"],
                order=[("votes", False)], filters=[where("votes IS NOT NULL")], ignore=("partido",))],
-        [clone("elected_table", "Candidatos_eleitos", width=12, height=70, ignore=("turno",))],
+        [_elected_table(municipal)],
     ]
     if code in _TICKET:
         offices = ", ".join(map(str, _TICKET[code]))
@@ -197,7 +212,8 @@ def result_block(code: int) -> list:
 def territory_block(maps: bool = True, by_state: bool = True) -> list:
     rows = []
     if maps:
-        rows.append([clone("turnout_map", "Comparecimento_por_UF", width=6, height=70)])
+        # One color per state: a single city would leave a map with one state painted.
+        rows.append([clone("turnout_map", "Comparecimento_por_UF", width=6, height=70, ignore=("municipio",))])
     rows.append([clone("blank_by_election", "Brancos_e_nulos_por_eleicao", history=True, width=12)])
     if by_state:
         rows.append([clone("blank_by_state", "Brancos_e_nulos_por_UF_e_ano", history=True, width=12, height=80)])
@@ -263,12 +279,16 @@ def reelection_line(key: str = "reelection") -> Chart:
 
 def legislature_block(by_state: bool = True, municipal: bool = False) -> list:
     """Benches, votes against seats and the vote structure of a proportional office."""
+    source = MUNICIPAL_PARTY if municipal else None
     rows = [
-        [clone("benches", "Bancadas_por_ano", history=True), clone("benches_line", "Evolucao_das_bancadas", history=True)],
-        [clone("votes_seats", "Votos_e_cadeiras_por_partido"), clone("votes_seats_table", "Votos_e_cadeiras_tabela")],
+        [clone("benches", "Bancadas_por_ano", history=True, dataset=source),
+         clone("benches_line", "Evolucao_das_bancadas", history=True, dataset=source)],
+        [clone("votes_seats", "Votos_e_cadeiras_por_partido", dataset=source,
+               params={"y_axis_title": "% do total"} if municipal else {}),
+         clone("votes_seats_table", "Votos_e_cadeiras_tabela", dataset=source)],
     ]
     if by_state:
-        rows.append([pivot("bench_by_state", "Bancada por UF e partido", ELECTED_PARTY, ["state"], ["party_current"],
+        rows.append([pivot("bench_by_state", "Bancada por UF e partido", source or ELECTED_PARTY, ["state"], ["party_current"],
                            metric("SUM(elected)", "Eleitos"), filters=[where("elected > 0")])])
     rows += [
         [line("vote_kinds", "Votos nominais e de legenda", MUNICIPALITY_RESULTS if municipal else STATE_RESULTS, "election_year",

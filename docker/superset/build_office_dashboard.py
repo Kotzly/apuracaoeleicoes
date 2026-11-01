@@ -44,7 +44,7 @@ OFFICES = ("presidente", "governador", "senador", "deputado_federal", "deputado_
 FEDERAL, MUNICIPAL = (1, 3, 5, 6, 7, 8), (11, 13)
 # Tables whose `state` or `label` is empty for these offices, so the filter would blank the chart.
 _NATIONAL_ROWS = {"candidate_results", "candidates", "elected_party", "office_seats"}
-_CITY_LEVEL_ONLY = {"candidate_results", "office_seats", "unit_winners"}
+_CITY_LEVEL_ONLY = {"candidate_results", "candidates", "office_seats", "unit_winners"}
 BLANK_NULL = "7b1fb97d-cf0e-5804-a2b4-d533ebc3146e"
 ELECTED_PARTY = "b92a5725-3a7e-425c-a7d4-c3352c23b05b"
 CANDIDATE_RESULTS = "806e47fb-121a-5d49-85e6-05e638197cc5"
@@ -311,9 +311,20 @@ def check(position: dict, charts: dict, facts: dict, datasets: dict, db: str | N
         missing = _referenced_columns(chart["params"]) - _dataset_columns(dataset)
         if missing:
             problems.append(f"{name}: columns not in {dataset['table_name']}: {sorted(missing)}")
+    if not problems:
+        problems += _check_city_filter(charts, facts, datasets)
     if db and not problems:
         problems += _check_on_data(charts, datasets, db)
     return problems
+
+
+def _check_city_filter(charts: dict, facts: dict, datasets: dict) -> list:
+    """A municipal chart outside the Município filter would show the whole state under a chosen city."""
+    city = next(f for f in FILTERS if f["key"] == "municipio")
+    names = {chart_id: chart["slice_name"] for chart, chart_id, _ in charts.values()}
+    return [f"{names[i]}: ignores the Município filter, without ignore=('municipio',) in its spec"
+            for i, fact in facts.items()
+            if fact["office"] in MUNICIPAL and "municipio" not in fact["spec"].ignore and not _in_scope(city, fact, datasets)]
 
 
 def _check_on_data(charts: dict, datasets: dict, db: str) -> list:

@@ -37,6 +37,36 @@ metrics:
   extra: null
   warning_text: null
 columns:
+- column_name: label
+  verbose_name: "Munic\xEDpio (UF)"
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: municipality_name || ' (' || state || ')'
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party_current
+  verbose_name: Partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: (CASE party WHEN 'PMDB' THEN 'MDB' WHEN 'PTN' THEN 'PODE' WHEN 'PT do B' THEN
+    'AVANTE' WHEN 'PSDC' THEN 'DC' WHEN 'SD' THEN 'SOLIDARIEDADE' WHEN 'PR' THEN 'PL' WHEN 'PRB'
+    THEN 'REPUBLICANOS' WHEN 'PPS' THEN 'CIDADANIA' WHEN 'PEN' THEN 'PATRIOTA' WHEN 'PATRI'
+    THEN 'PATRIOTA' WHEN 'PTC' THEN 'AGIR' WHEN 'PMN' THEN 'MOBILIZA' WHEN 'PMB' THEN 'DEMOCRATA'
+    WHEN 'PC do B' THEN 'PCDOB' ELSE party END)
+  description: "Sigla atual do partido: renomea\xE7\xF5es unificadas, fus\xF5es n\xE3o."
+  python_date_format: null
+  datetime_format: null
+  extra: null
 - column_name: country_code
   verbose_name: "C\xF3digo do pa\xEDs"
   is_dttm: false

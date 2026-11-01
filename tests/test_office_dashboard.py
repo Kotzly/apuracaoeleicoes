@@ -158,3 +158,36 @@ def test_export_leaves_out_exactly_what_the_generator_makes():
     versioned = {_load(p)["uuid"] for p in (SOURCE / "charts").glob("*.yaml") if not p.name.startswith("Cargos__")}
     assert not uuids & versioned
     assert {n["meta"]["uuid"] for n in _chart_nodes()} - uuids <= versioned
+
+
+def _in_city_filter(chart_node):
+    filters = _dashboard()["metadata"]["native_filter_configuration"]
+    city = next(f for f in filters if f["name"] == "Município")
+    return chart_node["meta"]["chartId"] not in city["scope"]["excluded"]
+
+
+def test_municipal_charts_answer_to_the_city_filter_except_the_state_map():
+    charts = _charts()
+    outside = {charts[n["meta"]["uuid"]]["slice_name"] for n in _chart_nodes()
+               if _tab_of(n) in ("Prefeito", "Vereador") and not _in_city_filter(n)}
+    assert outside == {"Prefeito · Comparecimento por UF", "Vereador · Comparecimento por UF"}
+
+
+def test_party_votes_read_a_table_with_the_city_and_only_the_first_round():
+    charts = _charts()
+    for office in OFFICE_CODES:
+        chart = next(c for c in charts.values() if c["slice_name"] == f"{office} · Votos no 1º turno por partido")
+        assert "label" in _dataset_columns(chart)
+        assert [f["comparator"] for f in chart["params"]["adhoc_filters"] if f.get("subject") == "round_number"] == [1]
+
+
+def test_check_rejects_a_municipal_chart_outside_the_city_filter():
+    sys.path.insert(0, str(SUPERSET))
+    import build_office_dashboard as builder
+    from office_specs.common import Chart
+    datasets = {"state_only": {"table_name": "elected_party", "columns": [{"column_name": "state"}]}}
+    chart = ({"slice_name": "Vereador · X"}, 1, False)
+    facts = {1: dict(office=13, subtab="Resultado", dataset="state_only", spec=Chart(key="x"))}
+    assert "Vereador · X" in builder._check_city_filter({"u": chart}, facts, datasets)[0]
+    facts[1]["spec"] = Chart(key="x", ignore=("municipio",))
+    assert builder._check_city_filter({"u": chart}, facts, datasets) == []

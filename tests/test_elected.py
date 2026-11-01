@@ -204,3 +204,40 @@ def test_senate_seats_exist_without_senators_and_when_only_they_are_missing(tmp_
     capsys.readouterr()
     elected.build(path)
     assert "senate_seats:" in capsys.readouterr().out
+
+
+def test_municipal_party_adds_up_to_elected_party(tmp_path):
+    path = _db(tmp_path)
+    by_city = """SELECT election_year, office_code, state, party, sum(elected) FROM municipal_party
+                 WHERE elected > 0 GROUP BY ALL ORDER BY ALL"""
+    by_state = """SELECT election_year, office_code, state, party, sum(elected) FROM elected_party
+                  WHERE elected > 0 AND office_code IN (11, 13) GROUP BY ALL ORDER BY ALL"""
+    assert _rows(path, by_city) == _rows(path, by_state) != []
+    # the same city code in MG is another city
+    assert _rows(path, """SELECT label, party, elected FROM municipal_party
+                          WHERE election_year = 2024 AND municipality_code = 2 ORDER BY label""") == [
+        ("CIDADE 2 (MG)", "PT", 1), ("CIDADE 2 (SP)", "PT", 1)]
+
+
+def test_municipal_party_counts_first_round_votes_under_the_results_spelling(tmp_path):
+    path = _db(tmp_path)
+    con = duckdb.connect(str(path))
+    for rnd, votes in ((1, 70), (2, 500)):
+        con.execute("""INSERT INTO votes (election_year, round_number, state, municipality_code, municipality_name,
+                       zone, section, office_code, vote_type, candidate_number, candidate_name, party, vote_count)
+                       VALUES (2024, ?, 'SP', 1, 'CIDADE UM', 1, 1, 11, 'Nominal', 13, 'N', 'PT', ?)""", [rnd, votes])
+    con.close()
+    results.build(path, force=True)
+    elected.build(path, force=True)
+    assert _rows(path, """SELECT label, party, elected, votes FROM municipal_party
+                          WHERE election_year = 2024 AND office_code = 11 AND state = 'SP' AND municipality_code = 1
+                          """) == [("CIDADE UM (SP)", "PT", 1, 70)]
+
+
+def test_an_older_database_gets_municipal_party_without_forcing(tmp_path):
+    path = _db(tmp_path)
+    con = duckdb.connect(str(path))
+    con.execute("DROP TABLE municipal_party")
+    con.close()
+    elected.build(path)
+    assert _rows(path, "SELECT count(*) FROM municipal_party")[0][0] > 0

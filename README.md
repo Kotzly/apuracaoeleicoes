@@ -150,6 +150,7 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 | `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
 | `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
 | `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
+| `municipal_party` | ano × cargo municipal × município × partido | Eleitos e votos do 1º turno, para os gráficos de prefeito e vereador responderem ao filtro de município |
 | `senate_seats` | ano × UF × partido | Cadeiras do Senado após cada eleição: os eleitos do ano e os da eleição anterior, pelo partido de eleição |
 | `mayor_flows` | transição × município × partido do prefeito na origem e no destino | Sankey do partido dos prefeitos entre 2016, 2020 e 2024 |
 | `municipality_shapes` | município × parte do contorno | Contorno de cada município (lista JSON de pares `[longitude, latitude]`) para o mapa por cidade; sem o exterior |

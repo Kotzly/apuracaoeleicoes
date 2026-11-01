@@ -5,6 +5,9 @@ For mayors and governors, where a place has one seat, a supplementary election r
 of the ordinary one: the winner counts from the latest election (supplementary before ordinary,
 then the highest election code and round). The president has `state` = 'BR'.
 
+`municipal_party` is the same count for mayors and councillors in each city, so that their charts can
+answer to a city filter: `elected_party` stops at the state.
+
 `mayor_flows` follows the party of each city's mayor from one election to the next, for Sankey
 charts: a city without an elected mayor on one side goes to the node `Sem eleito`, and parties
 outside the 12 with most mayors in the three elections are grouped as `Outros`.
@@ -18,7 +21,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from . import derived, parties
-from .domain import MAYOR, OFFICE_LIST, OFFICE_NAME_CASE, PRESIDENT, SENATOR, consecutive_elections
+from .domain import MAYOR, MUNICIPAL_OFFICES, OFFICE_LIST, OFFICE_NAME_CASE, PRESIDENT, SENATOR, consecutive_elections
 from .parties import canonical_party_sql
 
 NO_MAYOR = "Sem eleito"
@@ -80,6 +83,39 @@ def _create_elected_tables(con: derived.Connection) -> None:
         WINDOW w AS (PARTITION BY election_year, office_code, state)
         ORDER BY office_code, election_year, state, party""")
     derived.report_rows(con, "elected_party")
+
+
+def _create_municipal_party(con: derived.Connection) -> None:
+    offices = ", ".join(map(str, MUNICIPAL_OFFICES))
+    party = canonical_party_sql()
+    # Named as in the results, because the dashboards' Município filter offers those names and the
+    # TSE spells some cities differently in `candidates`.
+    con.execute(f"""
+        CREATE OR REPLACE TABLE municipal_party AS
+        WITH names AS (
+            SELECT election_year, office_code, state, municipality_code, min(municipality_name) AS municipality_name
+            FROM municipality_results WHERE office_code IN ({offices}) GROUP BY ALL),
+        seats AS (
+            SELECT election_year, office_code, state, municipality_code, party, count(*) AS elected,
+                   min(municipality_name) AS seat_name
+            FROM winners WHERE office_code IN ({offices}) GROUP BY ALL),
+        ballots AS (
+            SELECT election_year, office_code, state, municipality_code, {party} AS party, sum(votes)::BIGINT AS votes
+            FROM municipality_results
+            WHERE round_number = 1 AND party IS NOT NULL AND office_code IN ({offices})
+            GROUP BY ALL),
+        joined AS (
+            SELECT election_year, office_code, state, municipality_code, party, seat_name,
+                   coalesce(elected, 0)::INTEGER AS elected, coalesce(votes, 0)::BIGINT AS votes
+            FROM seats FULL JOIN ballots USING (election_year, office_code, state, municipality_code, party))
+        SELECT j.election_year::SMALLINT AS election_year, j.office_code::SMALLINT AS office_code, {OFFICE_NAME_CASE} AS office_name,
+               j.state, j.municipality_code, coalesce(n.municipality_name, j.seat_name) AS municipality_name,
+               coalesce(n.municipality_name, j.seat_name) || ' (' || j.state || ')' AS label,
+               j.party, j.elected, j.votes
+        FROM joined j
+        LEFT JOIN names n USING (election_year, office_code, state, municipality_code)
+        ORDER BY office_code, election_year, state, municipality_code, party""")
+    derived.report_rows(con, "municipal_party")
 
 
 def _create_mayor_flows(con: derived.Connection) -> None:
@@ -150,16 +186,17 @@ def _create_senate_seats(con: derived.Connection) -> None:
 
 
 def build(db: Path, force: bool = False) -> None:
-    """Rebuilds `elected_party`, `mayor_flows` and `senate_seats`, unless results, candidates and renames are unchanged."""
+    """Rebuilds these tables (see the module's docstring), unless results, candidates and renames are unchanged."""
     if not derived.has_tables(db, "national_results", "party_results", "candidates"):
         print("warning: elected_party not built: the results or `candidates` could not be loaded")
         return
     if (not force and parties.is_current(db, _STATE_TABLE, uses_candidates=True)
-            and derived.has_tables(db, "senate_seats")):
+            and derived.has_tables(db, "senate_seats", "municipal_party")):
         print("elected_party: up to date")
         return
     with derived.rebuilding(db) as con:
         _create_elected_tables(con)
+        _create_municipal_party(con)
         _create_mayor_flows(con)
         _create_senate_seats(con)
         derived.mark_current(con, _STATE_TABLE, parties.source_state(con, True))
