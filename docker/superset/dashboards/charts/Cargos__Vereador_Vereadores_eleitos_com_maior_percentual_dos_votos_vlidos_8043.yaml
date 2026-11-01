@@ -1,0 +1,40 @@
+slice_name: "Vereador \xB7 Vereadores eleitos com maior percentual dos votos v\xE1\
+  lidos"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  query_mode: raw
+  all_columns:
+  - election_year
+  - state
+  - label
+  - candidate_name
+  - party_current
+  - votes
+  - pct_of_valid
+  row_limit: 500
+  server_pagination: true
+  server_page_length: 50
+  include_search: true
+  annotation_layers: []
+  order_by_cols:
+  - '["pct_of_valid", false]'
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 13
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: elected AND votes >= 1000
+  viz_type: table
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 88fbdd86-e017-5f0e-9e2f-7bbaa5323fcd
+version: 1.0.0
+dataset_uuid: 806e47fb-121a-5d49-85e6-05e638197cc5

@@ -1,0 +1,43 @@
+slice_name: "Prefeito \xB7 Volatilidade por UF (mapa)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: country_map
+params:
+  viz_type: country_map
+  select_country: brazil
+  entity: state_iso
+  metric:
+    expressionType: SIMPLE
+    column:
+      column_name: pedersen_pp
+    aggregate: MAX
+    label: Volatilidade (%)
+    hasCustomLabel: true
+    optionName: metric_pedersen_pp
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: UF
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: state <> 'ZZ'
+  row_limit: 100
+  number_format: .0f
+  linear_color_scheme: schemeYlOrRd
+  annotation_layers: []
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 07058e9f-00d9-538b-a9c6-3a4bba86f9ef
+version: 1.0.0
+dataset_uuid: 0a765893-8334-4ba8-92a2-94bc602ab29c

@@ -181,7 +181,7 @@ def result_block(code: int) -> list:
         [table("candidates_table", "Resultado por candidato", CANDIDATE_RESULTS,
                ["election_year", "round_number", "uf", "label", "candidate_name", "party_current", "votes", "pct_of_valid", "result"],
                order=[("votes", False)], filters=[where("votes IS NOT NULL")], ignore=("partido",))],
-        [clone("elected_table", "Candidatos_eleitos", width=12, height=70)],
+        [clone("elected_table", "Candidatos_eleitos", width=12, height=70, ignore=("turno",))],
     ]
     if code in _TICKET:
         offices = ", ".join(map(str, _TICKET[code]))

@@ -1,0 +1,45 @@
+slice_name: "Vereador \xB7 Munic\xEDpios com vereador eleito, por partido"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: election_year
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(DISTINCT municipality_code)
+    label: "Munic\xEDpios com eleito"
+    hasCustomLabel: true
+    optionName: "metric_munic\xEDpioscomeleito"
+  groupby:
+  - party_current
+  row_limit: 5000
+  markerEnabled: true
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 13
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: elected
+  viz_type: echarts_timeseries_line
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: b3290d95-77ce-5a65-add9-9c6aa52b63c9
+version: 1.0.0
+dataset_uuid: 806e47fb-121a-5d49-85e6-05e638197cc5

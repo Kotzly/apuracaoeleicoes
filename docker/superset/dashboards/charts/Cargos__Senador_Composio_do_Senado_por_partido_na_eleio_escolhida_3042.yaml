@@ -1,0 +1,47 @@
+slice_name: "Senador \xB7 Composi\xE7\xE3o do Senado por partido na elei\xE7\xE3o\
+  \ escolhida"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: party_current
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(seats_this_election)
+    label: "Eleitos nesta elei\xE7\xE3o"
+    hasCustomLabel: true
+    optionName: "metric_eleitosnestaelei\xE7\xE3o"
+  - expressionType: SQL
+    sqlExpression: SUM(seats_previous_election)
+    label: "Eleitos na elei\xE7\xE3o anterior"
+    hasCustomLabel: true
+    optionName: "metric_eleitosnaelei\xE7\xE3oanterior"
+  groupby: []
+  orientation: horizontal
+  stack: Stack
+  row_limit: 30
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_sort: "Eleitos nesta elei\xE7\xE3o"
+  x_axis_sort_asc: false
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: seats > 0
+  viz_type: echarts_timeseries_bar
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 69175844-b446-57f3-8a8d-b4ae63481d08
+version: 1.0.0
+dataset_uuid: c5a2813a-0a69-552d-92cc-aad1b8aa9be8

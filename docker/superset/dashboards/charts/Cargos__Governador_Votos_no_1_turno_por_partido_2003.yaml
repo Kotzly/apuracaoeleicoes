@@ -1,0 +1,47 @@
+slice_name: "Governador \xB7 Votos no 1\xBA turno por partido"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: party_current
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(votes)
+    label: Votos
+    hasCustomLabel: true
+    optionName: metric_votos
+  groupby: []
+  orientation: vertical
+  stack: null
+  row_limit: 35
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_sort: Votos
+  x_axis_sort_asc: false
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 3
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: votes > 0
+  viz_type: echarts_timeseries_bar
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: c09b5d44-3783-55ce-8199-3b360e1596a3
+version: 1.0.0
+dataset_uuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b

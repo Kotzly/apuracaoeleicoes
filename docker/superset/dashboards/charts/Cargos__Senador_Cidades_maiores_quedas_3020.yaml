@@ -1,0 +1,58 @@
+slice_name: "Senador \xB7 Cidades: maiores quedas"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  x_axis: unit_label
+  xAxisForceCategorical: true
+  x_axis_sort: Queda (p.p.)
+  x_axis_sort_asc: false
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: drop_pp
+    aggregate: MAX
+    label: Queda (p.p.)
+    hasCustomLabel: true
+    optionName: metric_drop_pp
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 5
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: "Munic\xEDpio"
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: share_change < 0
+  orientation: horizontal
+  row_limit: 30
+  show_legend: false
+  show_value: true
+  y_axis_format: .1f
+  color_scheme: supersetColors
+  stack: null
+  order_desc: true
+  truncate_metric: true
+  rich_tooltip: true
+  x_axis_title: ''
+  y_axis_title: Queda (p.p.)
+  y_axis_title_margin: 40
+  x_axis_title_margin: 30
+  zoomable: false
+  annotation_layers: []
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: fe20cc58-2d8d-56c5-9554-f64e44d745ed
+version: 1.0.0
+dataset_uuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2

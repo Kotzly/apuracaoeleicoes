@@ -1,0 +1,41 @@
+slice_name: "Prefeito \xB7 Comparecimento por UF"
+description: null
+certified_by: null
+certification_details: null
+viz_type: country_map
+params:
+  datasource: 0__table
+  viz_type: country_map
+  select_country: brazil
+  entity: state_iso
+  metric:
+    expressionType: SQL
+    label: Comparecimento
+    sqlExpression: SUM(turnout) * 1.0 / NULLIF(SUM(eligible_voters), 0)
+    optionName: metric_mapa_comparecimento
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: state
+    operator: '!='
+    comparator: ZZ
+  row_limit: 100
+  number_format: .1%
+  linear_color_scheme: schemeYlGnBu
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 1d01fed4-ae8e-5b0d-a014-07bea0ea72b4
+version: 1.0.0
+dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6

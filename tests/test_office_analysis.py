@@ -57,7 +57,7 @@ VOTES = [
 ]
 # (year, type, office, state, city, seats)
 SEATS = [(2018, ORD, 6, "SP", None, 70), (2022, ORD, 6, "SP", None, 70), (2022, ORD, 1, None, None, 1),
-         (2016, ORD, 11, "SP", 1, 1), (2016, SUP, 11, "SP", 1, 1), (2020, ORD, 11, "SP", 1, 1)]
+         (2016, ORD, 11, "SP", 1, 1), (2016, "Eleição Suplementar", 11, "SP", 1, 1), (2020, ORD, 11, "SP", 1, 1)]
 # (year, office, state, city, zone, section, eligible)
 SECTIONS = [(2016, 11, "SP", 1, 1, 1, 4000), (2016, 11, "SP", 1, 1, 2, 2000), (2020, 11, "SP", 1, 1, 1, 250000),
             (2020, 11, "SP", 2, 2, 1, 100)]
@@ -153,10 +153,10 @@ def test_unit_winners_of_the_president_are_the_most_voted_of_each_state(db):
 
 def test_unit_winners_continuity_follows_the_seat_holder_and_cities_get_a_size(db):
     assert _rows(db, """SELECT party, holder_party, size_band FROM unit_winners
-                        WHERE office_code = 11 AND election_year = 2016""") == [("PT", "PSDB", "5 a 20 mil")]
+                        WHERE office_code = 11 AND election_year = 2016""") == [("PT", "PSDB", "2. 5 a 20 mil")]
     got = _rows(db, """SELECT municipality_code, same_party_as_previous, size_band FROM unit_winners
                        WHERE office_code = 11 AND election_year = 2020 ORDER BY 1""")
-    assert got == [(1, True, "Mais de 200 mil"), (2, None, "Até 5 mil")]
+    assert got == [(1, True, "5. Mais de 200 mil"), (2, None, "1. Até 5 mil")]
 
 
 def test_runoff_shifts_compares_finalists_of_each_place_at_each_level(db):

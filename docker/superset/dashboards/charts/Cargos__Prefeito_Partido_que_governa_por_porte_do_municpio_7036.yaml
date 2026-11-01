@@ -1,0 +1,45 @@
+slice_name: "Prefeito \xB7 Partido que governa, por porte do munic\xEDpio"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: size_band
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: "Munic\xEDpios"
+    hasCustomLabel: true
+    optionName: "metric_munic\xEDpios"
+  groupby:
+  - continuity_party
+  orientation: vertical
+  stack: Stack
+  row_limit: 300
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_sort: size_band
+  x_axis_sort_asc: true
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  viz_type: echarts_timeseries_bar
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 127e529d-9cb6-5cf1-8f0a-a581bda0cd57
+version: 1.0.0
+dataset_uuid: 9cdb4b61-6e63-5675-8d23-7a0ebca406ff

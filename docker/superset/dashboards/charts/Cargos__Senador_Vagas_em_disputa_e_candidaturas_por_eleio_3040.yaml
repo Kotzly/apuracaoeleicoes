@@ -1,0 +1,49 @@
+slice_name: "Senador \xB7 Vagas em disputa e candidaturas por elei\xE7\xE3o"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: election_year
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(seats)
+    label: Vagas
+    hasCustomLabel: true
+    optionName: metric_vagas
+  - expressionType: SQL
+    sqlExpression: SUM(candidates)
+    label: Candidaturas
+    hasCustomLabel: true
+    optionName: metric_candidaturas
+  groupby: []
+  orientation: vertical
+  stack: null
+  row_limit: 30
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_sort: Vagas
+  x_axis_sort_asc: false
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 5
+  viz_type: echarts_timeseries_bar
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 623a69de-d046-55be-b56e-e177508bd806
+version: 1.0.0
+dataset_uuid: ea1a05d0-442b-570d-93b1-cc535aab20b1

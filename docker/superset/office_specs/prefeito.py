@@ -15,6 +15,18 @@ FLOW_NOTE = (
     "Os fluxos mostram, entre duas eleições municipais, de que partido para que partido passou cada prefeitura, "
     "conforme o partido do prefeito eleito em cada ano.")
 
+
+def _by_size(chart):
+    """The bands are numbered, so sorting the axis by name puts them in order of size."""
+    chart.params.update(x_axis_sort="size_band", x_axis_sort_asc=True)
+    return chart
+
+
+def _smallest_first(chart):
+    chart.params.update(order_desc=False)
+    return chart
+
+
 BAND_NOTE = (
     "Porte é o número de eleitores aptos do município na eleição: até 5 mil, 5 a 20 mil, 20 a 50 mil, 50 a 200 mil e "
     "mais de 200 mil. O filtro de ano vale para estes gráficos; escolha uma eleição para comparar os portes.")
@@ -44,16 +56,16 @@ OFFICE = office("Prefeito", CODE, 7000, [
            [reuse("Fluxos_entre_partidos_de_prefeitos")]),
     subtab("Porte do município",
            note("band_note", BAND_NOTE, height=8),
-           [bar("band_winners", "Partido que governa, por porte do município", UNIT_WINNERS, "size_band",
+           [_by_size(bar("band_winners", "Partido que governa, por porte do município", UNIT_WINNERS, "size_band",
                 [metric("COUNT(*)", "Municípios")], groupby=(GOVERNING,), stack="Stack", sort="Municípios",
-                ignore=("partido",), row_limit=300, width=12)],
-           [bar("band_margin", "Margem média de vitória por porte (p.p.)", UNIT_WINNERS, "size_band",
+                ignore=("partido",), row_limit=300, width=12))],
+           [_by_size(bar("band_margin", "Margem média de vitória por porte (p.p.)", UNIT_WINNERS, "size_band",
                 [metric("AVG(margin_pp)", "Margem média"), metric("MIN(margin_pp)", "Menor margem")],
-                y_format=".1f", sort="Margem média", ignore=("partido",)),
-            bar("band_continuity", "Continuidade do partido por porte (%)", UNIT_WINNERS, "size_band",
+                y_format=".1f", sort="Margem média", ignore=("partido",))),
+            _by_size(bar("band_continuity", "Continuidade do partido por porte (%)", UNIT_WINNERS, "size_band",
                 [metric(KEPT, "% que manteve o partido")],
-                y_format=".1f", filters=[where("same_party_as_previous IS NOT NULL")], ignore=("partido",))],
-           [aggregated_table("band_table", "Eleições por porte do município", UNIT_WINNERS, ["size_band"],
+                y_format=".1f", filters=[where("same_party_as_previous IS NOT NULL")], ignore=("partido",)))],
+           [_smallest_first(aggregated_table("band_table", "Eleições por porte do município", UNIT_WINNERS, ["size_band"],
                              [metric("COUNT(*)", "Municípios"),
                               metric("AVG(winner_pct)", "% médio do eleito"),
                               metric("AVG(margin_pp)", "Margem média (p.p.)"),
@@ -61,7 +73,7 @@ OFFICE = office("Prefeito", CODE, 7000, [
                               metric("COUNT(*) FILTER (WHERE flipped)", "Viradas"),
                               metric(KEPT, "% que manteve o partido"),
                               metric("MIN(eligible_voters)", "Menor eleitorado")],
-                             order_by=metric("MIN(eligible_voters)", "Menor eleitorado"), ignore=("partido",))]),
+                             order_by=metric("MIN(eligible_voters)", "Menor eleitorado"), ignore=("partido",)))]),
     subtab("Entre turnos",
            note("runoff_note", RUNOFF_NOTE, height=10),
            *runoff_block(levels=("Município", "Zona")),

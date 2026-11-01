@@ -1,0 +1,42 @@
+slice_name: "Deputado federal \xB7 Bancada por UF e partido"
+description: null
+certified_by: null
+certification_details: null
+viz_type: pivot_table_v2
+params:
+  groupbyRows:
+  - state
+  groupbyColumns:
+  - party_current
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(elected)
+    label: Eleitos
+    hasCustomLabel: true
+    optionName: metric_eleitos
+  aggregateFunction: Sum
+  metricsLayout: COLUMNS
+  row_limit: 50000
+  valueFormat: .0f
+  annotation_layers: []
+  transposePivot: false
+  combineMetric: false
+  colOrder: key_a_to_z
+  rowOrder: key_a_to_z
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 6
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: elected > 0
+  viz_type: pivot_table_v2
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 67bec884-63b2-5351-ae62-52d4602f6065
+version: 1.0.0
+dataset_uuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b

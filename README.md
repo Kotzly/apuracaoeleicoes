@@ -138,6 +138,10 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 | `state_round_shifts` | ano × UF × finalista, só presidente | O mesmo por UF, com o percentual calculado sobre os totais da UF |
 | `zone_round_shifts` | ano × UF × zona × finalista, só presidente | O mesmo por zona; o número da zona só é único dentro da UF |
 | `blank_null_votes` | ano × turno × cargo × município | Brancos, nulos, válidos e o total, em contagens; `has_second_round` marca quem votou nos dois turnos |
+| `candidate_results` | ano × turno × cargo × candidatura | Votos, perfil, se foi eleita e `elected_before` (mesmo nome, cargo e local um mandato antes; aproximado, pois não há CPF) |
+| `unit_winners` | ano × cargo × UF ou município, só presidente, governador e prefeito | Mais votado, margem, líder do 1º turno, viradas, continuidade do partido e porte do município |
+| `runoff_shifts` | ano × cargo × nível × unidade × finalista, só governador e prefeito | Votos e percentual de cada finalista nos dois turnos, por UF, município e zona |
+| `office_seats` | ano × cargo × unidade | Vagas e candidatos da eleição ordinária, sem as suplementares |
 | `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
 | `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
 | `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
@@ -245,13 +249,19 @@ cp .env.example .env                               # defina SUPERSET_SECRET_KEY
 docker compose up --build                          # http://localhost:8088 (admin / admin)
 ```
 
-Os painéis são quatro:
+Os painéis são seis:
 
 - **Evolução da apuração**: votos por candidato e por partido, com filtro de recebimento do BU;
 - **Entre turnos**: cidades, UFs e zonas em que cada finalista à presidência mais mudou, em % e em votos;
 - **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas, Senado e votos × cadeiras;
 - **Brancos e nulos**: evolução deles entre anos e entre turnos, por cargo, UF e município;
-- **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados.
+- **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados;
+- **Cargos**: uma aba por cargo, com resultado, território, mudança e candidatos, mais as análises específicas de cada um.
+
+O painel **Cargos** é gerado: `office_specs/` descreve cada aba e `python docker/superset/build_office_dashboard.py`
+grava os YAML (`--check --office governador --db elections.duckdb` só valida, rodando cada gráfico nos dados). O spec é a
+fonte da verdade: um ajuste nesses gráficos feito na interface e exportado é sobrescrito na próxima geração, se não for
+levado também para o spec.
 
 A importação nunca apaga: os antigos painéis **Candidatos eleitos** e **Fluxo dos mais votados**, hoje dentro
 dos painéis acima, continuam numa instalação existente até serem excluídos na interface. Antes disso,

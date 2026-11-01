@@ -1,0 +1,33 @@
+slice_name: "Senador \xB7 Se\xE7\xF5es"
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 0__table
+  viz_type: big_number_total
+  metric:
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: "Se\xE7\xF5es"
+    optionName: metric_47ce4acd33d2
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 5
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  y_axis_format: SMART_NUMBER
+  subheader: "se\xE7\xF5es eleitorais"
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 3df96a1d-003c-5dfd-b0dc-bd6eb872b458
+version: 1.0.0
+dataset_uuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6

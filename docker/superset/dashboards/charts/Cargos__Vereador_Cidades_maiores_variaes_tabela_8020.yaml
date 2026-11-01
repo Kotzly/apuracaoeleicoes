@@ -1,0 +1,51 @@
+slice_name: "Vereador \xB7 Cidades: maiores varia\xE7\xF5es (tabela)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  query_mode: raw
+  all_columns:
+  - unit_label
+  - party
+  - share_from_pp
+  - share_to_pp
+  - share_change_pp
+  - votes_from
+  - votes_to
+  order_by_cols:
+  - '["abs_share_change_pp", false]'
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 13
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: "Munic\xEDpio"
+  row_limit: 30
+  server_pagination: false
+  include_search: true
+  column_config:
+    share_from_pp:
+      d3NumberFormat: .1f
+      d3SmallNumberFormat: .1f
+    share_to_pp:
+      d3NumberFormat: .1f
+      d3SmallNumberFormat: .1f
+    share_change_pp:
+      d3NumberFormat: +.1f
+      d3SmallNumberFormat: +.1f
+  annotation_layers: []
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: d2f2e9a8-6be0-59db-ba52-f612bdf9401a
+version: 1.0.0
+dataset_uuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2

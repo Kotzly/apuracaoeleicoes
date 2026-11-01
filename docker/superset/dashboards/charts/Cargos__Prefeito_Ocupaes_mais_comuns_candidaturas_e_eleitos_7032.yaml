@@ -1,0 +1,56 @@
+slice_name: "Prefeito \xB7 Ocupa\xE7\xF5es mais comuns: candidaturas e eleitos"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: occupation
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: 100.0 * COUNT(*) / SUM(COUNT(*)) OVER ()
+    label: '% das candidaturas'
+    hasCustomLabel: true
+    optionName: metric_dascandidaturas
+  - expressionType: SQL
+    sqlExpression: 100.0 * COUNT(*) FILTER (WHERE elected) / NULLIF(SUM(COUNT(*) FILTER
+      (WHERE elected)) OVER (), 0)
+    label: '% dos eleitos'
+    hasCustomLabel: true
+    optionName: metric_doseleitos
+  groupby: []
+  orientation: horizontal
+  stack: null
+  row_limit: 15
+  show_value: true
+  y_axis_format: .1f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_sort: '% das candidaturas'
+  x_axis_sort_asc: false
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: round_number
+    operator: ==
+    operatorId: EQUALS
+    comparator: 1
+  viz_type: echarts_timeseries_bar
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: ae178bca-7ec1-54c2-9d73-d8967d09f2c5
+version: 1.0.0
+dataset_uuid: 806e47fb-121a-5d49-85e6-05e638197cc5

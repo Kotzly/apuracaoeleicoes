@@ -1,0 +1,55 @@
+slice_name: "Presidente \xB7 Volatilidade por UF"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  x_axis: unit_label
+  xAxisForceCategorical: true
+  x_axis_sort: Volatilidade (%)
+  x_axis_sort_asc: false
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: pedersen_pp
+    aggregate: MAX
+    label: Volatilidade (%)
+    hasCustomLabel: true
+    optionName: metric_pedersen_pp
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 1
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: UF
+  orientation: horizontal
+  row_limit: 40
+  show_legend: false
+  show_value: true
+  y_axis_format: .0f
+  color_scheme: supersetColors
+  stack: null
+  order_desc: true
+  truncate_metric: true
+  rich_tooltip: true
+  x_axis_title: ''
+  y_axis_title: Volatilidade (%)
+  y_axis_title_margin: 40
+  x_axis_title_margin: 30
+  zoomable: false
+  annotation_layers: []
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: ab275d1e-c3ed-5a6d-bb18-3284a4a400bf
+version: 1.0.0
+dataset_uuid: 0a765893-8334-4ba8-92a2-94bc602ab29c

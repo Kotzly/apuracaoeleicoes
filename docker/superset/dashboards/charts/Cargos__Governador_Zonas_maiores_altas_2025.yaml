@@ -1,0 +1,58 @@
+slice_name: "Governador \xB7 Zonas: maiores altas"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  x_axis: unit_label
+  xAxisForceCategorical: true
+  x_axis_sort: "Varia\xE7\xE3o (p.p.)"
+  x_axis_sort_asc: false
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: share_change_pp
+    aggregate: MAX
+    label: "Varia\xE7\xE3o (p.p.)"
+    hasCustomLabel: true
+    optionName: metric_share_change_pp
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 3
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: Zona
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: share_change > 0
+  orientation: horizontal
+  row_limit: 30
+  show_legend: false
+  show_value: true
+  y_axis_format: .1f
+  color_scheme: supersetColors
+  stack: null
+  order_desc: true
+  truncate_metric: true
+  rich_tooltip: true
+  x_axis_title: ''
+  y_axis_title: "Varia\xE7\xE3o (p.p.)"
+  y_axis_title_margin: 40
+  x_axis_title_margin: 30
+  zoomable: false
+  annotation_layers: []
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 74e4d25b-1bf6-563f-89fa-4cadb8a9018e
+version: 1.0.0
+dataset_uuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2

@@ -1,0 +1,58 @@
+slice_name: "Deputado estadual \xB7 Evolu\xE7\xE3o das cadeiras por partido"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  viz_type: echarts_timeseries_line
+  x_axis: election_year
+  xAxisForceCategorical: true
+  groupby:
+  - party_current
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: elected
+    aggregate: SUM
+    label: Cadeiras
+    hasCustomLabel: true
+    optionName: metric_elected_sum
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 7
+  limit: 25
+  timeseries_limit_metric:
+    expressionType: SIMPLE
+    column:
+      column_name: elected
+    aggregate: SUM
+    label: Cadeiras
+    hasCustomLabel: true
+    optionName: metric_elected_sum
+  order_desc: true
+  row_limit: 10000
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  color_scheme: supersetColors
+  rich_tooltip: true
+  markerEnabled: true
+  y_axis_format: ',d'
+  y_axis_title: Cadeiras
+  y_axis_title_margin: 40
+  x_axis_title_margin: 30
+  x_axis_title: ''
+  stack: null
+  zoomable: false
+  truncate_metric: true
+  datasource: 0__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: c6846e08-4295-5adb-a7ea-1d740f3794d7
+version: 1.0.0
+dataset_uuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b

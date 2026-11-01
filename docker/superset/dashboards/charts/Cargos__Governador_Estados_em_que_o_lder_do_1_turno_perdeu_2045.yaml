@@ -1,0 +1,46 @@
+slice_name: "Governador \xB7 Estados em que o l\xEDder do 1\xBA turno perdeu"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: election_year
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*) FILTER (WHERE flipped)
+    label: Viradas
+    hasCustomLabel: true
+    optionName: metric_viradas
+  - expressionType: SQL
+    sqlExpression: COUNT(*) FILTER (WHERE has_second_round)
+    label: "Estados com 2\xBA turno"
+    hasCustomLabel: true
+    optionName: "metric_estadoscom2\xBAturno"
+  groupby: []
+  row_limit: 5000
+  markerEnabled: true
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 3
+  viz_type: echarts_timeseries_line
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: f96cebf0-815a-56b0-b6f4-37c869f5230c
+version: 1.0.0
+dataset_uuid: 9cdb4b61-6e63-5675-8d23-7a0ebca406ff

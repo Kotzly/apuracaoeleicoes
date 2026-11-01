@@ -1,0 +1,41 @@
+slice_name: "Senador \xB7 Chapas"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  query_mode: raw
+  all_columns:
+  - election_year
+  - round_number
+  - state
+  - electoral_unit
+  - candidate_number
+  - office_name
+  - candidate_name
+  - party_current
+  - result
+  row_limit: 5000
+  server_pagination: true
+  server_page_length: 50
+  include_search: true
+  annotation_layers: []
+  order_by_cols:
+  - '["election_year", false]'
+  - '["state", true]'
+  - '["electoral_unit", true]'
+  - '["candidate_number", true]'
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: office_code IN (5, 9, 10)
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: "election_type = 'ELEI\xC7\xC3O ORDIN\xC1RIA'"
+  viz_type: table
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 4cfe03a5-1e2c-5bb1-9394-2cb93a2157d4
+version: 1.0.0
+dataset_uuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36

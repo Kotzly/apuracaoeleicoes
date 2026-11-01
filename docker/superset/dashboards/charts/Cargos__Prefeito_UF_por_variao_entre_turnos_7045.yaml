@@ -1,0 +1,73 @@
+slice_name: "Prefeito \xB7 UF por varia\xE7\xE3o entre turnos"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  row_limit: 50000
+  color_scheme: supersetColors
+  annotation_layers: []
+  rich_tooltip: true
+  truncate_metric: true
+  zoomable: false
+  comparison_type: values
+  datasource: 0__table
+  query_mode: aggregate
+  groupby:
+  - state
+  metrics:
+  - expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) FILTER (WHERE round_number = 1) /
+      NULLIF(SUM(votes_total) FILTER (WHERE round_number = 1), 0)
+    label: "1\xBA turno (%)"
+    hasCustomLabel: true
+    optionName: metric_30f4fefbbee8
+  - expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) FILTER (WHERE round_number = 2) /
+      NULLIF(SUM(votes_total) FILTER (WHERE round_number = 2), 0)
+    label: "2\xBA turno (%)"
+    hasCustomLabel: true
+    optionName: metric_a9b2ba1e292d
+  - expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) FILTER (WHERE round_number = 2) /
+      NULLIF(SUM(votes_total) FILTER (WHERE round_number = 2), 0) - 100.0 * SUM(votes_blank_null)
+      FILTER (WHERE round_number = 1) / NULLIF(SUM(votes_total) FILTER (WHERE round_number
+      = 1), 0)
+    label: "Varia\xE7\xE3o (p.p.)"
+    hasCustomLabel: true
+    optionName: metric_04cba83f82b5
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: has_second_round
+  order_desc: true
+  server_page_length: 50
+  include_search: true
+  timeseries_limit_metric:
+    expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) FILTER (WHERE round_number = 2) /
+      NULLIF(SUM(votes_total) FILTER (WHERE round_number = 2), 0) - 100.0 * SUM(votes_blank_null)
+      FILTER (WHERE round_number = 1) / NULLIF(SUM(votes_total) FILTER (WHERE round_number
+      = 1), 0)
+    label: "Varia\xE7\xE3o (p.p.)"
+    hasCustomLabel: true
+    optionName: metric_04cba83f82b5
+  column_config:
+    "1\xBA turno (%)":
+      d3NumberFormat: .2f
+    "2\xBA turno (%)":
+      d3NumberFormat: .2f
+    "Varia\xE7\xE3o (p.p.)":
+      d3NumberFormat: +.2f
+query_context: null
+cache_timeout: null
+uuid: 9dc3b726-d347-5ba2-a1e4-dcc1310fc06c
+version: 1.0.0
+dataset_uuid: 7b1fb97d-cf0e-5804-a2b4-d533ebc3146e

@@ -32,12 +32,14 @@ _STATE_TABLE = "office_seats"  # built last: its comment says the four tables ar
 _PRESIDENT, _GOVERNOR, _SENATOR, _MAYOR = 1, 3, 5, 11
 _TERM = f"(CASE WHEN c.office_code = {_SENATOR} THEN 8 ELSE 4 END)"  # a senator's seat lasts two elections
 _NATIONAL = "BR"
-_ORDINARY = "coalesce(election_type, '') NOT LIKE '%SUPLEMENTAR%'"
+# `candidates` writes the type in capitals and `seats` does not.
+_ORDINARY = "upper(coalesce(election_type, '')) NOT LIKE '%SUPLEMENTAR%'"
 _MUNICIPAL = ", ".join(map(str, MUNICIPAL_OFFICES))
 _NAMES = " ".join(f"WHEN {code} THEN '{name}'" for code, name in OFFICES.items())
-_SIZE_BANDS = ((5_000, "Até 5 mil"), (20_000, "5 a 20 mil"), (50_000, "20 a 50 mil"),
-               (200_000, "50 a 200 mil"))
-_LARGEST_BAND = "Mais de 200 mil"
+# Numbered so that sorting by name puts them in order of size.
+_SIZE_BANDS = ((5_000, "1. Até 5 mil"), (20_000, "2. 5 a 20 mil"), (50_000, "3. 20 a 50 mil"),
+               (200_000, "4. 50 a 200 mil"))
+_LARGEST_BAND = "5. Mais de 200 mil"
 _TABLES = ("candidate_results", "unit_winners", "runoff_shifts", "office_seats")
 
 

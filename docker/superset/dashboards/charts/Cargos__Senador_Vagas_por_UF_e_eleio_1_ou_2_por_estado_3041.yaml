@@ -1,0 +1,39 @@
+slice_name: "Senador \xB7 Vagas por UF e elei\xE7\xE3o (1 ou 2 por estado)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: pivot_table_v2
+params:
+  groupbyRows:
+  - uf
+  groupbyColumns:
+  - election_year
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(seats)
+    label: Vagas
+    hasCustomLabel: true
+    optionName: metric_vagas
+  aggregateFunction: Sum
+  metricsLayout: COLUMNS
+  row_limit: 50000
+  valueFormat: .0f
+  annotation_layers: []
+  transposePivot: false
+  combineMetric: false
+  colOrder: key_a_to_z
+  rowOrder: key_a_to_z
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 5
+  viz_type: pivot_table_v2
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: ba56211b-7687-5398-9a71-79d6de0c4576
+version: 1.0.0
+dataset_uuid: ea1a05d0-442b-570d-93b1-cc535aab20b1

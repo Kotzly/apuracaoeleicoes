@@ -1,0 +1,44 @@
+slice_name: "Deputado federal \xB7 Cadeiras de cada UF na C\xE2mara"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: uf
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(seats)
+    label: Cadeiras
+    hasCustomLabel: true
+    optionName: metric_cadeiras
+  groupby: []
+  orientation: vertical
+  stack: null
+  row_limit: 30
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_sort: Cadeiras
+  x_axis_sort_asc: false
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 6
+  viz_type: echarts_timeseries_bar
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: 6f6e593a-4d93-5e0a-8cb1-663694a93dd9
+version: 1.0.0
+dataset_uuid: ea1a05d0-442b-570d-93b1-cc535aab20b1

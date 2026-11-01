@@ -1,0 +1,59 @@
+slice_name: "Prefeito \xB7 UF: maiores altas entre turnos"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  row_limit: 50000
+  color_scheme: supersetColors
+  annotation_layers: []
+  rich_tooltip: true
+  truncate_metric: true
+  zoomable: false
+  comparison_type: values
+  datasource: 0__table
+  x_axis: state
+  xAxisForceCategorical: true
+  x_axis_sort: Alta (p.p.)
+  x_axis_sort_asc: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) FILTER (WHERE round_number = 2) /
+      NULLIF(SUM(votes_total) FILTER (WHERE round_number = 2), 0) - 100.0 * SUM(votes_blank_null)
+      FILTER (WHERE round_number = 1) / NULLIF(SUM(votes_total) FILTER (WHERE round_number
+      = 1), 0)
+    label: Alta (p.p.)
+    hasCustomLabel: true
+    optionName: metric_06d00a809dba
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: has_second_round
+  - clause: HAVING
+    expressionType: SQL
+    sqlExpression: 100.0 * SUM(votes_blank_null) FILTER (WHERE round_number = 2) /
+      NULLIF(SUM(votes_total) FILTER (WHERE round_number = 2), 0) - 100.0 * SUM(votes_blank_null)
+      FILTER (WHERE round_number = 1) / NULLIF(SUM(votes_total) FILTER (WHERE round_number
+      = 1), 0) > 0
+  orientation: horizontal
+  show_legend: false
+  show_value: true
+  y_axis_format: .2f
+  x_axis_title: ''
+  y_axis_title: ''
+  y_axis_title_margin: 40
+  order_desc: true
+  stack: null
+query_context: null
+cache_timeout: null
+uuid: fd86d013-068b-5a77-922a-09349afb6406
+version: 1.0.0
+dataset_uuid: 7b1fb97d-cf0e-5804-a2b4-d533ebc3146e

@@ -1,0 +1,39 @@
+slice_name: "Senador \xB7 Cadeiras do Senado por partido ao longo do tempo"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  annotation_layers: []
+  color_scheme: supersetColors
+  show_legend: true
+  rich_tooltip: true
+  x_axis: election_year
+  xAxisForceCategorical: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(seats)
+    label: Cadeiras
+    hasCustomLabel: true
+    optionName: metric_cadeiras
+  groupby:
+  - party_current
+  row_limit: 5000
+  markerEnabled: true
+  show_value: true
+  y_axis_format: .0f
+  truncate_metric: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: ''
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: seats > 0
+  viz_type: echarts_timeseries_line
+  datasource: 0__table
+query_context: null
+cache_timeout: null
+uuid: c0ae8357-abf5-590f-88fd-849462b40591
+version: 1.0.0
+dataset_uuid: c5a2813a-0a69-552d-92cc-aad1b8aa9be8

@@ -1,0 +1,59 @@
+slice_name: "Prefeito \xB7 UF: maiores altas entre elei\xE7\xF5es"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  row_limit: 50000
+  color_scheme: supersetColors
+  annotation_layers: []
+  rich_tooltip: true
+  truncate_metric: true
+  zoomable: false
+  comparison_type: values
+  datasource: 0__table
+  x_axis: state
+  xAxisForceCategorical: true
+  x_axis_sort: Alta (p.p.)
+  x_axis_sort_asc: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: 100.0 * SUM(share_change)
+    label: Alta (p.p.)
+    hasCustomLabel: true
+    optionName: metric_06d00a809dba
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: office_code
+    operator: ==
+    operatorId: EQUALS
+    comparator: 11
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: UF
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: party IN ('Branco', 'Nulo')
+  - clause: HAVING
+    expressionType: SQL
+    sqlExpression: 100.0 * SUM(share_change) > 0
+  orientation: horizontal
+  show_legend: false
+  show_value: true
+  y_axis_format: .2f
+  x_axis_title: ''
+  y_axis_title: ''
+  y_axis_title_margin: 40
+  order_desc: true
+  stack: null
+query_context: null
+cache_timeout: null
+uuid: 47784a7c-a043-5019-9ddc-0f78f17d76cd
+version: 1.0.0
+dataset_uuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
