@@ -217,8 +217,8 @@ def territory_block(maps: bool = True, by_state: bool = True) -> list:
     rows.append([clone("blank_by_election", "Brancos_e_nulos_por_eleicao", history=True, width=12)])
     if by_state:
         rows.append([clone("blank_by_state", "Brancos_e_nulos_por_UF_e_ano", history=True, width=12, height=80)])
-        rows.append([clone("blank_up", "Brancos_e_nulos_altas_entre_eleicoes"),
-                     clone("blank_down", "Brancos_e_nulos_quedas_entre_eleicoes")])
+        rows.append([clone("blank_up", "Brancos_e_nulos_altas_entre_eleicoes", "Brancos e nulos: UF com maiores altas entre eleições (p.p.)"),
+                     clone("blank_down", "Brancos_e_nulos_quedas_entre_eleicoes", "Brancos e nulos: UF com maiores quedas entre eleições (p.p.)")])
     return rows
 
 
@@ -331,7 +331,7 @@ def flips_table(key: str = "flips") -> Chart:
 
 
 def round_blank_block() -> list:
-    return [[clone("blank_rounds", "Brancos_e_nulos_1o_e_2o_turno", history=True),
-             clone("blank_rounds_table", "Brancos_e_nulos_UF_entre_turnos")],
-            [clone("blank_rounds_up", "Brancos_e_nulos_altas_entre_turnos"),
-             clone("blank_rounds_down", "Brancos_e_nulos_quedas_entre_turnos")]]
+    return [[clone("blank_rounds", "Brancos_e_nulos_1o_e_2o_turno", "Brancos e nulos: 1º e 2º turno por ano", history=True),
+             clone("blank_rounds_table", "Brancos_e_nulos_UF_entre_turnos", "Brancos e nulos: UF por variação entre turnos")],
+            [clone("blank_rounds_up", "Brancos_e_nulos_altas_entre_turnos", "Brancos e nulos: UF com maiores altas entre turnos (p.p.)"),
+             clone("blank_rounds_down", "Brancos_e_nulos_quedas_entre_turnos", "Brancos e nulos: UF com maiores quedas entre turnos (p.p.)")]]
