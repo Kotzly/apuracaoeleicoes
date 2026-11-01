@@ -57,6 +57,9 @@ python -m election_tally download-municipalities                # atualiza a tab
   outros terminam e o comando lista o que falhou; rodar de novo baixa só o que falta.
 - Recarregar um ano/turno/UF substitui o que havia; anos diferentes convivem no mesmo banco.
 - `--offices` reduz bastante o tamanho (deputados e vereadores são a maior parte das linhas).
+  Com ele, a recarga substitui só esses cargos; sem ele, todos os cargos daquele ano/turno/UF.
+- A carga avisa quando um número não pôde ser lido (voto, seção, zona, município ou cargo), em vez
+  de seguir com um total menor sem dizer nada.
 - `validate` compara a soma dos boletins com o JSON oficial da divulgação
   (`resultados.tse.jus.br`); use `--json` para um arquivo já baixado.
 
@@ -123,6 +126,8 @@ comando avisa e o Superset sobe mesmo assim.
 | `party_results` | ano × turno × cargo × UF × partido | Votos por partido; some as UFs para o total nacional, como em deputado federal |
 | `leader_flows` | nível × transição × município × mais votado na origem e no destino | Sankey de seções e municípios por candidato mais votado |
 
+Em 2014, o arquivo do exterior não traz o partido dos candidatos a presidente. Nas tabelas derivadas ele vem
+do mesmo candidato nas outras UFs; em `votes` continua vazio, como no arquivo.
 `votes` conta linhas com votos; quem teve zero votos em um local não aparece em `*_results`.
 `share_of_valid` é a fração dos votos válidos (nominais e de legenda) naquele local e cargo, e
 fica vazia para branco e nulo. `state_results` não traz prefeito nem vereador, e `national_results`
@@ -149,9 +154,10 @@ só traz presidente, porque o mesmo número pertence a candidatos diferentes em 
 | `mayor_flows` | transição × município × partido do prefeito na origem e no destino | Sankey do partido dos prefeitos entre 2016, 2020 e 2024 |
 | `municipality_shapes` | município × parte do contorno | Contorno de cada município (lista JSON de pares `[longitude, latitude]`) para o mapa por cidade; sem o exterior |
 
-`party_shifts` e `unit_volatility` comparam o mesmo cargo com o ciclo anterior (presidente, governador,
-senador e deputados: 2014 → 2018 → 2022 → 2026; prefeito e vereador: 2016 → 2020 → 2024), com
-`transition` como `2018 → 2022 T1`. O `level` é `Brasil`, `UF`, `Município`, `Zona` ou `Seção`, e as
+`party_shifts` e `unit_volatility` comparam o mesmo cargo com a eleição quatro anos antes (presidente,
+governador, senador e deputados: 2014 → 2018 → 2022 → 2026; prefeito e vereador: 2016 → 2020 → 2024), com
+`transition` como `2018 → 2022 T1`. As comparações saem dos anos carregados: um ano novo entra sozinho, e
+quando falta um ano no meio, nada é comparado por cima da lacuna. O `level` é `Brasil`, `UF`, `Município`, `Zona` ou `Seção`, e as
 colunas `state`, `state_iso` (`BR-SP`, como no mapa do Superset), `municipality_*`, `zone` e `section`
 ficam vazias onde não se aplicam. Zonas são identificadas por (`state`, `zone`) e seções por
 (`municipality_code`, `zone`, `section`). O percentual é dos votos válidos (nominais e de legenda) da
@@ -160,14 +166,15 @@ unidade naquele cargo e turno. Um partido que concorreu em só um dos lados apar
 Brancos e nulos têm linhas próprias em `party_shifts` (`party` = `Branco` ou `Nulo`), com o percentual sobre todos os
 votos da unidade, e não entram em `pedersen_index`. As colunas `share_*_all`, `share_round*_all` e `pedersen_index_all` trazem as
 mesmas medidas sobre todos os votos, e os datasets do Superset escolhem entre as duas bases pela coluna `vote_base`
-(filtro **Base do percentual**, obrigatório: os datasets têm uma linha por base, e sem ele contariam em dobro).
+(filtro **Base do percentual**, obrigatório: os datasets têm uma linha por base, e sem ele contariam em dobro;
+um gráfico novo sobre esses datasets precisa desse filtro ou de um filtro próprio em `vote_base`, e um teste confere isso).
 A unidade precisa ter votos válidos nos dois lados: seção nova ou município criado não entra, e o
 2º turno só compara locais que votaram nos dois. Consultas populares e o cargo 25 ficam de fora.
 Seção e zona podem ter sido redesenhadas entre eleições: o número é mantido como está.
 
 **Seção só existe para presidente, governador, senador e prefeito** (cargos 1, 3, 5 e 11). Com todos os
-cargos a tabela passaria de 150 milhões de linhas e de 4 GB (estimativa; com estes quatro são
-50 milhões e cerca de 1,5 GB, e o `build-derived` leva cerca de 6 minutos). Os demais cargos chegam
+cargos a tabela passaria de 150 milhões de linhas (estimativa; com estes quatro, nos anos de 2014 a 2026, são
+62 milhões e cerca de 2,5 GB). Os demais cargos chegam
 até zona, e `SECTION_OFFICES` em `election_tally/shifts.py` muda isso.
 
 `elected_party`: eleito é `result LIKE 'ELEITO%'`. Em governador e prefeito, onde há uma vaga, vale o
@@ -191,7 +198,7 @@ Superset sobe sem o mapa por cidade. O arquivo é a malha municipal do IBGE, na 
 `https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?intrarregiao=municipio&formato=application/vnd.geo+json&qualidade=minima`
 (só o contorno externo de cada parte; enclaves são descartados). A página da API não informa a licença; trate como
 dado aberto do IBGE e cite a fonte (IBGE, Malha Municipal). `python -m election_tally download-municipality-shapes`
-baixa a versão mais nova e regrava o arquivo; o `build-derived` refaz a tabela quando o arquivo muda. Ao
+baixa a versão mais nova e regrava o arquivo; o `build-derived` refaz a tabela quando o conteúdo do arquivo muda. Ao
 construir, o comando imprime, por ano, quantos municípios têm contorno: a malha do IBGE não traz
 Boa Esperança do Norte (MT, código 5101837, criado em 2025), que aparece em 2024 e 2026 sem contorno; em 2014–2022 os
 5.568 a 5.570 municípios de cada ano casam todos. O exterior (`ZZ`) não tem contorno.
@@ -248,6 +255,10 @@ cd docker
 cp .env.example .env                               # defina SUPERSET_SECRET_KEY
 docker compose up --build                          # http://localhost:8088 (admin / admin)
 ```
+
+O Superset responde só em `127.0.0.1`. Para abrir na rede local, defina uma senha de verdade e
+`SUPERSET_BIND=0.0.0.0` no `.env`: o login padrão é público, ele dá acesso ao SQL Lab, e o DuckDB sabe ler
+arquivos, então trate o acesso ao Superset como acesso ao contêiner.
 
 Os painéis são seis:
 
@@ -337,8 +348,10 @@ dimensão `candidate_name` e, em *Advanced Analytics → Rolling window*, a soma
 
 As [tabelas derivadas](#tabelas-derivadas) acompanham sozinhas: depois de carregar o ano, o próximo
 `docker compose up` (ou `build-derived`) as completa, com o Superset parado. Se o TSE ainda não
-tiver publicado um arquivo do ano, o comando avisa e tenta de novo na execução seguinte. Coluna
-renomeada nesses arquivos vira `NULL` sem erro: confira as tabelas após um ano novo. Para ajustar,
+tiver publicado um arquivo do ano, o comando avisa e tenta de novo na execução seguinte. Um ano já
+carregado não é baixado de novo: se `candidates` foi carregado antes do resultado final (entre os
+turnos, por exemplo), rode `build-derived --force`. Coluna renomeada nesses arquivos vira `NULL`, e a
+carga lista as colunas sem correspondência: confira essa lista após um ano novo. Para ajustar,
 edite `TABLES` em `election_tally/tse_tables.py` e aumente `version`.
 
 Cada ano usa um `Format` (`election_tally/formats.py`), que define onde estão os

@@ -17,6 +17,8 @@ from pathlib import Path
 import duckdb
 import requests
 
+from .domain import ABROAD_STATE, sql_string
+
 URL = "https://cdn.tse.jus.br/estatistica/sead/odsele/municipio_tse_ibge/municipio_tse_ibge.zip"
 TABLE_PATH = files("election_tally").joinpath("data/municipalities.csv")
 FIELDS = ["state", "municipality_code", "municipality_name", "ibge_code"]
@@ -57,14 +59,14 @@ def add_ibge_code(con: duckdb.DuckDBPyConnection, table: str = "staging") -> Non
         CREATE OR REPLACE TEMP TABLE municipalities AS
         SELECT CAST(municipality_code AS INTEGER) AS municipality_code,
                CAST(ibge_code AS INTEGER) AS ibge_code
-        FROM read_csv('{TABLE_PATH}', header = true, all_varchar = true)
+        FROM read_csv({sql_string(TABLE_PATH)}, header = true, all_varchar = true)
     """)
     con.execute(f"""UPDATE {table} SET municipality_ibge_code = m.ibge_code FROM municipalities m
-                    WHERE {table}.state IS DISTINCT FROM 'ZZ'
+                    WHERE {table}.state IS DISTINCT FROM '{ABROAD_STATE}'
                       AND m.municipality_code = {table}.municipality_code""")
     missing = con.execute(f"""
         SELECT DISTINCT state, municipality_code, municipality_name FROM {table}
-        WHERE state IS DISTINCT FROM 'ZZ' AND municipality_ibge_code IS NULL ORDER BY 1, 2
+        WHERE state IS DISTINCT FROM '{ABROAD_STATE}' AND municipality_ibge_code IS NULL ORDER BY 1, 2
     """).fetchall()
     if missing:
         listed = ", ".join(f"{s}/{c} {n}" for s, c, n in missing[:10])

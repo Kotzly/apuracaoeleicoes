@@ -25,8 +25,9 @@ from pathlib import Path
 
 import duckdb
 
-from . import parties
-from .parties import MUNICIPAL_OFFICES, OFFICES, canonical_party_sql
+from . import derived, parties
+from .domain import MUNICIPAL_OFFICES, OFFICES
+from .parties import canonical_party_sql
 
 _STATE_TABLE = "office_seats"  # built last: its comment says the four tables are current
 _PRESIDENT, _GOVERNOR, _SENATOR, _MAYOR = 1, 3, 5, 11
@@ -258,10 +259,10 @@ def _create_office_seats(con: duckdb.DuckDBPyConnection) -> None:
 
 def build(db: Path, force: bool = False) -> None:
     """Rebuilds the four tables, unless results, candidates and renames are unchanged."""
-    if not parties.has_tables(db, "national_results", "state_results", "municipality_results", "candidates", "seats"):
+    if not derived.has_tables(db, "national_results", "state_results", "municipality_results", "candidates", "seats"):
         print("warning: office tables not built: the results, `candidates` or `seats` could not be loaded")
         return
-    if not force and parties.is_current(db, _STATE_TABLE, uses_candidates=True) and parties.has_tables(db, *_TABLES):
+    if not force and parties.is_current(db, _STATE_TABLE, uses_candidates=True) and derived.has_tables(db, *_TABLES):
         print("office tables: up to date")
         return
     con = duckdb.connect(str(db))

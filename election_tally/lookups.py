@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import duckdb
+from . import derived
 
 _METHOD_VERSION = 1  # raise when a table changes, so existing ones get rebuilt
 _STATE_TABLE = "elections"
@@ -40,47 +40,22 @@ _TABLES = {
 }
 
 
-def _source_state(con: duckdb.DuckDBPyConnection) -> str:
+def _source_state(con: derived.Connection) -> str:
     sections = con.execute("SELECT count(*), sum(eligible_voters) FROM sections").fetchone()
     candidates = con.execute("SELECT count(*) FROM candidates").fetchone()[0]
     return f"v{_METHOD_VERSION} sections={sections} candidates={candidates}"
 
 
-def _is_current(db: Path) -> bool:
-    """Read-only, so checking never conflicts with a running Superset."""
-    con = duckdb.connect(str(db), read_only=True)
-    try:
-        comment = con.execute(f"""SELECT comment FROM duckdb_tables()
-                                  WHERE table_name = '{_STATE_TABLE}'""").fetchone()
-        return bool(comment) and comment[0] == _source_state(con)
-    finally:
-        con.close()
-
-
-def _has_candidates(db: Path) -> bool:
-    con = duckdb.connect(str(db), read_only=True)
-    try:
-        return bool(con.execute("""SELECT count(*) FROM duckdb_tables()
-                                   WHERE table_name = 'candidates'""").fetchone()[0])
-    finally:
-        con.close()
-
-
 def build(db: Path, force: bool = False) -> None:
     """Rebuilds the lookup tables, unless `sections` and `candidates` are unchanged."""
-    if not _has_candidates(db):
+    if not derived.has_tables(db, "candidates"):
         print("warning: lookups not built: the table `candidates` could not be loaded")
         return
-    if not force and _is_current(db):
+    if not force and derived.is_current(db, _STATE_TABLE, _source_state):
         print("lookups: up to date")
         return
-    con = duckdb.connect(str(db))
-    try:
+    with derived.rebuilding(db) as con:
         for name, select in _TABLES.items():
             con.execute(f"CREATE OR REPLACE TABLE {name} AS {select}")
-            n = con.execute(f"SELECT count(*) FROM {name}").fetchone()[0]
-            print(f"{name}: {n:,} rows")
-        con.execute(f"COMMENT ON TABLE {_STATE_TABLE} IS '{_source_state(con)}'")
-        con.execute("CHECKPOINT")
-    finally:
-        con.close()
+            derived.report_rows(con, name)
+        derived.mark_current(con, _STATE_TABLE, _source_state(con))

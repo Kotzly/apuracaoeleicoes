@@ -8,6 +8,7 @@ import duckdb
 import pytest
 
 from election_tally import load as load_module
+from election_tally import repair
 from election_tally.load import load
 from election_tally.validate import validate
 
@@ -305,11 +306,11 @@ def test_discovery_finds_file_listed_only_by_its_hash(monkeypatch):
     (b'"A";"B"\n"C "D"";"E"\n', b'"A";"B"\n"C ""D""";"E"\n'),
 ])
 def test_repair_chunk(raw, repaired):
-    assert load_module._repair_chunk(raw) == repaired
+    assert repair.repair_chunk(raw) == repaired
 
 
 def test_load_repairs_tse_defects(tmp_path, monkeypatch):
-    monkeypatch.setattr(load_module, "_REPAIR_BLOCK", 64)  # lines cross block boundaries
+    monkeypatch.setattr(repair, "BLOCK_SIZE", 64)  # lines cross block boundaries
     line = '"05/10/2022";"SP";"{}";"7"\n'
     text = line.format("JOSÉ").encode("latin-1") * 2000
     text += b'"05/10/2022";"SP";"SANT"ANA";"7"\n"05/10/2022";"SP";"IRM\xc3\x83O";"7"\n'

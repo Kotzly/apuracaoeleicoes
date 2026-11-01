@@ -7,7 +7,6 @@ sum ordered by bu_received_at, grouped by the desired level.
 
 from __future__ import annotations
 
-import re
 import shutil
 import tempfile
 import zipfile
@@ -17,6 +16,7 @@ import duckdb
 
 from . import countries, municipalities, parties
 from .formats import CANONICAL, OFFICES, format_for
+from .repair import extract_repaired
 
 # Canonical columns plus the ones derived during the load.
 COLUMN_TYPES = {**CANONICAL, **countries.COLUMNS, "municipality_ibge_code": "INTEGER"}
@@ -41,10 +41,8 @@ _MEMINFO = Path("/proc/meminfo")
 _RAM_FOR_DUCKDB = 2 * 1024 ** 3  # left free for parsing and inserting
 # Measured on 7.7 GB of RAM: a 2 GB CSV loads faster from RAM, a 3.3 GB one slower than from disk.
 _RAM_EXTRACT_LIMIT = int(2.5 * 1024 ** 3)
-_REPAIR_BLOCK = 1 << 24
-_SEPARATOR = b'";"'
-_C1_BYTES = bytes(range(0x80, 0xA0))
-_UTF8_IN_LATIN1 = re.compile(rb"[\xc2-\xdf][\x80-\x9f]")
+# Every row needs these to count: TRY_CAST turns a value it cannot read into NULL, silently.
+_MUST_BE_NUMBERS = ("municipality_code", "zone", "section", "office_code", "vote_count")
 
 
 def create_schema(con: duckdb.DuckDBPyConnection) -> None:
@@ -62,7 +60,8 @@ def raw_columns(con: duckdb.DuckDBPyConnection, source: str) -> list[str]:
 
 def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
                offices: list[int] | None = None, check_lines: bool = True) -> int:
-    """Loads already extracted files. Replaces what existed for the same year/round/state/election."""
+    """Loads already extracted files. Replaces what existed for the same year/round/state/election
+    and, with `offices`, only those offices: the others stay as they were."""
     fmt = format_for(year)
     source = fmt.source_sql(files)
     select, nulls = fmt.select_sql(source, set(raw_columns(con, source)), files, offices)
@@ -89,10 +88,12 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
         "SELECT count(*) FROM staging WHERE bu_received_at IS NULL").fetchone()[0]
     if missing_time and "bu_received_at" not in nulls:
         print(f"  warning: {missing_time:,} of {n:,} rows with invalid receipt time")
+    _warn_about_unreadable_numbers(con, n)
 
     keys = con.execute(
         "SELECT DISTINCT election_year, round_number, state, election_code FROM staging").fetchall()
     count_columns = {"eligible_voters", "turnout", "abstentions"}
+    same_offices = f" AND office_code IN ({','.join(map(str, offices))})" if offices else ""
     aggregates = ", ".join(
         f"{_SECTION_AGGREGATION.get(c, 'max' if c in count_columns else 'any_value')}({c})"
         for c in SECTIONS_COLUMNS if c not in SECTION_KEY)
@@ -102,7 +103,7 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
             for key in keys:
                 con.execute(f"DELETE FROM {table} WHERE election_year IS NOT DISTINCT FROM ? AND "
                             "round_number IS NOT DISTINCT FROM ? AND state IS NOT DISTINCT FROM ? "
-                            "AND election_code IS NOT DISTINCT FROM ?",
+                            f"AND election_code IS NOT DISTINCT FROM ?{same_offices}",
                             list(key))
         con.execute(f"INSERT INTO votes ({', '.join(VOTES_COLUMNS)}) "
                     f"SELECT {', '.join(VOTES_COLUMNS)} FROM staging")
@@ -118,12 +119,27 @@ def load_files(con: duckdb.DuckDBPyConnection, files: list[Path], year: int,
     return n
 
 
+def _warn_about_unreadable_numbers(con: duckdb.DuckDBPyConnection, rows: int) -> None:
+    counts = ", ".join(f"count(*) FILTER (WHERE {c} IS NULL)" for c in _MUST_BE_NUMBERS)
+    found = con.execute(f"SELECT {counts} FROM staging").fetchone()
+    unreadable = {c: n for c, n in zip(_MUST_BE_NUMBERS, found) if n}
+    if unreadable:
+        print(f"  WARNING: of {rows:,} rows, these have no readable value and will not add up "
+              f"as expected: {unreadable}")
+
+
+def _count_lines(file: Path) -> int:
+    lines, last = 0, b"\n"
+    with open(file, "rb") as f:
+        for block in iter(lambda: f.read(1 << 24), b""):
+            lines += block.count(b"\n")
+            last = block[-1:]
+    return lines + (last != b"\n")  # the last line may have no line break
+
+
 def _check_line_count(con, parsed_from: str, files: list[Path], header: int) -> None:
     """Makes sure the parser neither dropped nor merged lines (TSE sometimes gets quotes wrong)."""
-    physical = 0
-    for a in files:
-        with open(a, "rb") as f:
-            physical += sum(b.count(b"\n") for b in iter(lambda: f.read(1 << 24), b"")) - header
+    physical = sum(_count_lines(a) - header for a in files)
     parsed = con.execute(f"SELECT count(*) FROM {parsed_from}").fetchone()[0]
     if parsed != physical:
         print(f"  WARNING: {physical:,} lines in the file, {parsed:,} parsed. "
@@ -146,52 +162,13 @@ def _extraction_dir(file: Path, extension: str) -> str | None:
     return str(RAM_DIR) if size <= limit else None
 
 
-def _repair_line(line: bytes) -> bytes:
-    """Escapes the inner quotes of the fields of a line in which every field is quoted."""
-    body = line.rstrip(b"\r\n")
-    separators = body.count(_SEPARATOR)
-    if body[:1] != b'"' or body[-1:] != b'"' or not separators or body.count(b";") != separators:
-        return line
-    fields = [f.replace(b'""', b'"').replace(b'"', b'""') for f in body[1:-1].split(_SEPARATOR)]
-    return b'"' + _SEPARATOR.join(fields) + b'"' + line[len(body):]
-
-
-def _repair_chunk(chunk: bytes) -> bytes:
-    """Fixes the TSE's defects in whole lines of a Latin-1 file; both would stop the parser.
-
-    Unescaped quotes in names (2018, 2020), and UTF-8 text such as IRMÃO (2016), whose bytes
-    0x80-0x9F DuckDB refuses as Latin-1. Clean chunks cost two counts, not a pass per line.
-    """
-    if len(chunk.translate(None, _C1_BYTES)) != len(chunk):
-        chunk = _UTF8_IN_LATIN1.sub(lambda m: m[0].decode().encode("latin-1"), chunk)
-    if chunk.count(b'"') == 2 * (chunk.count(_SEPARATOR) + chunk.count(b"\n")):
-        return chunk
-    first = chunk[:chunk.find(b"\n") + 1]
-    if first.count(b";") != first.count(_SEPARATOR):  # layout with unquoted numbers (2024 on)
-        return chunk
-    return b"".join(_repair_line(line) for line in chunk.splitlines(keepends=True))
-
-
-def _extract_repaired(z: zipfile.ZipFile, member: str, target: Path) -> Path:
-    with z.open(member) as source, open(target, "wb") as out:
-        rest = b""
-        while block := source.read(_REPAIR_BLOCK):
-            cut = block.rfind(b"\n") + 1
-            if cut:
-                out.write(_repair_chunk(rest + block[:cut]))
-                rest = b""
-            rest += block[cut:]
-        out.write(_repair_chunk(rest))
-    return target
-
-
 def _data_files(file: Path, extension: str, dest: Path) -> list[Path]:
     """Data files: the ones inside the zip, repaired, or the file itself if it is not a zip."""
     if file.suffix.lower() != ".zip":
         return [file]
     with zipfile.ZipFile(file) as z:
         members = [m for m in z.namelist() if m.lower().endswith(extension)]
-        return [_extract_repaired(z, m, dest / Path(m).name) for m in members]
+        return [extract_repaired(z, m, dest / Path(m).name) for m in members]
 
 
 def load(files: list[Path], db: Path, year: int,

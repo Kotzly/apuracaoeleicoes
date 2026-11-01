@@ -17,28 +17,29 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import duckdb
-
-from . import parties
-from .parties import OFFICES, canonical_party_sql, election_cycles
+from . import derived, parties
+from .domain import MAYOR, OFFICE_LIST, OFFICE_NAME_CASE, PRESIDENT, SENATOR, consecutive_elections
+from .parties import canonical_party_sql
 
 NO_MAYOR = "Sem eleito"
 OTHERS = "Outros"
 TOP_PARTIES = 12
 _STATE_TABLE = "elected_party"
-_MAYOR = 11
-_SINGLE_SEAT = (3, _MAYOR)  # one seat per state or city: only the latest election counts
+_SINGLE_SEAT = (3, MAYOR)  # one seat per state or city: only the latest election counts
 _NATIONAL = "BR"
-_SENATOR = 5
 # Elected before the merger, but sitting in UNIÃO afterwards. Only `senate_seats` joins them: a
 # seat lasts two elections, and everywhere else a merger stays a change of party.
 _SENATE_MERGERS = {"DEM": "UNIÃO", "PSL": "UNIÃO"}
 _MERGER_YEAR = 2022
+# Years of a general municipal election. A supplementary one can fall in any year, for a few cities:
+# in those years the flows would compare almost every city with nothing.
+_MAYOR_YEARS = f"""SELECT DISTINCT election_year FROM candidates
+                   WHERE office_code = {MAYOR} AND election_year IS NOT NULL
+                     AND coalesce(election_type, '') NOT LIKE '%SUPLEMENTAR%'"""
 
 
-def _create_elected_tables(con: duckdb.DuckDBPyConnection) -> None:
+def _create_elected_tables(con: derived.Connection) -> None:
     party = canonical_party_sql("party")
-    offices = ", ".join(map(str, OFFICES))
     single = ", ".join(map(str, _SINGLE_SEAT))
     # Every seat holder, once: `winners` is also what mayor_flows reads.
     con.execute(f"""
@@ -46,14 +47,13 @@ def _create_elected_tables(con: duckdb.DuckDBPyConnection) -> None:
         SELECT election_year, office_code, coalesce(state, '{_NATIONAL}') AS state,
                municipality_code, municipality_name, {party} AS party
         FROM candidates c
-        WHERE office_code IN ({offices}) AND result LIKE 'ELEITO%'
+        WHERE office_code IN ({OFFICE_LIST}) AND result LIKE 'ELEITO%'
         QUALIFY CASE WHEN office_code IN ({single})
                      THEN dense_rank() OVER (
                          PARTITION BY election_year, office_code, state, municipality_code
                          ORDER BY coalesce(election_type, '') LIKE '%SUPLEMENTAR%' DESC,
                                   election_code DESC, round_number DESC) = 1
                      ELSE true END""")
-    names = " ".join(f"WHEN {code} THEN '{name}'" for code, name in OFFICES.items())
     pparty = canonical_party_sql()
     con.execute(f"""
         CREATE OR REPLACE TABLE elected_party AS
@@ -62,51 +62,53 @@ def _create_elected_tables(con: duckdb.DuckDBPyConnection) -> None:
             FROM winners GROUP BY ALL),
         ballots AS (
             SELECT election_year, office_code,
-                   CASE WHEN office_code = 1 THEN '{_NATIONAL}' ELSE state END AS state,
+                   CASE WHEN office_code = {PRESIDENT} THEN '{_NATIONAL}' ELSE state END AS state,
                    {pparty} AS party, sum(votes)::BIGINT AS votes
             FROM party_results
-            WHERE round_number = 1 AND office_code IN ({offices})
+            WHERE round_number = 1 AND office_code IN ({OFFICE_LIST})
             GROUP BY ALL),
         joined AS (
             SELECT election_year, office_code, state, party,
                    coalesce(elected, 0)::INTEGER AS elected, coalesce(votes, 0)::BIGINT AS votes
             FROM seats FULL JOIN ballots USING (election_year, office_code, state, party))
         SELECT election_year::SMALLINT AS election_year, office_code::SMALLINT AS office_code,
-               CASE office_code {names} END AS office_name, state, party, elected, votes,
+               {OFFICE_NAME_CASE} AS office_name, state, party, elected, votes,
                votes * 1.0 / nullif(sum(votes) OVER w, 0) AS vote_share,
                elected * 1.0 / nullif(sum(elected) OVER w, 0) AS seat_share,
                (sum(elected) OVER w)::INTEGER AS seats_total, (sum(votes) OVER w)::BIGINT AS votes_total
         FROM joined
         WINDOW w AS (PARTITION BY election_year, office_code, state)
         ORDER BY office_code, election_year, state, party""")
-    n = con.execute("SELECT count(*) FROM elected_party").fetchone()[0]
-    print(f"elected_party: {n:,} rows")
+    derived.report_rows(con, "elected_party")
 
 
-def _create_mayor_flows(con: duckdb.DuckDBPyConnection) -> None:
-    municipal_years = election_cycles(con)[1]
-    years = ", ".join(map(str, municipal_years))
+def _create_mayor_flows(con: derived.Connection) -> None:
+    years = [row[0] for row in con.execute(_MAYOR_YEARS).fetchall()]
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE top_parties AS
-        SELECT party FROM winners WHERE office_code = {_MAYOR} AND election_year IN ({years})
+        SELECT party FROM winners WHERE office_code = {MAYOR} AND election_year IN ({_MAYOR_YEARS})
         GROUP BY party ORDER BY count(*) DESC, party LIMIT {TOP_PARTIES}""")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE mayors AS
         SELECT cities.election_year, cities.state, cities.municipality_code,
                cities.municipality_name, coalesce(w.party, '{NO_MAYOR}') AS party
         FROM (SELECT election_year, state, municipality_code, any_value(municipality_name) AS municipality_name
-              FROM candidates WHERE office_code = {_MAYOR} AND election_year IN ({years})
+              FROM candidates WHERE office_code = {MAYOR} AND election_year IN ({_MAYOR_YEARS})
               GROUP BY ALL) cities
-        LEFT JOIN (SELECT * FROM winners WHERE office_code = {_MAYOR}) w
+        LEFT JOIN (SELECT * FROM winners WHERE office_code = {MAYOR}) w
              USING (election_year, state, municipality_code)""")
     side = "(SELECT * FROM mayors WHERE election_year = {})"
-    links = " UNION ALL ".join(f"""
+    links = [f"""
         SELECT {a} AS from_year, {b} AS to_year, coalesce(x.state, y.state) AS state,
                coalesce(y.municipality_name, x.municipality_name) AS municipality_name,
                coalesce(x.party, '{NO_MAYOR}') AS source_party,
                coalesce(y.party, '{NO_MAYOR}') AS target_party
         FROM {side.format(a)} x FULL JOIN {side.format(b)} y USING (state, municipality_code)"""
-                               for a, b in zip(municipal_years, municipal_years[1:]))
+             for a, b in consecutive_elections(years)]
+    # Typed even when empty, because the dataset expects these columns.
+    empty = """SELECT NULL::INTEGER AS from_year, NULL::INTEGER AS to_year, NULL::VARCHAR AS state,
+                      NULL::VARCHAR AS municipality_name, NULL::VARCHAR AS source_party,
+                      NULL::VARCHAR AS target_party WHERE false"""
     node = ("CASE WHEN {p} = '" + NO_MAYOR + "' OR {p} IN (SELECT party FROM top_parties) THEN {p} "
             "ELSE '" + OTHERS + "' END")
     con.execute(f"""
@@ -116,17 +118,14 @@ def _create_mayor_flows(con: duckdb.DuckDBPyConnection) -> None:
                from_year || ' · ' || {node.format(p='source_party')} AS source,
                to_year || ' · ' || {node.format(p='target_party')} AS target,
                count(*)::INTEGER AS units
-        FROM ({links}) GROUP BY ALL ORDER BY from_year, state, municipality_name""")
-    n = con.execute("SELECT count(*) FROM mayor_flows").fetchone()[0]
-    print(f"mayor_flows: {n:,} rows")
+        FROM ({' UNION ALL '.join(links + [empty])}) GROUP BY ALL ORDER BY from_year, state, municipality_name""")
+    derived.report_rows(con, "mayor_flows")
 
 
-def _create_senate_seats(con: duckdb.DuckDBPyConnection) -> None:
+def _create_senate_seats(con: derived.Connection) -> None:
     """Seats after each election, for the years whose previous election is also loaded."""
-    loaded = {row[0] for row in con.execute(f"""SELECT DISTINCT election_year FROM elected_party
-                                                WHERE office_code = {_SENATOR} AND elected > 0""").fetchall()}
-    federal_years = election_cycles(con)[0]
-    pairs = [(a, b) for a, b in zip(federal_years, federal_years[1:]) if a in loaded and b in loaded]
+    loaded = [row[0] for row in con.execute(f"""SELECT DISTINCT election_year FROM elected_party
+                                                WHERE office_code = {SENATOR} AND elected > 0""").fetchall()]
     merged = " ".join(f"WHEN '{old}' THEN '{new}'" for old, new in _SENATE_MERGERS.items())
     selects = [f"""
         SELECT {year}::SMALLINT AS election_year, state,
@@ -134,8 +133,8 @@ def _create_senate_seats(con: duckdb.DuckDBPyConnection) -> None:
                (sum(elected) FILTER (WHERE election_year = {year}))::INTEGER AS seats_this_election,
                (sum(elected) FILTER (WHERE election_year = {previous}))::INTEGER AS seats_previous_election
         FROM elected_party
-        WHERE office_code = {_SENATOR} AND elected > 0 AND election_year IN ({previous}, {year})
-        GROUP BY ALL""" for previous, year in pairs]
+        WHERE office_code = {SENATOR} AND elected > 0 AND election_year IN ({previous}, {year})
+        GROUP BY ALL""" for previous, year in consecutive_elections(loaded)]
     # Typed even when empty, because the dataset expects these columns.
     empty = """SELECT NULL::SMALLINT AS election_year, NULL::VARCHAR AS state, NULL::VARCHAR AS party,
                       NULL::INTEGER AS seats_this_election, NULL::INTEGER AS seats_previous_election
@@ -147,27 +146,20 @@ def _create_senate_seats(con: duckdb.DuckDBPyConnection) -> None:
                coalesce(seats_this_election, 0) + coalesce(seats_previous_election, 0) AS seats
         FROM ({' UNION ALL '.join(selects + [empty])})
         ORDER BY election_year, state, party""")
-    n = con.execute("SELECT count(*) FROM senate_seats").fetchone()[0]
-    print(f"senate_seats: {n:,} rows")
+    derived.report_rows(con, "senate_seats")
 
 
 def build(db: Path, force: bool = False) -> None:
     """Rebuilds `elected_party`, `mayor_flows` and `senate_seats`, unless results, candidates and renames are unchanged."""
-    if not parties.has_tables(db, "national_results", "party_results", "candidates"):
+    if not derived.has_tables(db, "national_results", "party_results", "candidates"):
         print("warning: elected_party not built: the results or `candidates` could not be loaded")
         return
     if (not force and parties.is_current(db, _STATE_TABLE, uses_candidates=True)
-            and parties.has_tables(db, "senate_seats")):
+            and derived.has_tables(db, "senate_seats")):
         print("elected_party: up to date")
         return
-    con = duckdb.connect(str(db))
-    try:
-        con.begin()
+    with derived.rebuilding(db) as con:
         _create_elected_tables(con)
         _create_mayor_flows(con)
         _create_senate_seats(con)
-        con.execute(f"COMMENT ON TABLE elected_party IS '{parties.source_state(con, True)}'")
-        con.commit()
-        con.execute("CHECKPOINT")
-    finally:
-        con.close()
+        derived.mark_current(con, _STATE_TABLE, parties.source_state(con, True))

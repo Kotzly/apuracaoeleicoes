@@ -32,6 +32,12 @@ params:
     operatorId: EQUALS
     comparator: UF
   - clause: WHERE
+    expressionType: SIMPLE
+    subject: vote_base
+    operator: ==
+    operatorId: EQUALS
+    comparator: Todos os votos
+  - clause: WHERE
     expressionType: SQL
     sqlExpression: party IN ('Branco', 'Nulo')
   - clause: HAVING

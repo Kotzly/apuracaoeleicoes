@@ -209,10 +209,9 @@ def test_generating_again_replaces_the_data(tmp_path, small):
     assert "national_results" not in tables
 
 
-def test_cycles_of_a_real_database_do_not_change(tmp_path):
+def test_a_real_database_is_not_synthetic(tmp_path):
     c = duckdb.connect(str(tmp_path / "real.duckdb"))
-    assert parties.election_cycles(c) == (parties.FEDERAL_YEARS, parties.MUNICIPAL_YEARS)
-    assert parties.years_of(c, 11) == parties.MUNICIPAL_YEARS
+    assert not parties.is_synthetic(c)
     c.close()
 
 
