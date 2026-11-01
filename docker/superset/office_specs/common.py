@@ -307,7 +307,7 @@ def flips_table(key: str = "flips") -> Chart:
     return table(key, "Viradas: líder do 1º turno derrotado", UNIT_WINNERS,
                  ["election_year", "state", "label", "round1_leader_name", "round1_leader_party", "winner_name", "party_current",
                   "winner_pct", "margin_pp"],
-                 order=[("election_year", False), ("margin_pp", False)], filters=[where("flipped")], height=60)
+                 order=[("election_year", False), ("margin_pp", False)], filters=[where("flipped")], height=60, history=True)
 
 
 def round_blank_block() -> list:

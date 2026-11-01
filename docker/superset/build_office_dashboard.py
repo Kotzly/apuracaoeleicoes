@@ -312,6 +312,8 @@ def _check_on_data(charts: dict, datasets: dict, db: str) -> list:
             metrics.append(params["metric"])
         if params.get("timeseries_limit_metric"):
             metrics.append(params["timeseries_limit_metric"])
+        saved = {m["metric_name"]: m["expression"] for m in dataset.get("metrics") or []}
+        metrics = [{"expressionType": "SQL", "sqlExpression": saved[m]} if isinstance(m, str) else m for m in metrics]
         keys = [k for k in [params.get("x_axis"), *(params.get("groupby") or []), *(params.get("groupbyRows") or []),
                             *(params.get("groupbyColumns") or [])] if isinstance(k, str)]
         wheres = " AND ".join(f"({_expression(f)})" for f in params.get("adhoc_filters") or [] if f.get("clause") != "HAVING") or "true"

@@ -3,8 +3,9 @@
 `candidate_results` has one row per candidate and round, with the votes. A supplementary election
 has no votes here, because the results only hold the ordinary one; for mayors and governors it still
 decides who is `elected` (same rule as `elected_party`). `elected_before` says whether the same full
-name won the same office in the same place in the previous election: it is approximate, because the
-TSE id changes every election and there is no CPF, and NULL in the first election loaded.
+name won the same office in the same place one term before (8 years for a senator, 4 otherwise): it
+is approximate, because the TSE id changes every election and there is no CPF, and NULL when that
+election was not loaded.
 
 `unit_winners` has one row per year, office and unit for the one-seat offices: each state for
 president and governor, each city for mayor. `party` is the most voted in the last round, and
@@ -28,7 +29,8 @@ from . import parties
 from .parties import MUNICIPAL_OFFICES, OFFICES, canonical_party_sql
 
 _STATE_TABLE = "office_seats"  # built last: its comment says the four tables are current
-_PRESIDENT, _GOVERNOR, _MAYOR = 1, 3, 11
+_PRESIDENT, _GOVERNOR, _SENATOR, _MAYOR = 1, 3, 5, 11
+_TERM = f"(CASE WHEN c.office_code = {_SENATOR} THEN 8 ELSE 4 END)"  # a senator's seat lasts two elections
 _NATIONAL = "BR"
 _ORDINARY = "coalesce(election_type, '') NOT LIKE '%SUPLEMENTAR%'"
 _MUNICIPAL = ", ".join(map(str, MUNICIPAL_OFFICES))
@@ -80,14 +82,14 @@ def _create_candidate_results(con: duckdb.DuckDBPyConnection) -> None:
                c.candidacy_status, c.result, c.elected, c.gender, c.race, c.education, c.occupation,
                CASE WHEN {_ORDINARY.replace('election_type', 'c.election_type')} THEN b.votes END::BIGINT AS votes,
                CASE WHEN {_ORDINARY.replace('election_type', 'c.election_type')} THEN b.share_of_valid END AS share_of_valid,
-               CASE WHEN c.election_year = f.y THEN NULL ELSE p.full_name IS NOT NULL END AS elected_before
+               CASE WHEN c.election_year - {_TERM} < f.y THEN NULL ELSE p.full_name IS NOT NULL END AS elected_before
         FROM _candidacies c
         JOIN first_year f USING (office_code)
         LEFT JOIN _ballots b ON b.election_year = c.election_year AND b.round_number = c.round_number
              AND b.office_code = c.office_code AND b.candidate_number = c.candidate_number
              AND b.state IS NOT DISTINCT FROM (CASE WHEN c.office_code = {_PRESIDENT} THEN NULL ELSE c.state END)
              AND b.municipality_code IS NOT DISTINCT FROM c.place
-        LEFT JOIN _elected_names p ON p.election_year = c.election_year - 4 AND p.office_code = c.office_code
+        LEFT JOIN _elected_names p ON p.election_year = c.election_year - {_TERM} AND p.office_code = c.office_code
              AND p.state IS NOT DISTINCT FROM c.state AND p.place IS NOT DISTINCT FROM c.place
              AND p.full_name = c.full_name
         ORDER BY c.office_code, c.election_year, c.state, c.place, c.round_number, c.candidate_number""")

@@ -28,6 +28,10 @@ CANDIDATES = [
     (2018, 1, 1, ORD, 6, "SP", None, 1501, "GIL", "PMDB", "ELEITO POR QP", "MASCULINO"),
     (2022, 1, 2, ORD, 6, "SP", None, 1501, "GIL", "MDB", "ELEITO POR MÉDIA", "MASCULINO"),
     (2022, 1, 2, ORD, 6, "SP", None, 1302, "HIL", "PT", "NÃO ELEITO", "FEMININO"),
+    # A senator's term lasts two elections: 2022 follows 2014, and 2018 has nothing to compare.
+    (2014, 1, 7, ORD, 5, "SP", None, 131, "KIM", "PT", "ELEITO", "FEMININO"),
+    (2018, 1, 1, ORD, 5, "SP", None, 451, "LIA", "PSDB", "ELEITO", "FEMININO"),
+    (2022, 1, 2, ORD, 5, "SP", None, 131, "KIM", "PT", "ELEITO", "FEMININO"),
     # President.
     (2022, 1, 2, ORD, 1, None, None, 13, "IVO", "PT", "2º TURNO", "MASCULINO"),
     (2022, 1, 2, ORD, 1, None, None, 22, "JOE", "PL", "2º TURNO", "MASCULINO"),
@@ -125,6 +129,11 @@ def test_elected_before_is_unknown_in_the_first_cycle_and_ignores_namesakes_else
                         WHERE office_code = 11 AND election_year = 2016""") == [(None,)]
     assert _rows(db, """SELECT full_name, elected_before FROM candidate_results WHERE office_code = 6
                         AND election_year = 2022 ORDER BY 1""") == [("GIL", True), ("HIL", False)]
+
+
+def test_a_senators_previous_election_is_two_elections_ago(db):
+    assert _rows(db, """SELECT election_year, elected_before FROM candidate_results WHERE office_code = 5
+                        ORDER BY 1""") == [(2014, None), (2018, None), (2022, True)]
 
 
 def test_unit_winners_shows_flips_margin_and_continuity(db):
