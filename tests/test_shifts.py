@@ -103,6 +103,18 @@ def test_unit_must_exist_on_both_sides(tmp_path):
     assert round2 == [(1,)]
 
 
+def test_all_votes_columns_put_blanks_in_the_total_and_in_the_volatility(tmp_path):
+    path = _db(tmp_path)
+    got = dict(_rows(path, """SELECT party, share_from_all FROM party_shifts WHERE level = 'Seção'
+                              AND transition = '2018 → 2022 T1' AND municipality_code = 100 AND section = 1"""))
+    assert got["PT"] == pytest.approx(60 / 1099) and got["Branco"] == pytest.approx(999 / 1099)
+    index = _rows(path, """SELECT pedersen_index_all FROM unit_volatility WHERE level = 'Seção'
+                           AND transition = '2018 → 2022 T1' AND municipality_code = 100 AND section = 1""")
+    # 2018 over 1099 votes, 2022 over 100: MDB 40 -> 50, PT 60 -> 30, NOVO 0 -> 20, Branco 999 -> 0
+    expected = 0.5 * (abs(.5 - 40 / 1099) + abs(.3 - 60 / 1099) + .2 + 999 / 1099)
+    assert index == [(pytest.approx(expected),)]
+
+
 def test_merged_parties_are_not_joined(tmp_path):
     path = _db(tmp_path)
     got = _shift(path, "Município", "2018 → 2022 T1", municipality_code=200)
@@ -254,6 +266,9 @@ def test_zone_round_shifts_keep_equal_zone_numbers_of_two_states_apart(tmp_path)
     assert got["SP", 1, 13] == ("PT", 80, 75, pytest.approx(0.8), pytest.approx(0.75), -5)
     assert got["RJ", 1, 13][1:] == (0, 2, 0.0, pytest.approx(0.2), 2)   # no votes in a round: 0
     assert got["SP", 1, 15][0] == "MDB"
+    shares = _rows(path, """SELECT share_round1_all, share_round2_all FROM zone_round_shifts
+                            WHERE state = 'SP' AND candidate_number = 13""")
+    assert shares == [(pytest.approx(80 / 600), pytest.approx(0.75))]   # the 500 blanks enter the total
 
 
 def test_missing_round_table_is_built_without_redoing_party_shifts(tmp_path, capsys):

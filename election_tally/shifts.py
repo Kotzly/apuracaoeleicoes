@@ -5,6 +5,8 @@ that ran on either side of the pair appears on both, with 0 votes where it did n
 the party's votes over the unit's valid votes (Nominal and Legenda) for that office and round.
 Blank and null votes have rows too, under the party `Branco` and `Nulo`: their share is over all of
 the unit's votes, since they are not part of the valid ones, and they stay out of the volatility.
+The `*_all` columns are the same measures over all of the unit's votes, for every row; there, blank
+and null votes do count in the volatility, as a move of voters like any other.
 A unit enters a pair only if it has valid votes on both sides, so a new section or a municipality
 that was created has no previous share to compare. `unit_volatility` is the Pedersen index of each
 unit, half the sum of the absolute changes in share. `round_shifts` follows the presidential
@@ -134,7 +136,9 @@ def _build_pair(con: duckdb.DuckDBPyConnection, level: str, office: int, start: 
         SELECT unit, party, coalesce(a.votes, 0)::BIGINT AS votes_from,
                coalesce(b.votes, 0)::BIGINT AS votes_to,
                coalesce(a.votes, 0) * 1.0 / CASE WHEN party IN {_BLANKS} THEN all_a ELSE ta END AS share_from,
-               coalesce(b.votes, 0) * 1.0 / CASE WHEN party IN {_BLANKS} THEN all_b ELSE tb END AS share_to
+               coalesce(b.votes, 0) * 1.0 / CASE WHEN party IN {_BLANKS} THEN all_b ELSE tb END AS share_to,
+               coalesce(a.votes, 0) * 1.0 / all_a AS share_from_all,
+               coalesce(b.votes, 0) * 1.0 / all_b AS share_to_all
         FROM (SELECT * FROM a WHERE party IS NOT NULL) a
              FULL JOIN (SELECT * FROM b WHERE party IS NOT NULL) b USING (unit, party)
              JOIN units USING (unit)""")
@@ -145,17 +149,19 @@ def _build_pair(con: duckdb.DuckDBPyConnection, level: str, office: int, start: 
     con.execute(f"""
         INSERT INTO party_shifts
         SELECT {head}, {unit_columns}, party, votes_from, votes_to, share_from, share_to,
-               share_change
+               share_change, share_from_all, share_to_all
         FROM ({_decoded(level, 'batch', 'party, votes_from, votes_to, share_from, share_to, '
-                                        'share_to - share_from AS share_change')})
+                                        'share_to - share_from AS share_change, share_from_all, share_to_all')})
         {order}, party""")
-    pedersen = f"""(SELECT unit, 0.5 * sum(abs(share_to - share_from)) AS pedersen_index,
-                           count(*)::INTEGER AS parties FROM batch
-                    WHERE party NOT IN {_BLANKS} GROUP BY unit)"""
+    parties_only = f"FILTER (WHERE party NOT IN {_BLANKS})"
+    pedersen = f"""(SELECT unit, 0.5 * sum(abs(share_to - share_from)) {parties_only} AS pedersen_index,
+                           (count(*) {parties_only})::INTEGER AS parties,
+                           0.5 * sum(abs(share_to_all - share_from_all)) AS pedersen_index_all
+                    FROM batch GROUP BY unit HAVING count(*) {parties_only} > 0)"""
     con.execute(f"""
         INSERT INTO unit_volatility
-        SELECT {head}, {unit_columns}, pedersen_index, parties
-        FROM ({_decoded(level, pedersen, 'pedersen_index, parties')}) {order}""")
+        SELECT {head}, {unit_columns}, pedersen_index, parties, pedersen_index_all
+        FROM ({_decoded(level, pedersen, 'pedersen_index, parties, pedersen_index_all')}) {order}""")
 
 
 def _create_tables(con: duckdb.DuckDBPyConnection) -> None:
@@ -166,9 +172,9 @@ def _create_tables(con: duckdb.DuckDBPyConnection) -> None:
               transition VARCHAR, from_year SMALLINT, to_year SMALLINT"""
     con.execute(f"""CREATE OR REPLACE TABLE party_shifts ({head}, {unit}, party VARCHAR,
         votes_from BIGINT, votes_to BIGINT, share_from DOUBLE, share_to DOUBLE,
-        share_change DOUBLE)""")
+        share_change DOUBLE, share_from_all DOUBLE, share_to_all DOUBLE)""")
     con.execute(f"""CREATE OR REPLACE TABLE unit_volatility ({head}, {unit},
-        pedersen_index DOUBLE, parties INTEGER)""")
+        pedersen_index DOUBLE, parties INTEGER, pedersen_index_all DOUBLE)""")
 
 
 def _build_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
@@ -184,8 +190,11 @@ def _build_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
                    any_value({party}) AS party
             FROM national_results WHERE round_number = 2 AND vote_type = 'Nominal'
             GROUP BY ALL),
-        r AS (SELECT * FROM municipality_results
-              WHERE office_code = {_PRESIDENT} AND vote_type = 'Nominal'),
+        r AS (SELECT * FROM (
+                  SELECT *, votes * 1.0 / sum(votes) FILTER (WHERE {_COUNTED}) OVER (
+                             PARTITION BY election_year, round_number, municipality_code) AS share_of_all
+                  FROM municipality_results WHERE office_code = {_PRESIDENT})
+              WHERE vote_type = 'Nominal'),
         places AS (
             SELECT election_year, municipality_code, any_value(state) AS state,
                    any_value(municipality_name) AS municipality_name,
@@ -199,7 +208,9 @@ def _build_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
                coalesce(a.share_of_valid, 0) AS share_round1,
                coalesce(b.share_of_valid, 0) AS share_round2,
                coalesce(b.share_of_valid, 0) - coalesce(a.share_of_valid, 0) AS share_change,
-               (coalesce(b.votes, 0) - coalesce(a.votes, 0))::BIGINT AS votes_change
+               (coalesce(b.votes, 0) - coalesce(a.votes, 0))::BIGINT AS votes_change,
+               coalesce(a.share_of_all, 0) AS share_round1_all,
+               coalesce(b.share_of_all, 0) AS share_round2_all
         FROM places p JOIN finalists f USING (election_year)
         LEFT JOIN r a ON a.election_year = p.election_year AND a.round_number = 1
                      AND a.municipality_code = p.municipality_code
@@ -215,8 +226,8 @@ def _build_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
 def _build_place_round_shifts(con: duckdb.DuckDBPyConnection, table: str, rows: str, keys: list[str]) -> None:
     """Each finalist's votes in the two rounds, in every place (`keys`) that voted in both.
 
-    `rows` has the year, round, keys, candidate number, votes and share of the place's own valid
-    votes, so a share is never the mean of smaller units, which would weigh a village like a capital.
+    `rows` has the year, round, keys, candidate number, votes and shares of the place's own valid
+    and of all its votes, so a share is never the mean of smaller units, which would weigh a village like a capital.
     """
     party = canonical_party_sql()
     columns = ", ".join(f"p.{k}" for k in keys)
@@ -238,7 +249,9 @@ def _build_place_round_shifts(con: duckdb.DuckDBPyConnection, table: str, rows: 
                coalesce(a.share_of_valid, 0) AS share_round1,
                coalesce(b.share_of_valid, 0) AS share_round2,
                coalesce(b.share_of_valid, 0) - coalesce(a.share_of_valid, 0) AS share_change,
-               (coalesce(b.votes, 0) - coalesce(a.votes, 0))::BIGINT AS votes_change
+               (coalesce(b.votes, 0) - coalesce(a.votes, 0))::BIGINT AS votes_change,
+               coalesce(a.share_of_all, 0) AS share_round1_all,
+               coalesce(b.share_of_all, 0) AS share_round2_all
         FROM places p JOIN finalists f USING (election_year)
         LEFT JOIN r a ON a.election_year = p.election_year AND a.round_number = 1
                      AND {same_place.format('a')} AND a.candidate_number = f.candidate_number
@@ -253,8 +266,12 @@ def _build_state_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
     """Municipalities that voted in only one round still count, so a state's votes may differ
     slightly from the sum of its rows in `round_shifts`."""
     _build_place_round_shifts(con, "state_round_shifts", f"""
-        SELECT election_year, round_number, state, candidate_number, votes, share_of_valid
-        FROM state_results WHERE office_code = {_PRESIDENT} AND vote_type = 'Nominal'""", ["state"])
+        SELECT * FROM (
+            SELECT election_year, round_number, state, candidate_number, votes, share_of_valid, vote_type,
+                   votes * 1.0 / sum(votes) FILTER (WHERE {_COUNTED}) OVER (
+                       PARTITION BY election_year, round_number, state) AS share_of_all
+            FROM state_results WHERE office_code = {_PRESIDENT})
+        WHERE vote_type = 'Nominal'""", ["state"])
 
 
 def _build_zone_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
@@ -262,13 +279,15 @@ def _build_zone_round_shifts(con: duckdb.DuckDBPyConnection) -> None:
     _build_place_round_shifts(con, "zone_round_shifts", f"""
         SELECT * FROM (
             SELECT election_year, round_number, state, zone::INTEGER AS zone, candidate_number,
-                   votes, votes * 1.0 / sum(votes) OVER (
+                   votes, votes * 1.0 / sum(votes) FILTER (WHERE {_VALID}) OVER (
                        PARTITION BY election_year, round_number, state, zone) AS share_of_valid,
+                   votes * 1.0 / sum(votes) OVER (
+                       PARTITION BY election_year, round_number, state, zone) AS share_of_all,
                    vote_type
             FROM (SELECT election_year, round_number, state, zone, vote_type, candidate_number,
                          sum(vote_count)::BIGINT AS votes
                   FROM votes
-                  WHERE office_code = {_PRESIDENT} AND vote_count > 0 AND {_VALID}
+                  WHERE office_code = {_PRESIDENT} AND vote_count > 0 AND {_COUNTED}
                   GROUP BY ALL))
         WHERE vote_type = 'Nominal'""", ["state", "zone"])
 

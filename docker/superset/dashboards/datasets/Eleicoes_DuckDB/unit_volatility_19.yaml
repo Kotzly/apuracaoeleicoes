@@ -8,7 +8,7 @@ offset: 0
 cache_timeout: null
 catalog: null
 schema: main
-sql: null
+sql: "SELECT u.* EXCLUDE (pedersen_index, pedersen_index_all), b.vote_base, CASE WHEN b.vote_base = 'Todos os votos' THEN u.pedersen_index_all ELSE u.pedersen_index END AS pedersen_index FROM unit_volatility u CROSS JOIN (VALUES ('Votos v\xe1lidos'), ('Todos os votos')) b(vote_base)"
 params: null
 template_params: null
 filter_select_enabled: true
@@ -20,6 +20,19 @@ folders: null
 uuid: 0a765893-8334-4ba8-92a2-94bc602ab29c
 metrics: []
 columns:
+- column_name: vote_base
+  verbose_name: Base do percentual
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
 - column_name: level
   verbose_name: "N\xEDvel"
   is_dttm: false

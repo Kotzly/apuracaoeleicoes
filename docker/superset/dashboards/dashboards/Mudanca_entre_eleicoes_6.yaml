@@ -62,7 +62,7 @@ position:
         \ e municipais t\xEAm anos diferentes); Transi\xE7\xE3o termina em T1 (vota\xE7\
         \xE3o principal) ou T2 (revers\xE3o, s\xF3 onde o cargo teve segundo turno\
         \ nos dois anos: prefeito em poucas cidades, governador em parte dos estados).\
-        \ Branco e Nulo tamb\xE9m s\xE3o op\xE7\xF5es do filtro Partido: o percentual deles \xE9 sobre todos os votos do local, enquanto o dos partidos continua sobre os v\xE1lidos, e eles n\xE3o entram na volatilidade. Partido vale nas abas que comparam um partido; UF tem sele\xE7\xE3o inversa;\
+        \ O filtro Base do percentual troca os votos v\xE1lidos por todos os votos, incluindo brancos e nulos, em percentuais, varia\xE7\xF5es e volatilidade; os n\xFAmeros de votos n\xE3o mudam. Branco e Nulo tamb\xE9m s\xE3o op\xE7\xF5es do filtro Partido: o percentual deles \xE9 sobre todos os votos do local, enquanto o dos partidos fica sobre a base escolhida; eles s\xF3 entram na volatilidade em Todos os votos. Partido vale nas abas que comparam um partido; UF tem sele\xE7\xE3o inversa;\
         \ Munic\xEDpio depende da UF e s\xF3 vale onde h\xE1 cidade (n\xE3o vale para\
         \ UF e zona)."
   ROW-TAB-map-note:
@@ -770,6 +770,46 @@ position:
     - GRID_ID
 metadata:
   native_filter_configuration:
+  - id: NATIVE_FILTER-voteBase
+    name: Base do percentual
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: vote_base
+      datasetUuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: vote_base
+          op: IN
+          val: ["Votos v\xe1lidos"]
+      filterState:
+        value: ["Votos v\xe1lidos"]
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 18
+      - 19
+    description: "Votos v\xe1lidos: como o TSE divulga. Todos os votos: inclui brancos e nulos no total."
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: level
+      operator: ==
+      operatorId: EQUALS
+      comparator: Brasil
+    time_range: No filter
   - id: NATIVE_FILTER-office
     name: Cargo
     filterType: filter_select

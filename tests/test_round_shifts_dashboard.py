@@ -86,6 +86,19 @@ def test_zone_tabs_only_use_zone_charts_and_zone_labels_tell_states_apart():
     assert dict(zip(expr, got))["label"] == "Zona 7 (CE)"
 
 
+def test_vote_base_is_a_required_filter_on_every_tab_and_each_dataset_picks_one_share():
+    base = _filters()["Base do percentual"]
+    assert base["controlValues"]["enableEmptyFilter"] and not base["controlValues"]["multiSelect"]
+    assert base["defaultDataMask"]["filterState"]["value"] == ["Votos válidos"]
+    assert base["scope"] == {"rootPath": ["ROOT_ID"], "excluded": []}
+    duckdb.sql("""CREATE OR REPLACE TEMP TABLE state_round_shifts AS SELECT 'SP' AS state, 0.5::DOUBLE AS share_round1,
+                  0.6::DOUBLE AS share_round2, 0.1::DOUBLE AS share_change, 0.4::DOUBLE AS share_round1_all, 0.3::DOUBLE AS share_round2_all""")
+    sql = _load("datasets/Eleicoes_DuckDB/state_round_shifts_21.yaml")["sql"]
+    got = duckdb.sql(f"SELECT vote_base, share_round1, share_round2, share_change FROM ({sql}) ORDER BY 1").fetchall()
+    assert [g[0] for g in got] == ["Todos os votos", "Votos válidos"]
+    assert got[0][1:3] == (0.4, 0.3) and round(got[0][3], 9) == -0.1 and got[1][1:] == (0.5, 0.6, 0.1)
+
+
 def test_filters_of_cities_stay_out_of_the_tabs_without_their_column():
     filters = _filters()
     assert filters["Município"]["scope"]["rootPath"] == ["TAB-pct", "TAB-abs"]

@@ -8,8 +8,7 @@ offset: 0
 cache_timeout: null
 catalog: null
 schema: main
-sql: "SELECT p.*, s.polygon\nFROM party_shifts p\nJOIN municipality_shapes s ON s.municipality_ibge_code\
-  \ = p.municipality_ibge_code\nWHERE p.level = 'Munic\xEDpio'"
+sql: "SELECT p.* EXCLUDE (share_from, share_to, share_change, share_from_all, share_to_all), b.vote_base, CASE WHEN b.vote_base = 'Todos os votos' THEN p.share_from_all ELSE p.share_from END AS share_from, CASE WHEN b.vote_base = 'Todos os votos' THEN p.share_to_all ELSE p.share_to END AS share_to, CASE WHEN b.vote_base = 'Todos os votos' THEN p.share_to_all - p.share_from_all ELSE p.share_change END AS share_change, s.polygon FROM party_shifts p JOIN municipality_shapes s ON s.municipality_ibge_code = p.municipality_ibge_code CROSS JOIN (VALUES ('Votos v\xe1lidos'), ('Todos os votos')) b(vote_base) WHERE p.level = 'Munic\xedpio'"
 params: null
 template_params: null
 filter_select_enabled: true
@@ -21,6 +20,19 @@ folders: null
 uuid: 768579eb-df0e-4df1-a4e8-4d6d57683882
 metrics: []
 columns:
+- column_name: vote_base
+  verbose_name: Base do percentual
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
 - column_name: level
   verbose_name: "N\xEDvel"
   is_dttm: false

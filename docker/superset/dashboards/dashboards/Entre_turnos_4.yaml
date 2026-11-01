@@ -47,7 +47,7 @@ position:
     meta:
       width: 12
       height: 24
-      code: "**Como ler.** Cada aba mostra um finalista da elei\xe7\xe3o presidencial, escolhido no filtro **Candidato**, por cidade, por UF ou por zona eleitoral. A varia\xe7\xe3o \xe9 o 2\xba turno menos o 1\xba, dentro do pr\xf3prio local. A participa\xe7\xe3o \xe9 sobre os votos v\xe1lidos do local, ent\xe3o a de uma UF ou zona \xe9 recalculada com os totais dela, e n\xe3o \xe9 a m\xe9dia das partes. No 1\xba turno h\xe1 muitos candidatos e no 2\xba s\xf3 dois, ent\xe3o os finalistas quase sempre ganham participa\xe7\xe3o ao herdar votos dos eliminados: a alta m\xe9dia medida nas cidades \xe9 de 3 a 10 pontos percentuais por ano, e \xe9 essa a refer\xeancia para julgar um local, n\xe3o o zero. Locais pequenos dominam a varia\xe7\xe3o em pontos percentuais e locais grandes dominam a varia\xe7\xe3o em votos; por isso h\xe1 o filtro **M\xednimo de votos no 1\xba turno**, j\xe1 que cidades min\xfasculas e o exterior costumam encabe\xe7ar o ranking em %. **Munic\xedpio** s\xf3 vale nas abas de cidades, e **M\xednimo de votos**, nas de cidades e zonas. Uma zona pode cobrir v\xe1rios munic\xedpios, e uma cidade grande, v\xe1rias zonas; o n\xfamero da zona s\xf3 \xe9 \xfanico dentro da UF. O exterior \xe9 a UF `ZZ`: para tirar estados (inclusive `ZZ`), use o filtro **UF** com a op\xe7\xe3o de excluir selecionados (\"Inverse selection\"). N\xe3o h\xe1 ajuste pela m\xe9dia nacional. \"Maiores quedas\" s\xf3 lista locais em que o candidato realmente perdeu (pode ficar vazio)."
+      code: "**Como ler.** Cada aba mostra um finalista da elei\xe7\xe3o presidencial, escolhido no filtro **Candidato**, por cidade, por UF ou por zona eleitoral. A varia\xe7\xe3o \xe9 o 2\xba turno menos o 1\xba, dentro do pr\xf3prio local. A participa\xe7\xe3o \xe9 sobre os votos v\xe1lidos do local (ou todos, incluindo brancos e nulos, no filtro **Base do percentual**), ent\xe3o a de uma UF ou zona \xe9 recalculada com os totais dela, e n\xe3o \xe9 a m\xe9dia das partes. No 1\xba turno h\xe1 muitos candidatos e no 2\xba s\xf3 dois, ent\xe3o os finalistas quase sempre ganham participa\xe7\xe3o ao herdar votos dos eliminados: a alta m\xe9dia medida nas cidades \xe9 de 3 a 10 pontos percentuais por ano, e \xe9 essa a refer\xeancia para julgar um local, n\xe3o o zero. Locais pequenos dominam a varia\xe7\xe3o em pontos percentuais e locais grandes dominam a varia\xe7\xe3o em votos; por isso h\xe1 o filtro **M\xednimo de votos no 1\xba turno**, j\xe1 que cidades min\xfasculas e o exterior costumam encabe\xe7ar o ranking em %. **Munic\xedpio** s\xf3 vale nas abas de cidades, e **M\xednimo de votos**, nas de cidades e zonas. Uma zona pode cobrir v\xe1rios munic\xedpios, e uma cidade grande, v\xe1rias zonas; o n\xfamero da zona s\xf3 \xe9 \xfanico dentro da UF. O exterior \xe9 a UF `ZZ`: para tirar estados (inclusive `ZZ`), use o filtro **UF** com a op\xe7\xe3o de excluir selecionados (\"Inverse selection\"). N\xe3o h\xe1 ajuste pela m\xe9dia nacional. \"Maiores quedas\" s\xf3 lista locais em que o candidato realmente perdeu (pode ficar vazio)."
   TABS-main:
     type: TABS
     id: TABS-main
@@ -731,6 +731,36 @@ position:
       sliceName: "Zonas por varia\xe7\xe3o (votos)"
 metadata:
   native_filter_configuration:
+  - id: NATIVE_FILTER-voteBase
+    name: Base do percentual
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: vote_base
+      datasetUuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: vote_base
+          op: IN
+          val: ["Votos v\xe1lidos"]
+      filterState:
+        value: ["Votos v\xe1lidos"]
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: "Votos v\xe1lidos: como o TSE divulga. Todos os votos: inclui brancos e nulos no total."
   - id: NATIVE_FILTER-shiftYear
     name: Ano
     filterType: filter_select

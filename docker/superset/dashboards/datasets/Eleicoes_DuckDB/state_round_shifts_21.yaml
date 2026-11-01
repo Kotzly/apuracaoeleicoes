@@ -7,7 +7,7 @@ offset: 0
 cache_timeout: null
 catalog: null
 schema: main
-sql: null
+sql: "SELECT t.* EXCLUDE (share_round1, share_round2, share_change, share_round1_all, share_round2_all), b.vote_base, CASE WHEN b.vote_base = 'Todos os votos' THEN t.share_round1_all ELSE t.share_round1 END AS share_round1, CASE WHEN b.vote_base = 'Todos os votos' THEN t.share_round2_all ELSE t.share_round2 END AS share_round2, CASE WHEN b.vote_base = 'Todos os votos' THEN t.share_round2_all - t.share_round1_all ELSE t.share_change END AS share_change FROM state_round_shifts t CROSS JOIN (VALUES ('Votos v\xe1lidos'), ('Todos os votos')) b(vote_base)"
 params: null
 template_params: null
 filter_select_enabled: true
@@ -19,6 +19,19 @@ folders: null
 uuid: 29be6563-5047-53d5-9b2e-853c37e0a428
 metrics: []
 columns:
+- column_name: vote_base
+  verbose_name: Base do percentual
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
 - column_name: election_year
   verbose_name: Ano
   is_dttm: false

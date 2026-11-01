@@ -267,6 +267,25 @@ def test_filters_reach_exactly_the_charts_where_they_mean_something():
     assert filters["UF"]["controlValues"]["inverseSelection"] and filters["UF"]["controlValues"]["multiSelect"]
 
 
+def test_vote_base_reaches_every_comparison_and_each_dataset_picks_one_measure():
+    base = _filters()["Base do percentual"]
+    assert base["controlValues"]["enableEmptyFilter"] and not base["controlValues"]["multiSelect"]
+    assert base["defaultDataMask"]["filterState"]["value"] == ["Votos válidos"]
+    assert _scoped(base) == _scoped(_filters()["Transição"])
+    for table in ("party_shifts", "party_shift_map", "unit_volatility"):
+        assert "vote_base" in {c["column_name"] for c in _dataset(table)["columns"]}
+    con = duckdb.connect()
+    con.execute("""CREATE TABLE unit_volatility AS SELECT 'UF' AS level, 0.2::DOUBLE AS pedersen_index, 0.3::DOUBLE AS pedersen_index_all""")
+    con.execute("""CREATE TABLE party_shifts AS SELECT 'Município' AS level, 7 AS municipality_ibge_code, 0.5::DOUBLE AS share_from,
+                   0.6::DOUBLE AS share_to, 0.1::DOUBLE AS share_change, 0.4::DOUBLE AS share_from_all, 0.3::DOUBLE AS share_to_all""")
+    con.execute("CREATE TABLE municipality_shapes AS SELECT 7 AS municipality_ibge_code, '[]' AS polygon")
+    assert con.execute(f"SELECT vote_base, pedersen_index FROM ({_dataset('unit_volatility')['sql']}) ORDER BY 1").fetchall() == [
+        ("Todos os votos", 0.3), ("Votos válidos", 0.2)]
+    for table in ("party_shifts", "party_shift_map"):
+        got = con.execute(f"SELECT vote_base, share_from, share_to, round(share_change, 9) FROM ({_dataset(table)['sql']}) ORDER BY 1").fetchall()
+        assert got == [("Todos os votos", 0.4, 0.3, -0.1), ("Votos válidos", 0.5, 0.6, 0.1)]
+
+
 def test_notes_explain_the_caveats():
     position = _dashboard()["position"]
     text = " ".join(v["meta"]["code"] for v in position.values()
