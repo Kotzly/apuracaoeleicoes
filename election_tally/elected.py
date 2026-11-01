@@ -20,7 +20,7 @@ from pathlib import Path
 import duckdb
 
 from . import parties
-from .parties import FEDERAL_YEARS, MUNICIPAL_YEARS, OFFICES, canonical_party_sql
+from .parties import OFFICES, canonical_party_sql, election_cycles
 
 NO_MAYOR = "Sem eleito"
 OTHERS = "Outros"
@@ -84,7 +84,8 @@ def _create_elected_tables(con: duckdb.DuckDBPyConnection) -> None:
 
 
 def _create_mayor_flows(con: duckdb.DuckDBPyConnection) -> None:
-    years = ", ".join(map(str, MUNICIPAL_YEARS))
+    municipal_years = election_cycles(con)[1]
+    years = ", ".join(map(str, municipal_years))
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE top_parties AS
         SELECT party FROM winners WHERE office_code = {_MAYOR} AND election_year IN ({years})
@@ -105,7 +106,7 @@ def _create_mayor_flows(con: duckdb.DuckDBPyConnection) -> None:
                coalesce(x.party, '{NO_MAYOR}') AS source_party,
                coalesce(y.party, '{NO_MAYOR}') AS target_party
         FROM {side.format(a)} x FULL JOIN {side.format(b)} y USING (state, municipality_code)"""
-                               for a, b in zip(MUNICIPAL_YEARS, MUNICIPAL_YEARS[1:]))
+                               for a, b in zip(municipal_years, municipal_years[1:]))
     node = ("CASE WHEN {p} = '" + NO_MAYOR + "' OR {p} IN (SELECT party FROM top_parties) THEN {p} "
             "ELSE '" + OTHERS + "' END")
     con.execute(f"""
@@ -124,7 +125,8 @@ def _create_senate_seats(con: duckdb.DuckDBPyConnection) -> None:
     """Seats after each election, for the years whose previous election is also loaded."""
     loaded = {row[0] for row in con.execute(f"""SELECT DISTINCT election_year FROM elected_party
                                                 WHERE office_code = {_SENATOR} AND elected > 0""").fetchall()}
-    pairs = [(a, b) for a, b in zip(FEDERAL_YEARS, FEDERAL_YEARS[1:]) if a in loaded and b in loaded]
+    federal_years = election_cycles(con)[0]
+    pairs = [(a, b) for a, b in zip(federal_years, federal_years[1:]) if a in loaded and b in loaded]
     merged = " ".join(f"WHEN '{old}' THEN '{new}'" for old, new in _SENATE_MERGERS.items())
     selects = [f"""
         SELECT {year}::SMALLINT AS election_year, state,

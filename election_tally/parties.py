@@ -26,10 +26,27 @@ OFFICES = {1: "Presidente", 3: "Governador", 5: "Senador", 6: "Deputado federal"
 FEDERAL_YEARS = (2014, 2018, 2022, 2026)
 MUNICIPAL_YEARS = (2016, 2020, 2024)
 MUNICIPAL_OFFICES = (11, 13)
+# A database with this table holds the made-up dataset (see `synthetic.py`), with these cycles.
+SYNTHETIC_TABLE = "synthetic_dataset"
+SYNTHETIC_FEDERAL_YEARS = (2206, 2210, 2214, 2218)
+SYNTHETIC_MUNICIPAL_YEARS = (2208, 2212, 2216)
 
 
-def years_of(office: int) -> tuple[int, ...]:
-    return MUNICIPAL_YEARS if office in MUNICIPAL_OFFICES else FEDERAL_YEARS
+def is_synthetic(con: duckdb.DuckDBPyConnection) -> bool:
+    return bool(con.execute("SELECT count(*) FROM duckdb_tables() WHERE table_name = ?",
+                            [SYNTHETIC_TABLE]).fetchone()[0])
+
+
+def election_cycles(con: duckdb.DuckDBPyConnection) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """Years of the federal cycle and of the municipal cycle in this database."""
+    if is_synthetic(con):
+        return SYNTHETIC_FEDERAL_YEARS, SYNTHETIC_MUNICIPAL_YEARS
+    return FEDERAL_YEARS, MUNICIPAL_YEARS
+
+
+def years_of(con: duckdb.DuckDBPyConnection, office: int) -> tuple[int, ...]:
+    federal, municipal = election_cycles(con)
+    return municipal if office in MUNICIPAL_OFFICES else federal
 
 
 def read_renames(text: str | None = None) -> list[dict]:

@@ -289,6 +289,25 @@ Como as peças se encaixam:
   Se ele precisar reconstruir algo, pare o Superset antes (`docker compose stop superset`).
 - Os metadados do próprio Superset (usuários, gráficos extras) ficam no volume `superset_home`.
 
+**Testando com dados sintéticos.** Para testar os painéis e o `build-derived` sem o banco real, há um
+dataset inventado, centenas de vezes menor (cerca de 760 mil linhas em `votes` e 30 MB):
+
+```bash
+python -m election_tally load --synthetic      # ou: pipeline --synthetic; grava em ./synthetic.duckdb
+python -m election_tally build-derived --db synthetic.duckdb
+cd docker && ELECTIONS_DB=../synthetic.duckdb docker compose up
+```
+
+Os lugares são reais, para os mapas funcionarem: as 27 UFs, cerca de 70 municípios e 5 cidades do exterior. Os
+anos (2206 a 2218), os candidatos (`CANDIDATO 13`), os partidos (`P-A` a `P-O`) e todos os votos são inventados.
+Cargos, turnos, zonas, seções e tipos de voto seguem a estrutura real. A mesma `--seed` gera os mesmos dados.
+
+- Os dados reais e os sintéticos não se misturam: `--synthetic` recusa um arquivo com outros dados, e a carga real
+  recusa um arquivo sintético. Rodar `--synthetic` de novo apaga as tabelas do arquivo e recria tudo.
+- O gerador grava direto nas tabelas, então não testa o download nem a leitura dos arquivos do TSE.
+- Os painéis abrem vazios onde o filtro padrão aponta para dados reais (`2026`, `LULA`, `PT`, `2022 → 2026`): troque
+  o filtro. Os textos fixos dos painéis continuam citando anos e partidos reais.
+
 **Editando os painéis.** Como a importação sobrescreve os painéis do repositório a cada
 inicialização, edições feitas na interface se perdem se não forem salvas de volta:
 

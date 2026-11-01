@@ -324,7 +324,7 @@ def build(db: Path, force: bool = False) -> None:
         _create_tables(con)
         for level in _UNIT_COLUMNS:
             for office in _offices_of(level):
-                years = years_of(office)
+                years = years_of(con, office)
                 for start, end in zip(years, years[1:]):
                     for round_number in (1, 2):
                         _build_pair(con, level, office, start, end, round_number)
