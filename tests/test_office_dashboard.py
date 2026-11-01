@@ -133,6 +133,16 @@ def test_generating_again_changes_nothing():
     assert before == _output()
 
 
+def test_an_export_renaming_the_chart_files_does_not_change_the_output(tmp_path):
+    assets = tmp_path / "dashboards"
+    shutil.copytree(SOURCE, assets, ignore=shutil.ignore_patterns("Cargos__*", "Cargos_8.yaml"))
+    for n, path in enumerate(sorted((assets / "charts").glob("*.yaml"))):
+        path.rename(path.with_name(f"renamed_{n}.yaml"))
+    _generate(assets)
+    assert (assets / "dashboards" / "Cargos_8.yaml").read_bytes() == _output()["dashboard"]
+    assert len(list((assets / "charts").glob("Cargos__*.yaml"))) == len(_output()) - 1
+
+
 def _generated_uuids():
     code = ("import sys; sys.path.insert(0, sys.argv[1]); from build_office_dashboard import generated_uuids; "
             "print(*generated_uuids())")

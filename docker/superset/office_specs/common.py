@@ -2,7 +2,7 @@
 
 A spec is a module named after the office, with `OFFICE = office("Presidente", 1, 1000, [subtab(...), ...])`.
 
-- `clone(key, "UF_maiores_altas")` copies an existing chart, named by its file without the id, and pins it
+- `clone(key, "UF_maiores_altas")` copies an existing chart, named as in templates.py, and pins it
   to the office: `office_code` filters of the original go away and `office_code = N` comes in.
 - `reuse("Maiores_altas_pct")` places an existing chart that is already about one office, unchanged.
 - `bar`, `line`, `table`, `aggregated_table`, `pivot`, `big_number` create a chart, also pinned.
@@ -35,7 +35,7 @@ _RUNOFF_LEVELS = {"Município": ("Cidades", ""), "UF": ("UF", "UF_entre_turnos_"
 class Chart:
     key: str
     title: str | None = None
-    template: str | None = None  # file name without the id
+    template: str | None = None  # a name in templates.py
     reused: bool = False
     dataset: str | None = None
     viz: str | None = None

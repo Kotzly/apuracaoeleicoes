@@ -31,6 +31,7 @@ sys.path.insert(0, str(HERE))
 sys.dont_write_bytecode = True
 
 from office_specs.common import Chart, Note, Office  # noqa: E402
+from office_specs.templates import TEMPLATES  # noqa: E402
 
 ASSETS = HERE / "dashboards"
 CHARTS = ASSETS / "charts"
@@ -100,12 +101,9 @@ def load_yaml(path: Path) -> dict:
 
 
 def load_templates() -> dict:
-    """File name without the id -> chart, skipping what this script generated."""
-    found = {}
-    for path in sorted(CHARTS.glob("*.yaml")):
-        if not path.name.startswith(GENERATED_PREFIX):
-            found[re.sub(r"_\d+$", "", path.stem)] = load_yaml(path)
-    return found
+    """Name in the specs -> chart. By uuid, because an export changes the names of the files."""
+    by_uuid = {chart["uuid"]: chart for chart in map(load_yaml, CHARTS.glob("*.yaml"))}
+    return {name: by_uuid[uid] for name, uid in TEMPLATES.items() if uid in by_uuid}
 
 
 def load_datasets() -> dict:
@@ -140,7 +138,7 @@ def build_chart(spec: Chart, office: Office, templates: dict) -> dict:
     """The chart's YAML. A reused one is the template itself."""
     if spec.template:
         if spec.template not in templates:
-            raise ValueError(f"{office.name}/{spec.key}: no chart file named {spec.template}_<id>.yaml")
+            raise ValueError(f"{office.name}/{spec.key}: no chart for the template {spec.template}")
         template = templates[spec.template]
         if spec.reused:
             return template
