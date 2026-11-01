@@ -14,7 +14,7 @@ params:
     label: Votos
     optionName: metric_e904f5c8576e
   groupby:
-  - party_current
+  - party_or_blank
   adhoc_filters:
   - clause: WHERE
     expressionType: SIMPLE
@@ -23,8 +23,7 @@ params:
     comparator: No filter
   - clause: WHERE
     expressionType: SQL
-    sqlExpression: party IS NOT NULL AND office_code <> 25 AND bu_received_at IS NOT
-      NULL
+    sqlExpression: office_code <> 25 AND (party IS NOT NULL OR vote_type IN ('Branco', 'Nulo')) AND bu_received_at IS NOT NULL
   order_desc: true
   rolling_type: cumsum
   row_limit: 50000
@@ -33,6 +32,7 @@ params:
   legendType: scroll
   legendOrientation: top
   x_axis_title: "Recebimento do BU (hor\xE1rio de Bras\xEDlia)"
+  x_axis_title_margin: 40
   rich_tooltip: true
   y_axis_format: SMART_NUMBER
   comparison_type: values

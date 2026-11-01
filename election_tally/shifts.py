@@ -3,6 +3,8 @@
 `party_shifts` has one row per level, office, round, pair of elections, unit and party; a party
 that ran on either side of the pair appears on both, with 0 votes where it did not run. Share is
 the party's votes over the unit's valid votes (Nominal and Legenda) for that office and round.
+Blank and null votes have rows too, under the party `Branco` and `Nulo`: their share is over all of
+the unit's votes, since they are not part of the valid ones, and they stay out of the volatility.
 A unit enters a pair only if it has valid votes on both sides, so a new section or a municipality
 that was created has no previous share to compare. `unit_volatility` is the Pedersen index of each
 unit, half the sum of the absolute changes in share. `round_shifts` follows the presidential
@@ -27,6 +29,8 @@ _STATE_TABLE = "party_shifts"
 _ROUND_TABLES = ("round_shifts", "state_round_shifts", "zone_round_shifts")
 _PRESIDENT = 1
 _VALID = "vote_type IN ('Nominal', 'Legenda')"
+_BLANKS = "('Branco', 'Nulo')"
+_COUNTED = f"({_VALID} OR vote_type IN {_BLANKS})"
 SECTION_OFFICES = (1, 3, 5, 11)  # majoritarian offices; the others stop at Zona
 # level -> SQL, over `unit`, for each unit column (m: municipality_dim, for the names of cities)
 _NO_STATE = "NULL::VARCHAR"
@@ -53,9 +57,10 @@ def _offices_of(level: str) -> tuple[int, ...]:
 def _create_bases(con: duckdb.DuckDBPyConnection) -> None:
     """One temp table per level: valid votes by year, round, office, unit and party.
 
-    The party is NULL for votes of candidates without one, which still count in the total.
+    The party is NULL for votes of candidates without one, which still count in the total. Blank
+    and null votes use their type as the party.
     """
-    party = canonical_party_sql()
+    party = f"CASE WHEN vote_type IN {_BLANKS} THEN vote_type ELSE {canonical_party_sql()} END"
     offices = ", ".join(map(str, OFFICES))
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE municipality_dim AS
@@ -68,7 +73,7 @@ def _create_bases(con: duckdb.DuckDBPyConnection) -> None:
         SELECT election_year, round_number, office_code, municipality_code::BIGINT AS unit,
                {party} AS party, sum(votes)::INTEGER AS votes
         FROM municipality_results
-        WHERE office_code IN ({offices}) AND {_VALID}
+        WHERE office_code IN ({offices}) AND {_COUNTED}
         GROUP BY ALL ORDER BY office_code, election_year, round_number, unit""")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE base_uf AS
@@ -85,14 +90,14 @@ def _create_bases(con: duckdb.DuckDBPyConnection) -> None:
         CREATE OR REPLACE TEMP TABLE base_zona AS
         SELECT election_year, round_number, office_code, ({_ZONE_UNIT})::BIGINT AS unit,
                {party} AS party, sum(vote_count)::INTEGER AS votes
-        FROM votes WHERE vote_count > 0 AND {_VALID} AND office_code IN ({offices})
+        FROM votes WHERE vote_count > 0 AND {_COUNTED} AND office_code IN ({offices})
         GROUP BY ALL ORDER BY office_code, election_year, round_number, unit""")
     section_offices = ", ".join(map(str, SECTION_OFFICES))
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE base_seção AS
         SELECT election_year, round_number, office_code, ({_SECTION_UNIT})::BIGINT AS unit,
                {party} AS party, sum(vote_count)::INTEGER AS votes
-        FROM votes WHERE vote_count > 0 AND {_VALID} AND office_code IN ({section_offices})
+        FROM votes WHERE vote_count > 0 AND {_COUNTED} AND office_code IN ({section_offices})
         GROUP BY ALL ORDER BY office_code, election_year, round_number, unit""")
 
 
@@ -118,15 +123,18 @@ def _build_pair(con: duckdb.DuckDBPyConnection, level: str, office: int, start: 
     side = (f"SELECT unit, party, votes FROM {base} "
             f"WHERE election_year = {{}} AND round_number = {round_number} AND office_code = {office}")
     transition = f"{start} → {end} T{round_number}"
+    valid = f"sum(votes) FILTER (WHERE coalesce(party, '') NOT IN {_BLANKS})"
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE batch AS
         WITH a AS ({side.format(start)}), b AS ({side.format(end)}),
-        units AS (SELECT unit, ta, tb FROM
-                     (SELECT unit, sum(votes) AS ta FROM a GROUP BY unit)
-                     JOIN (SELECT unit, sum(votes) AS tb FROM b GROUP BY unit) USING (unit))
+        units AS (SELECT unit, ta, tb, all_a, all_b FROM
+                     (SELECT unit, {valid} AS ta, sum(votes) AS all_a FROM a GROUP BY unit)
+                     JOIN (SELECT unit, {valid} AS tb, sum(votes) AS all_b FROM b GROUP BY unit) USING (unit)
+                  WHERE ta > 0 AND tb > 0)
         SELECT unit, party, coalesce(a.votes, 0)::BIGINT AS votes_from,
                coalesce(b.votes, 0)::BIGINT AS votes_to,
-               coalesce(a.votes, 0) * 1.0 / ta AS share_from, coalesce(b.votes, 0) * 1.0 / tb AS share_to
+               coalesce(a.votes, 0) * 1.0 / CASE WHEN party IN {_BLANKS} THEN all_a ELSE ta END AS share_from,
+               coalesce(b.votes, 0) * 1.0 / CASE WHEN party IN {_BLANKS} THEN all_b ELSE tb END AS share_to
         FROM (SELECT * FROM a WHERE party IS NOT NULL) a
              FULL JOIN (SELECT * FROM b WHERE party IS NOT NULL) b USING (unit, party)
              JOIN units USING (unit)""")
@@ -141,8 +149,9 @@ def _build_pair(con: duckdb.DuckDBPyConnection, level: str, office: int, start: 
         FROM ({_decoded(level, 'batch', 'party, votes_from, votes_to, share_from, share_to, '
                                         'share_to - share_from AS share_change')})
         {order}, party""")
-    pedersen = """(SELECT unit, 0.5 * sum(abs(share_to - share_from)) AS pedersen_index,
-                          count(*)::INTEGER AS parties FROM batch GROUP BY unit)"""
+    pedersen = f"""(SELECT unit, 0.5 * sum(abs(share_to - share_from)) AS pedersen_index,
+                           count(*)::INTEGER AS parties FROM batch
+                    WHERE party NOT IN {_BLANKS} GROUP BY unit)"""
     con.execute(f"""
         INSERT INTO unit_volatility
         SELECT {head}, {unit_columns}, pedersen_index, parties

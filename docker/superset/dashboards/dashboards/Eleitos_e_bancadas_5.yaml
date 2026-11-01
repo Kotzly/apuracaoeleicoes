@@ -449,7 +449,7 @@ position:
     - ROW-TAB-senate-note
     meta:
       width: 12
-      height: 34
+      height: 20
       code: "**Como ler.** O Senado tem 81 cadeiras, 3 por UF, com mandatos de 8 anos: cada elei\xe7\xe3o renova 27 ou 54 delas, alternadamente. Por isso **Senadores eleitos** alterna entre 27 e 54 sem que isso seja ganho ou perda. **Cadeiras por partido de elei\xe7\xe3o** soma os eleitos do ano com os da elei\xe7\xe3o anterior e chega \xe0s 81 cadeiras, de 2018 em diante (2014 dependeria de 2010, que n\xe3o foi carregada). **N\xe3o \xe9 a bancada oficial do Senado:** conta o partido pelo qual cada senador foi eleito, sem trocas de partido nem suplentes. A partir de 2022, eleitos por DEM e PSL contam como UNI\xc3O nesse gr\xe1fico; as outras fus\xf5es n\xe3o s\xe3o unificadas, ent\xe3o um eleito em 2018 por PHS, PRP, PROS, PTB ou PSC segue com a sigla antiga. **Ano**, **UF** e **Partido** valem nesta aba."
   ROW-senate-elected:
     type: ROW

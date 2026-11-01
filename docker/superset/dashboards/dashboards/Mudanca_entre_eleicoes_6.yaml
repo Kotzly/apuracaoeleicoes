@@ -62,7 +62,7 @@ position:
         \ e municipais t\xEAm anos diferentes); Transi\xE7\xE3o termina em T1 (vota\xE7\
         \xE3o principal) ou T2 (revers\xE3o, s\xF3 onde o cargo teve segundo turno\
         \ nos dois anos: prefeito em poucas cidades, governador em parte dos estados).\
-        \ Partido vale nas abas que comparam um partido; UF tem sele\xE7\xE3o inversa;\
+        \ Branco e Nulo tamb\xE9m s\xE3o op\xE7\xF5es do filtro Partido: o percentual deles \xE9 sobre todos os votos do local, enquanto o dos partidos continua sobre os v\xE1lidos, e eles n\xE3o entram na volatilidade. Partido vale nas abas que comparam um partido; UF tem sele\xE7\xE3o inversa;\
         \ Munic\xEDpio depende da UF e s\xF3 vale onde h\xE1 cidade (n\xE3o vale para\
         \ UF e zona)."
   ROW-TAB-map-note:

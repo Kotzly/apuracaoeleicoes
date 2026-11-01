@@ -222,6 +222,7 @@ position:
     children:
     - ROW-note2
     - ROW-party
+    - ROW-kind
     parents:
     - ROOT_ID
     - GRID_ID
@@ -258,9 +259,10 @@ position:
       code: "**Como ler esta aba.** Votos somados por partido, para o ano, turno,\
         \ cargo e \xE1rea escolhidos nos filtros. Siglas renomeadas aparecem com o\
         \ nome atual (PMDB \xE9 MDB, PC do B \xE9 PCDOB); fus\xF5es n\xE3o s\xE3o\
-        \ unificadas (DEM e PSL continuam separados do Uni\xE3o Brasil). Votos de\
-        \ legenda contam para o partido; brancos e nulos ficam de fora, assim como\
-        \ o cargo 25 (siglas fict\xEDcias P17 e PCA1). **2014 e 2018 n\xE3o t\xEA\
+        \ unificadas (DEM e PSL continuam separados do Uni\xE3o Brasil). Nas barras,\
+        \ cada partido separa os votos no candidato dos votos na legenda (s\xF3 existem\
+        \ nos cargos proporcionais), em ordem de votos no candidato; brancos e nulos aparecem como itens pr\xF3prios,\
+        \ e o cargo 25 fica de fora (siglas fict\xEDcias P17 e PCA1). **2014 e 2018 n\xE3o t\xEA\
         m hor\xE1rio de recebimento**: a curva fica vazia e as barras s\xF3 funcionam\
         \ sem filtro de hor\xE1rio. Cada se\xE7\xE3o tem um \xFAnico hor\xE1rio de\
         \ recebimento, ent\xE3o a curva de uma s\xF3 se\xE7\xE3o \xE9 um degrau. Recebimento\
@@ -288,7 +290,7 @@ position:
     - ROW-party
     meta:
       width: 5
-      height: 70
+      height: 120
       chartId: 10
       uuid: 677c0699-a4a0-4c9b-8cc1-ed8e099848c1
       sliceName: Votos por partido
@@ -304,10 +306,34 @@ position:
     - ROW-party
     meta:
       width: 7
-      height: 70
+      height: 120
       chartId: 11
       uuid: 57e92c33-8a94-44dd-8b98-459d3ca2b1ce
       sliceName: Votos acumulados por partido
+  ROW-kind:
+    type: ROW
+    id: ROW-kind
+    children:
+    - CHART-kind_curve
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-kind_curve:
+    type: CHART
+    id: CHART-kind_curve
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-party
+    - ROW-kind
+    meta:
+      width: 12
+      height: 60
+      chartId: 64
+      uuid: 76e1110d-9bc5-5f99-bcac-6c6ec4989e52
+      sliceName: Votos acumulados por tipo de voto
 metadata:
   native_filter_configuration:
   - id: NATIVE_FILTER-IoAjkTb0o6

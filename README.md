@@ -152,6 +152,8 @@ ficam vazias onde não se aplicam. Zonas são identificadas por (`state`, `zone`
 (`municipality_code`, `zone`, `section`). O percentual é dos votos válidos (nominais e de legenda) da
 unidade naquele cargo e turno. Um partido que concorreu em só um dos lados aparece nos dois, com
 0 votos onde não concorreu, e votos de candidatos sem partido contam no total mas não têm linha.
+Brancos e nulos têm linhas próprias em `party_shifts` (`party` = `Branco` ou `Nulo`), com o percentual sobre todos os
+votos da unidade, e não entram em `unit_volatility`.
 A unidade precisa ter votos válidos nos dois lados: seção nova ou município criado não entra, e o
 2º turno só compara locais que votaram nos dois. Consultas populares e o cargo 25 ficam de fora.
 Seção e zona podem ter sido redesenhadas entre eleições: o número é mantido como está.

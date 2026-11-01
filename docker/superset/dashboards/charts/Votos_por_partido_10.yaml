@@ -6,12 +6,21 @@ viz_type: echarts_timeseries_bar
 params:
   datasource: 2__table
   viz_type: echarts_timeseries_bar
-  x_axis: party_current
+  x_axis: party_or_blank
+  xAxisForceCategorical: true
+  orientation: horizontal
+  stack: Stack
   metrics:
   - expressionType: SQL
-    sqlExpression: SUM(vote_count)
-    label: Votos
-    optionName: metric_e904f5c8576e
+    sqlExpression: SUM(vote_count) FILTER (WHERE vote_type <> 'Legenda')
+    label: Candidato (ou branco/nulo)
+    hasCustomLabel: true
+    optionName: metric_not_party_list
+  - expressionType: SQL
+    sqlExpression: SUM(vote_count) FILTER (WHERE vote_type = 'Legenda')
+    label: Legenda
+    hasCustomLabel: true
+    optionName: metric_party_list
   groupby: []
   adhoc_filters:
   - clause: WHERE
@@ -21,14 +30,15 @@ params:
     comparator: No filter
   - clause: WHERE
     expressionType: SQL
-    sqlExpression: party IS NOT NULL AND office_code <> 25
+    sqlExpression: office_code <> 25 AND (party IS NOT NULL OR vote_type IN ('Branco', 'Nulo'))
   order_desc: true
-  x_axis_sort: Votos
-  x_axis_sort_asc: false
+  x_axis_sort: Candidato (ou branco/nulo)
+  x_axis_sort_asc: true
   row_limit: 50000
-  show_legend: false
-  show_value: true
-  x_axis_title: Partido
+  show_legend: true
+  legendOrientation: top
+  show_value: false
+  x_axis_title: ''
   y_axis_format: SMART_NUMBER
   rich_tooltip: true
   comparison_type: values

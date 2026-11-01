@@ -63,7 +63,7 @@ def test_renamed_party_is_one_party_and_new_party_is_zero_filled(tmp_path):
     path = _db(tmp_path)
     got = _shift(path, "Seção", "2018 → 2022 T1",
                  municipality_code=100, zone=1, section=1)
-    assert set(got) == {"MDB", "NOVO", "PT"}  # PMDB is MDB; NOVO did not run in 2018
+    assert set(got) == {"Branco", "MDB", "NOVO", "PT"}  # PMDB is MDB; NOVO did not run in 2018
     assert got["NOVO"][:2] == (0, 20) and got["NOVO"][2:4] == (0.0, pytest.approx(0.2))
     assert got["MDB"][0] == 40 and got["MDB"][1] == 50
 
@@ -73,8 +73,22 @@ def test_share_is_over_valid_votes_and_change_is_the_difference(tmp_path):
     got = _shift(path, "Seção", "2018 → 2022 T1", municipality_code=100, zone=1, section=1)
     # the 999 blanks of 2018 are not in the total of 100
     assert got["PT"][2:] == (pytest.approx(0.6), pytest.approx(0.3), pytest.approx(-0.3))
-    assert sum(v[2] for v in got.values()) == pytest.approx(1)
-    assert sum(v[3] for v in got.values()) == pytest.approx(1)
+    parties_only = [v for party, v in got.items() if party != "Branco"]
+    assert sum(v[2] for v in parties_only) == pytest.approx(1)
+    assert sum(v[3] for v in parties_only) == pytest.approx(1)
+
+
+def test_blank_votes_are_rows_with_a_share_of_all_votes_and_stay_out_of_volatility(tmp_path):
+    path = _db(tmp_path)
+    got = _shift(path, "Seção", "2018 → 2022 T1", municipality_code=100, zone=1, section=1)
+    # 2018: 999 blanks among 1099 votes; 2022: no blanks among 100 votes
+    assert got["Branco"] == (999, 0, pytest.approx(999 / 1099), 0.0, pytest.approx(-999 / 1099))
+    pedersen = _rows(path, """SELECT pedersen_index, parties FROM unit_volatility WHERE level = 'Seção'
+                              AND transition = '2018 → 2022 T1' AND municipality_code = 100 AND section = 1""")
+    assert pedersen == [(pytest.approx(0.3), 3)]
+    # The total of the state keeps them apart as well.
+    uf = _shift(path, "UF", "2018 → 2022 T1", state="SP")
+    assert uf["Branco"][:2] == (999, 0) and uf["PT"][2] == pytest.approx(90 / 210)
 
 
 def test_unit_must_exist_on_both_sides(tmp_path):
@@ -108,7 +122,8 @@ def test_pedersen_index(tmp_path):
         SELECT v.pedersen_index, 0.5 * sum(abs(s.share_change)) AS p
         FROM unit_volatility v JOIN party_shifts s USING (level, office_code, round_number,
              transition, municipality_code, zone, section)
-        WHERE level = 'Seção' GROUP BY ALL) WHERE abs(pedersen_index - p) > 1e-9""")
+        WHERE level = 'Seção' AND s.party NOT IN ('Branco', 'Nulo') GROUP BY ALL)
+        WHERE abs(pedersen_index - p) > 1e-9""")
     assert check == [(0,)]
 
 

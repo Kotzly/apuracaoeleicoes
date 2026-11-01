@@ -16,7 +16,7 @@ from pathlib import Path
 import duckdb
 
 RENAMES_PATH = files("election_tally").joinpath("data/party_renames.csv")
-_METHOD_VERSION = 1  # raise when a table changes, so existing ones get rebuilt
+_METHOD_VERSION = 2  # raise when a table changes, so existing ones get rebuilt
 _STATE_TABLE = "party_names"
 
 # Same name for the same code in every table below (the TSE spelling changes between files).
