@@ -18,6 +18,7 @@ from pathlib import Path
 import duckdb
 import requests
 
+from . import parties
 from .load import _extract_repaired
 
 URL = "https://cdn.tse.jus.br/estatistica/sead/odsele/{folder}/{folder}_{year}.zip"
@@ -208,5 +209,8 @@ def build_table(db: Path, table: Table, force: bool = False) -> list[int]:
 
 
 def build(db: Path, force: bool = False) -> None:
+    if parties.has_tables(db, parties.SYNTHETIC_TABLE):
+        print("TSE tables: synthetic dataset, nothing to download")
+        return
     for table in TABLES:
         build_table(db, table, force)

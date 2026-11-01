@@ -15,7 +15,7 @@ from pathlib import Path
 
 import duckdb
 
-from . import countries, municipalities
+from . import countries, municipalities, parties
 from .formats import CANONICAL, OFFICES, format_for
 
 # Canonical columns plus the ones derived during the load.
@@ -199,6 +199,10 @@ def load(files: list[Path], db: Path, year: int,
     """Loads .zip files (as they come from the TSE) or already extracted files of a year."""
     fmt = format_for(year)
     con = duckdb.connect(str(db))
+    if parties.is_synthetic(con):
+        con.close()
+        raise SystemExit(f"{db} holds the synthetic dataset; refusing to mix real data into it. "
+                         "Choose another file with --db.")
     create_schema(con)
     try:
         for file in files:
