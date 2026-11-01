@@ -12,7 +12,8 @@ from importlib.resources import files
 
 import duckdb
 
-ABROAD_STATE = "ZZ"
+from .domain import ABROAD_STATE, sql_string
+
 BRAZIL = ("Brasil", "BRA")
 COLUMNS = {"country": "VARCHAR", "country_code": "VARCHAR"}  # ISO 3166-1 alpha-3
 TABLE_PATH = files("election_tally").joinpath("data/abroad_cities.csv")
@@ -29,7 +30,7 @@ def add_country(con: duckdb.DuckDBPyConnection, table: str = "staging") -> None:
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE abroad_cities AS
         SELECT CAST(municipality_code AS INTEGER) AS municipality_code, city, country, country_code
-        FROM read_csv('{TABLE_PATH}', header = true, all_varchar = true)
+        FROM read_csv({sql_string(TABLE_PATH)}, header = true, all_varchar = true)
     """)
     missing = con.execute(f"""
         SELECT DISTINCT t.municipality_code, t.municipality_name FROM {table} t

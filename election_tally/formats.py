@@ -29,6 +29,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from .domain import OFFICES as DISPLAY_OFFICES
+from .domain import sql_string
+
 # Canonical schema: column -> type. Every load produces exactly these columns;
 # what a year's file lacks becomes NULL.
 CANONICAL: dict[str, str] = {
@@ -78,8 +81,7 @@ NULL_MARKERS = ("", "#NULO#", "#NE#")
 # Office code -> canonical name. Names in the files are matched case-insensitively
 # (2014 writes "PRESIDENTE"); sections that were not installed come with the code but
 # no name, and get it from here.
-OFFICES = {1: "Presidente", 3: "Governador", 5: "Senador", 6: "Deputado Federal",
-           7: "Deputado Estadual", 8: "Deputado Distrital", 11: "Prefeito", 13: "Vereador"}
+OFFICES = {code: name.title() for code, name in DISPLAY_OFFICES.items()}
 OFFICE_NAMES = list(OFFICES.values())
 
 _REGISTRY: dict[int, type[Format]] = {}
@@ -137,7 +139,7 @@ class Format:
         return self.package.format(year=self.year)
 
     def source_sql(self, files: list[Path]) -> str:
-        items = ", ".join(f"'{a.as_posix()}'" for a in files)
+        items = ", ".join(sql_string(a.as_posix()) for a in files)
         # strict_mode=false: the TSE sometimes publishes inner quotes without escaping
         # (e.g. ""NICKNAME""); strict mode would reject the whole line.
         options = (f"delim='{self.delim}', quote='\"', escape='\"', all_varchar=true, "

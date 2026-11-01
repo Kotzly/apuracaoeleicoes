@@ -28,6 +28,19 @@ def _positive_int(s: str) -> int:
     return n
 
 
+def _build_derived(db: Path, force: bool) -> int:
+    """docker compose runs this before Superset starts; add new derived tables here."""
+    from . import blank_votes, derived, elected, leader_flows, lookups, parties, results, shapes, shifts, tse_tables
+    if not db.is_file() or not derived.has_tables(db, "votes", "sections"):
+        print(f"{db} has no loaded data: run `python -m election_tally pipeline --year AAAA` first.",
+              file=sys.stderr)
+        return 1
+    # In order: the steps from `parties` on read the results (and `elected` also the candidates).
+    for step in (leader_flows, tse_tables, lookups, results, shapes, parties, blank_votes, shifts, elected):
+        step.build(db, force=force)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="election_tally", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -107,18 +120,7 @@ def main(argv: list[str] | None = None) -> int:
         from .shapes import download as download_shapes
         download_shapes(a.output)
     elif a.cmd == "build-derived":
-        # docker compose runs this before Superset starts; add new derived tables here.
-        from . import blank_votes, elected, leader_flows, lookups, parties, results, shapes, shifts, tse_tables
-        leader_flows.build(a.db, force=a.force)
-        tse_tables.build(a.db, force=a.force)
-        lookups.build(a.db, force=a.force)
-        results.build(a.db, force=a.force)
-        shapes.build(a.db, force=a.force)
-        # These depend on the results (and on candidates), so they come last.
-        parties.build(a.db, force=a.force)
-        blank_votes.build(a.db, force=a.force)
-        shifts.build(a.db, force=a.force)
-        elected.build(a.db, force=a.force)
+        return _build_derived(a.db, a.force)
     elif a.cmd == "validate":
         from .validate import validate
         return 0 if validate(a.db, a.cycle, a.election, a.office, a.scope, a.json) else 1

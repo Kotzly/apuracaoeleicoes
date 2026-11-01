@@ -46,19 +46,25 @@ class DownloadError(RuntimeError):
     """A file could not be downloaded or did not match its published SHA-512."""
 
 
-def _verify_sha512(target: Path, sha512_url: str) -> None:
-    expected = requests.get(sha512_url, timeout=60).text.split()[0].lower()
+def _verify_sha512(file: Path, sha512_url: str) -> None:
+    r = requests.get(sha512_url, timeout=60)
+    r.raise_for_status()
+    published = r.text.split()
+    if not published:
+        raise DownloadError("the published SHA-512 is empty")
     h = hashlib.sha512()
-    with open(target, "rb") as f:
+    with open(file, "rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
-    if h.hexdigest() != expected:
-        target.unlink()
+    if h.hexdigest() != published[0].lower():
         raise DownloadError("SHA-512 does not match the published one; file removed")
 
 
 def _fetch(url: str, target: Path, sha512_url: str | None) -> Path:
-    """Downloads one file to a .part name and renames it only when complete."""
+    """Downloads one file to a .part name and renames it only when complete and verified.
+
+    The final name means "good": later runs skip any file that has it.
+    """
     partial = target.with_name(target.name + ".part")
     try:
         with requests.get(url, stream=True, timeout=120) as r:
@@ -66,11 +72,11 @@ def _fetch(url: str, target: Path, sha512_url: str | None) -> Path:
             with open(partial, "wb") as f:
                 for chunk in r.iter_content(1 << 20):
                     f.write(chunk)
+        if sha512_url:
+            _verify_sha512(partial, sha512_url)
         partial.rename(target)
     finally:
         partial.unlink(missing_ok=True)
-    if sha512_url:
-        _verify_sha512(target, sha512_url)
     return target
 
 

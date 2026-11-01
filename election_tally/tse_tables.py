@@ -18,7 +18,9 @@ from pathlib import Path
 import duckdb
 import requests
 
-from .load import _extract_repaired
+from . import derived
+from .domain import sql_string
+from .repair import extract_repaired
 
 URL = "https://cdn.tse.jus.br/estatistica/sead/odsele/{folder}/{folder}_{year}.zip"
 NATIONAL = "BR"
@@ -48,6 +50,7 @@ class Table:
     # column -> (accepted raw columns, type). Personal data such as CPF is left out on purpose.
     columns: dict
     select: str  # from a subquery with the columns above
+    group_by: str | None = None
     version: int = 1
 
 
@@ -93,8 +96,8 @@ TABLES = [
         "education": (("DS_GRAU_ESCOLARIDADE",), "VARCHAR"),
         "voters": (("QT_ELEITORES_PERFIL", "QT_ELEITORES"), "BIGINT"),
     }, """SELECT election_year, state, municipality_code, any_value(municipality_name)
-                     AS municipality_name, gender, age_group, education, sum(voters)::BIGINT AS voters
-          GROUP BY election_year, state, municipality_code, gender, age_group, education"""),
+                     AS municipality_name, gender, age_group, education, sum(voters)::BIGINT AS voters""",
+          group_by="election_year, state, municipality_code, gender, age_group, education"),
 ]
 
 
@@ -115,7 +118,7 @@ def _national_file(archive: Path, dest: Path) -> Path:
             member = data[0]
         if member is None:
             raise zipfile.BadZipFile(f"no national file among {len(data)} files")
-        repaired = _extract_repaired(z, member, dest / "repaired.csv")
+        repaired = extract_repaired(z, member, dest / "repaired.csv")
     target = dest / "national.csv"
     with open(repaired, encoding="cp1252", errors="replace", newline="") as source, \
             open(target, "w", encoding="utf-8", newline="") as out:
@@ -125,45 +128,37 @@ def _national_file(archive: Path, dest: Path) -> Path:
     return target
 
 
-def _state(con: duckdb.DuckDBPyConnection, table: Table) -> tuple[bool, set[int]]:
-    """Whether the table has the current definition, and the years it holds."""
-    row = con.execute("SELECT comment FROM duckdb_tables() WHERE table_name = ?",
-                      [table.name]).fetchone()
-    if row is None or row[0] != f"v{table.version}":
-        return False, set()
-    return True, {r[0] for r in con.execute(
-        f"SELECT DISTINCT election_year FROM {table.name}").fetchall()}
-
-
 def _pending(db: Path, table: Table, force: bool) -> tuple[list[int], bool]:
     """Years to load and whether the table must be recreated. Read-only: never conflicts with Superset."""
-    con = duckdb.connect(str(db), read_only=True)
-    try:
+    with derived.reading(db) as con:
         years = {r[0] for r in con.execute(
             "SELECT DISTINCT election_year FROM votes WHERE election_year IS NOT NULL").fetchall()}
-        current, loaded = _state(con, table)
-        recreate = force or not current
-        return sorted(years if recreate else years - loaded), recreate
-    finally:
-        con.close()
+        if force or derived.table_comment(con, table.name) != f"v{table.version}":
+            return sorted(years), True
+        loaded = {r[0] for r in con.execute(
+            f"SELECT DISTINCT election_year FROM {table.name}").fetchall()}
+        return sorted(years - loaded), False
 
 
 def _load_year(con: duckdb.DuckDBPyConnection, table: Table, file: Path, year: int,
                recreate: bool) -> int:
-    source = (f"read_csv('{file.as_posix()}', delim=';', quote='\"', escape='\"', header=true, "
+    source = (f"read_csv({sql_string(file.as_posix())}, delim=';', quote='\"', escape='\"', header=true, "
               "all_varchar=true, strict_mode=false)")
     present = {r[0] for r in con.execute(f"DESCRIBE SELECT * FROM {source}").fetchall()}
     markers = ", ".join(f"'{m}'" for m in _NULL_MARKERS)
-    fields = []
+    fields, absent = [], []
     for column, (raws, kind) in table.columns.items():
         raw = next((r for r in raws if r in present), None)
+        if raw is None:
+            absent.append(column)
         fields.append(f"""CASE WHEN trim("{raw}") IN ({markers}) THEN NULL
                           ELSE TRY_CAST(trim("{raw}") AS {kind}) END AS {column}"""
                       if raw else f"NULL::{kind} AS {column}")
-    head, _, tail = table.select.partition("GROUP BY")
-    select = f"{head} FROM (SELECT {', '.join(fields)} FROM {source})"
-    if tail:
-        select += f" GROUP BY {tail}"
+    if absent:
+        print(f"  {table.name} of {year}: no match in the file, filled with NULL: {absent}")
+    select = f"{table.select} FROM (SELECT {', '.join(fields)} FROM {source})"
+    if table.group_by:
+        select += f" GROUP BY {table.group_by}"
     con.begin()
     try:
         if recreate:
@@ -199,7 +194,9 @@ def build_table(db: Path, table: Table, force: bool = False) -> list[int]:
                     n = _load_year(con, table, file, year, recreate and not loaded)
                     print(f"{table.name}: {year}: {n:,} rows", flush=True)
                     loaded.append(year)
-                except (requests.RequestException, zipfile.BadZipFile, duckdb.Error) as exc:
+                # Anything wrong with one file must not keep the dashboards from starting.
+                except (requests.RequestException, zipfile.BadZipFile, duckdb.Error, OSError,
+                        ValueError) as exc:
                     print(f"warning: {table.name} of {year} not loaded: {exc}", flush=True)
         con.execute("CHECKPOINT")
     finally:

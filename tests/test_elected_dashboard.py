@@ -5,7 +5,8 @@ from pathlib import Path
 import duckdb
 import yaml
 
-from election_tally.parties import OFFICES, canonical_party_sql
+from election_tally.domain import OFFICES
+from election_tally.parties import canonical_party_sql
 
 DASHBOARDS = Path(__file__).parent.parent / "docker" / "superset" / "dashboards"
 DATASETS = DASHBOARDS / "datasets" / "Eleicoes_DuckDB"

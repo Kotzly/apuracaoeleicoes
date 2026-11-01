@@ -15,7 +15,7 @@ data/municipality_shapes.csv (about 0.9 MB), so building the table needs no inte
 from __future__ import annotations
 
 import csv
-import io
+import hashlib
 import json
 from importlib.resources import files
 from pathlib import Path
@@ -23,12 +23,14 @@ from pathlib import Path
 import duckdb
 import requests
 
+from . import derived
+
 URL = ("https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR"
        "?intrarregiao=municipio&formato=application/vnd.geo+json&qualidade=minima")
 TABLE_PATH = files("election_tally").joinpath("data/municipality_shapes.csv")
 FIELDS = ["municipality_ibge_code", "part", "polyline"]
 TABLE = "municipality_shapes"
-VERSION = 2  # raise when the table definition changes, so existing ones get rebuilt
+VERSION = 3  # raise when the table definition changes, so existing ones get rebuilt
 
 
 def encode_polyline(points: list[tuple[float, float]]) -> str:
@@ -102,20 +104,10 @@ def download(output: Path | None = None) -> Path:
 
 
 def _source_state(path: Path) -> str:
-    return f"v{VERSION} size={path.stat().st_size}"
+    return f"v{VERSION} md5={hashlib.md5(path.read_bytes()).hexdigest()[:12]}"
 
 
-def _is_current(db: Path, state: str) -> bool:
-    """Read-only, so checking never conflicts with a running Superset."""
-    con = duckdb.connect(str(db), read_only=True)
-    try:
-        row = con.execute("SELECT comment FROM duckdb_tables() WHERE table_name = ?", [TABLE]).fetchone()
-        return bool(row) and row[0] == state
-    finally:
-        con.close()
-
-
-def _report_unmatched(con: duckdb.DuckDBPyConnection) -> None:
+def _report_unmatched(con: derived.Connection) -> None:
     """Cities with results but no outline, per election year (abroad has none and is not counted)."""
     rows = con.execute(f"""
         SELECT election_year, count(DISTINCT municipality_ibge_code) AS cities,
@@ -136,7 +128,7 @@ def build(db: Path, force: bool = False, path: Path | None = None) -> None:
     except OSError as exc:
         print(f"warning: {TABLE} not built: {exc}")
         return
-    if not force and _is_current(db, state):
+    if not force and derived.is_current(db, TABLE, lambda _: state):
         print(f"{TABLE}: up to date")
         return
     con = duckdb.connect(str(db))
@@ -153,7 +145,7 @@ def build(db: Path, force: bool = False, path: Path | None = None) -> None:
         except (duckdb.Error, OSError, KeyError, ValueError, IndexError) as exc:
             print(f"warning: {TABLE} not built: {exc}")
             return
-        con.execute(f"COMMENT ON TABLE {TABLE} IS '{state}'")
+        derived.mark_current(con, TABLE, state)
         n, cities = con.execute(f"SELECT count(*), count(DISTINCT municipality_ibge_code) FROM {TABLE}").fetchone()
         print(f"{TABLE}: {n:,} rings of {cities:,} municipalities")
         if con.execute("SELECT count(*) FROM duckdb_tables() WHERE table_name = 'municipality_results'").fetchone()[0]:

@@ -13,23 +13,11 @@ import hashlib
 from importlib.resources import files
 from pathlib import Path
 
-import duckdb
+from . import derived
 
 RENAMES_PATH = files("election_tally").joinpath("data/party_renames.csv")
 _METHOD_VERSION = 3  # raise when a table changes, so existing ones get rebuilt
 _STATE_TABLE = "party_names"
-
-# Same name for the same code in every table below (the TSE spelling changes between files).
-OFFICES = {1: "Presidente", 3: "Governador", 5: "Senador", 6: "Deputado federal",
-           7: "Deputado estadual", 8: "Deputado distrital", 11: "Prefeito", 13: "Vereador"}
-# Years of each cycle: federal offices and municipal offices.
-FEDERAL_YEARS = (2014, 2018, 2022, 2026)
-MUNICIPAL_YEARS = (2016, 2020, 2024)
-MUNICIPAL_OFFICES = (11, 13)
-
-
-def years_of(office: int) -> tuple[int, ...]:
-    return MUNICIPAL_YEARS if office in MUNICIPAL_OFFICES else FEDERAL_YEARS
 
 
 def read_renames(text: str | None = None) -> list[dict]:
@@ -67,41 +55,23 @@ def canonical_party_sql(column: str = "party") -> str:
     return canonical_sql(column, resolve(read_renames()))
 
 
-def source_state(con: duckdb.DuckDBPyConnection, uses_candidates: bool = False) -> str:
+def source_state(con: derived.Connection, uses_candidates: bool = False) -> str:
     """Identifies what the tables below depend on: the results, the renames and the method."""
-    results = con.execute("""SELECT comment FROM duckdb_tables()
-                             WHERE table_name = 'national_results'""").fetchone()
     digest = hashlib.md5(RENAMES_PATH.read_bytes()).hexdigest()[:12]
-    state = f"v{_METHOD_VERSION} renames={digest} results={results and results[0]}"
+    state = (f"v{_METHOD_VERSION} renames={digest} "
+             f"results={derived.table_comment(con, 'national_results')}")
     if uses_candidates:
         state += f" candidates={con.execute('SELECT count(*) FROM candidates').fetchone()[0]}"
     return state
 
 
-def has_tables(db: Path, *names: str) -> bool:
-    con = duckdb.connect(str(db), read_only=True)
-    try:
-        n = con.execute(f"""SELECT count(*) FROM duckdb_tables()
-                            WHERE table_name IN ({', '.join("'" + x + "'" for x in names)})""").fetchone()[0]
-        return n == len(names)
-    finally:
-        con.close()
-
-
 def is_current(db: Path, table: str, uses_candidates: bool = False) -> bool:
-    """Read-only, so checking never conflicts with a running Superset."""
-    con = duckdb.connect(str(db), read_only=True)
-    try:
-        comment = con.execute("SELECT comment FROM duckdb_tables() WHERE table_name = ?",
-                              [table]).fetchone()
-        return bool(comment) and comment[0] == source_state(con, uses_candidates)
-    finally:
-        con.close()
+    return derived.is_current(db, table, lambda con: source_state(con, uses_candidates))
 
 
 def build(db: Path, force: bool = False) -> None:
     """Rebuilds `party_names` (the CSV), unless it and the results are unchanged."""
-    if not has_tables(db, "national_results"):
+    if not derived.has_tables(db, "national_results"):
         print("warning: party_names not built: the results tables are missing")
         return
     if not force and is_current(db, _STATE_TABLE):
@@ -109,16 +79,12 @@ def build(db: Path, force: bool = False) -> None:
         return
     renames = read_renames()
     final = resolve(renames)
-    con = duckdb.connect(str(db))
-    try:
+    with derived.rebuilding(db) as con:
         con.execute("""CREATE OR REPLACE TABLE party_names (
             old_name VARCHAR, current_name VARCHAR, year_of_change INTEGER, note VARCHAR,
             final_name VARCHAR)""")
         con.executemany("INSERT INTO party_names VALUES (?, ?, ?, ?, ?)",
                         [(r["old_name"], r["current_name"], int(r["year_of_change"]), r["note"],
                           final[r["old_name"]]) for r in renames])
-        con.execute(f"COMMENT ON TABLE party_names IS '{source_state(con)}'")
-        con.execute("CHECKPOINT")
+        derived.mark_current(con, _STATE_TABLE, source_state(con))
         print(f"party_names: {len(renames)} rows")
-    finally:
-        con.close()
