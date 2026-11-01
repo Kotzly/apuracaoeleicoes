@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Generates the "Cargos" dashboard: one tab per office, from the specs in office_specs/.
 
-    python docker/superset/build_office_dashboard.py                        # writes the YAML
+    python docker/superset/build_office_dashboard.py                        # writes the YAML, ignored by git
+    python docker/superset/build_office_dashboard.py --assets /tmp/copy     # ...into a copy of dashboards/
     python docker/superset/build_office_dashboard.py --check --office governador
     python docker/superset/build_office_dashboard.py --check --office governador --db elections.duckdb
+
+bootstrap.sh runs this on every start, on a copy of dashboards/, because that folder is mounted read-only
+and the output is not versioned. export-dashboards.sh leaves the output out (see generated_uuids).
 
 The specs are the source of truth: a change to one of these charts made in the interface and exported
 is overwritten the next time this runs, unless it also goes into the spec. `--check` writes nothing;
@@ -72,6 +76,23 @@ FILTERS = [
     dict(key="candidato", name="Candidato", column="candidate_name", dataset=CANDIDATE_RESULTS, offices=(1, 3, 11),
          only_subtabs=("Entre turnos",), options="office_code IN (1, 3, 11) AND round_number = 2"),
 ]
+
+
+def set_assets(path: Path) -> None:
+    global ASSETS, CHARTS, DATASETS, DASHBOARD_FILE
+    ASSETS, CHARTS = path, path / "charts"
+    DATASETS = path / "datasets" / "Eleicoes_DuckDB"
+    DASHBOARD_FILE = path / "dashboards" / DASHBOARD_FILE.name
+
+
+def dashboard_uuid() -> str:
+    return str(uuid.uuid5(NAMESPACE, "dashboard"))
+
+
+def generated_uuids() -> set:
+    """What this script produces, by uuid: the dashboard and the charts it does not just reuse."""
+    _, charts, _ = build_tabs([load_office(m) for m in OFFICES], load_templates())
+    return {dashboard_uuid()} | {uid for uid, (_, _, reused) in charts.items() if not reused}
 
 
 def load_yaml(path: Path) -> dict:
@@ -346,7 +367,7 @@ def write(position: dict, charts: dict, filters: list) -> None:
             (CHARTS / f"{GENERATED_PREFIX}{safe}_{chart_id}.yaml").write_text(
                 yaml.safe_dump(chart, sort_keys=False), encoding="utf-8")
     dashboard = dict(dashboard_title="Cargos", description=None, css=None, slug="cargos", certified_by=None,
-                     certification_details=None, published=True, uuid=str(uuid.uuid5(NAMESPACE, "dashboard")),
+                     certification_details=None, published=True, uuid=dashboard_uuid(),
                      position=position,
                      metadata=dict(native_filter_configuration=filters, cross_filters_enabled=False,
                                    color_scheme="supersetColors", refresh_frequency=0, timed_refresh_immune_slices=[],
@@ -359,11 +380,14 @@ def write(position: dict, charts: dict, filters: list) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="validate only, writing nothing")
+    parser.add_argument("--assets", type=Path, help="read and write this copy of dashboards/ instead")
     parser.add_argument("--office", choices=OFFICES, help="only this office (requires --check)")
     parser.add_argument("--db", help="with --check, also run each chart on this DuckDB file, read-only")
     args = parser.parse_args()
     if args.office and not args.check:
         parser.error("--office requires --check: a partial dashboard is never written")
+    if args.assets:
+        set_assets(args.assets)
     modules = [args.office] if args.office else OFFICES
     offices = [load_office(m) for m in modules]
     templates, datasets = load_templates(), load_datasets()

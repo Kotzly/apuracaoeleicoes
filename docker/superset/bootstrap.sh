@@ -21,8 +21,14 @@ echo "== Initializing roles and permissions"
 superset init
 
 if [ -d "${DASHBOARDS_DIR}" ] && [ -f "${DASHBOARDS_DIR}/metadata.yaml" ]; then
-    echo "== Importing dashboards from ${DASHBOARDS_DIR} (overwrites earlier imports)"
-    python /app/import_assets.py "${DASHBOARDS_DIR}" "${ADMIN_USERNAME}"
+    # The Cargos dashboard is not versioned, and the mounted folder is read-only: generate it on a copy.
+    IMPORT_DIR="$(mktemp -d)"
+    cp -R "${DASHBOARDS_DIR}/." "${IMPORT_DIR}/"
+    echo "== Generating the Cargos dashboard"
+    python /app/build_office_dashboard.py --assets "${IMPORT_DIR}"
+    echo "== Importing dashboards from ${IMPORT_DIR} (overwrites earlier imports)"
+    python /app/import_assets.py "${IMPORT_DIR}" "${ADMIN_USERNAME}"
+    rm -rf "${IMPORT_DIR}"
 else
     echo "== No dashboards found in ${DASHBOARDS_DIR}; skipping import"
 fi

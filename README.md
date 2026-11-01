@@ -258,10 +258,11 @@ Os painéis são seis:
 - **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados;
 - **Cargos**: uma aba por cargo, com resultado, território, mudança e candidatos, mais as análises específicas de cada um.
 
-O painel **Cargos** é gerado: `office_specs/` descreve cada aba e `python docker/superset/build_office_dashboard.py`
-grava os YAML (`--check --office governador --db elections.duckdb` só valida, rodando cada gráfico nos dados). O spec é a
-fonte da verdade: um ajuste nesses gráficos feito na interface e exportado é sobrescrito na próxima geração, se não for
-levado também para o spec.
+O painel **Cargos** é gerado e seus YAML não são versionados: `office_specs/` descreve cada aba e `bootstrap.sh` roda
+`build_office_dashboard.py` a cada inicialização, então uma mudança num spec vale no próximo `docker compose up`.
+`python docker/superset/build_office_dashboard.py --check --office governador --db elections.duckdb` só valida, rodando
+cada gráfico nos dados. `export-dashboards.sh` deixa esse painel e seus gráficos de fora: um ajuste neles feito na
+interface se perde na próxima inicialização, se não for levado para o spec.
 
 A importação nunca apaga: os antigos painéis **Candidatos eleitos** e **Fluxo dos mais votados**, hoje dentro
 dos painéis acima, continuam numa instalação existente até serem excluídos na interface. Antes disso,

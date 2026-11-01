@@ -51,6 +51,15 @@ services:
         source: ./superset/dashboards
         target: /app/dashboards
         read_only: true
+      # What generates the Cargos dashboard on every start.
+      - type: bind
+        source: ./superset/build_office_dashboard.py
+        target: /app/build_office_dashboard.py
+        read_only: true
+      - type: bind
+        source: ./superset/office_specs
+        target: /app/office_specs
+        read_only: true
       # Superset's own metadata (users, saved charts), kept across restarts.
       - superset_home:/app/superset_home
     restart: unless-stopped
