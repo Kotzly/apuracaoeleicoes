@@ -54,11 +54,11 @@ def _sql_filter(sql: str) -> dict:
 FILTERS = [
     dict(key="ano", name="Ano", column="election_year", dataset=BLANK_NULL, offices=FEDERAL, default=2026,
          options=f"office_code IN {FEDERAL}"),
-    dict(key="ano_municipal", ignore_as="ano", name="Ano ", column="election_year", dataset=BLANK_NULL, offices=MUNICIPAL,
+    dict(key="ano_municipal", ignore_as="ano", name="Ano (municipal)", column="election_year", dataset=BLANK_NULL, offices=MUNICIPAL,
          default=2024, options=f"office_code IN {MUNICIPAL}"),
     dict(key="transicao", name="Transição", column="transition_label", dataset=PARTY_SHIFTS, offices=FEDERAL,
          default="2022 → 2026 T1", options=f"level = 'Brasil' AND office_code IN {FEDERAL}"),
-    dict(key="transicao_municipal", ignore_as="transicao", name="Transição ", column="transition_label", dataset=PARTY_SHIFTS,
+    dict(key="transicao_municipal", ignore_as="transicao", name="Transição (municipal)", column="transition_label", dataset=PARTY_SHIFTS,
          offices=MUNICIPAL, default="2020 → 2024 T1", options=f"level = 'Brasil' AND office_code IN {MUNICIPAL}"),
     dict(key="turno", name="Turno", column="round_number", dataset=BLANK_NULL, offices=(1, 3, 11), default=1,
          only_subtabs=("Resultado", "Território", "Candidatos")),

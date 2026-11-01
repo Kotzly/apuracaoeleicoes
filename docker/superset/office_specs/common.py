@@ -19,6 +19,7 @@ BLANK_NULL = "7b1fb97d-cf0e-5804-a2b4-d533ebc3146e"
 CANDIDATES = "2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36"
 CANDIDATE_RESULTS = "806e47fb-121a-5d49-85e6-05e638197cc5"
 ELECTED_PARTY = "b92a5725-3a7e-425c-a7d4-c3352c23b05b"
+MUNICIPALITY_RESULTS = "7a450a29-0b17-5534-b2c0-6527a4863b93"
 OFFICE_SEATS = "ea1a05d0-442b-570d-93b1-cc535aab20b1"
 RUNOFF_SHIFTS = "74708069-0d64-5a36-8660-da0cb48b46e5"
 SENATE_SEATS = "c5a2813a-0a69-552d-92cc-aad1b8aa9be8"
@@ -260,7 +261,7 @@ def reelection_line(key: str = "reelection") -> Chart:
                 filters=[where("elected_before IS NOT NULL")], description=REELECTION_NOTE, ignore=("turno",))
 
 
-def legislature_block(by_state: bool = True) -> list:
+def legislature_block(by_state: bool = True, municipal: bool = False) -> list:
     """Benches, votes against seats and the vote structure of a proportional office."""
     rows = [
         [clone("benches", "Bancadas_por_ano", history=True), clone("benches_line", "Evolucao_das_bancadas", history=True)],
@@ -270,7 +271,7 @@ def legislature_block(by_state: bool = True) -> list:
         rows.append([pivot("bench_by_state", "Bancada por UF e partido", ELECTED_PARTY, ["state"], ["party_current"],
                            metric("SUM(elected)", "Eleitos"), filters=[where("elected > 0")])])
     rows += [
-        [line("vote_kinds", "Votos nominais e de legenda", STATE_RESULTS, "election_year",
+        [line("vote_kinds", "Votos nominais e de legenda", MUNICIPALITY_RESULTS if municipal else STATE_RESULTS, "election_year",
               [metric("100.0 * SUM(votes) FILTER (WHERE vote_type = 'Legenda') / NULLIF(SUM(votes) FILTER (WHERE vote_type IN ('Nominal', 'Legenda')), 0)",
                       "% de legenda")], ignore=("partido",)),
          bar("elected_how", "Eleitos por quociente e por média", CANDIDATE_RESULTS, "election_year",
@@ -296,7 +297,7 @@ def runoff_block(levels: tuple = ("UF", "Município", "Zona")) -> list:
         tag = level.lower().replace("í", "i")
         up, down = (f"{prefix}maiores_altas_pct", f"{prefix}maiores_quedas_pct") if prefix else ("Maiores_altas_pct", "Maiores_quedas_pct")
         rows.append([clone(f"runoff_up_{tag}", up, f"{city}: maiores altas entre turnos (p.p.)", dataset=RUNOFF_SHIFTS,
-                           filters=filters, rename=rename, ignore=("ano_entre_turnos",)),
+                           filters=filters, rename=rename),
                      clone(f"runoff_down_{tag}", down, f"{city}: maiores quedas entre turnos (p.p.)", dataset=RUNOFF_SHIFTS,
                            filters=filters, rename=rename)])
     return rows
