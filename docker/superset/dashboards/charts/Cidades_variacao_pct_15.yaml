@@ -1,0 +1,42 @@
+slice_name: "Cidades por varia\xE7\xE3o (p.p.)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  query_mode: raw
+  all_columns:
+  - label
+  - state
+  - candidate_name
+  - votes_round1
+  - votes_round2
+  - pct_round1
+  - pct_round2
+  - share_change_pp
+  - votes_change
+  order_by_cols:
+  - '["abs_share_change_pp", false]'
+  adhoc_filters: []
+  row_limit: 50000
+  server_pagination: true
+  server_page_length: 30
+  include_search: true
+  column_config:
+    pct_round1:
+      d3NumberFormat: .1f
+      d3SmallNumberFormat: .1f
+    pct_round2:
+      d3NumberFormat: .1f
+      d3SmallNumberFormat: .1f
+    share_change_pp:
+      d3NumberFormat: +.1f
+      d3SmallNumberFormat: +.1f
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: 4b08e548-cea4-446a-a215-a4a4b189370a
+version: 1.0.0
+dataset_uuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9

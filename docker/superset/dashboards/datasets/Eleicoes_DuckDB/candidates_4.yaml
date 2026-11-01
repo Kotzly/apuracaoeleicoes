@@ -341,5 +341,53 @@ columns:
   python_date_format: null
   datetime_format: null
   extra: null
+- column_name: office_label
+  verbose_name: Cargo
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: CASE office_code WHEN 1 THEN 'Presidente' WHEN 3 THEN 'Governador' WHEN
+    5 THEN 'Senador' WHEN 6 THEN 'Deputado federal' WHEN 7 THEN 'Deputado estadual'
+    WHEN 8 THEN 'Deputado distrital' WHEN 11 THEN 'Prefeito' WHEN 13 THEN 'Vereador'
+    ELSE upper(left(office_name, 1)) || lower(substr(office_name, 2)) END
+  description: Mesmo nome de cargo da tabela elected_party.
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: uf
+  verbose_name: UF
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: coalesce(state, 'BR')
+  description: "UF, com BR para a Presid\xEAncia."
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party_current
+  verbose_name: Partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: (CASE party WHEN 'PMDB' THEN 'MDB' WHEN 'PTN' THEN 'PODE' WHEN 'PT do
+    B' THEN 'AVANTE' WHEN 'PSDC' THEN 'DC' WHEN 'SD' THEN 'SOLIDARIEDADE' WHEN 'PR'
+    THEN 'PL' WHEN 'PRB' THEN 'REPUBLICANOS' WHEN 'PPS' THEN 'CIDADANIA' WHEN 'PEN'
+    THEN 'PATRIOTA' WHEN 'PATRI' THEN 'PATRIOTA' WHEN 'PTC' THEN 'AGIR' WHEN 'PMN'
+    THEN 'MOBILIZA' WHEN 'PMB' THEN 'DEMOCRATA' WHEN 'PC do B' THEN 'PCDOB' ELSE party
+    END)
+  description: "Sigla atual do partido: renomea\xE7\xF5es unificadas (ex.: PMDB e\
+    \ MDB), fus\xF5es n\xE3o."
+  python_date_format: null
+  datetime_format: null
+  extra: null
 version: 1.0.0
 database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

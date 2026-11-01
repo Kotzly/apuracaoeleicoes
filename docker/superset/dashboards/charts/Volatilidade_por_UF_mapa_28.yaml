@@ -1,0 +1,37 @@
+slice_name: Volatilidade por UF (mapa)
+description: null
+certified_by: null
+certification_details: null
+viz_type: country_map
+params:
+  viz_type: country_map
+  select_country: brazil
+  entity: state_iso
+  metric:
+    expressionType: SIMPLE
+    column:
+      column_name: pedersen_pp
+    aggregate: MAX
+    label: Volatilidade (%)
+    hasCustomLabel: true
+    optionName: metric_pedersen_pp
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: UF
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: state <> 'ZZ'
+  row_limit: 100
+  number_format: .0f
+  linear_color_scheme: schemeYlOrRd
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: e969650a-1b9f-42f3-a895-9ad6a19e2f62
+version: 1.0.0
+dataset_uuid: 0a765893-8334-4ba8-92a2-94bc602ab29c

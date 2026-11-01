@@ -1,0 +1,209 @@
+table_name: elected_party
+main_dttm_col: null
+currency_code_column: null
+description: "Eleitos e votos do 1\xBA turno por partido, ano, cargo e UF (Presid\xEA\
+  ncia em BR)."
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: main
+sql: null
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+metrics: []
+columns:
+- column_name: election_year
+  verbose_name: Ano
+  is_dttm: false
+  is_active: true
+  type: SMALLINT
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_code
+  verbose_name: "C\xF3digo do cargo"
+  is_dttm: false
+  is_active: true
+  type: SMALLINT
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_name
+  verbose_name: Cargo (coluna original)
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: state
+  verbose_name: UF (coluna original)
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party
+  verbose_name: Partido (coluna original)
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: elected
+  verbose_name: Eleitos
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: votes
+  verbose_name: Votos
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: vote_share
+  verbose_name: "Fra\xE7\xE3o dos votos na UF"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: "Dentro de ano \xD7 cargo \xD7 UF: n\xE3o some nem tire a m\xE9dia\
+    \ entre UFs."
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: seat_share
+  verbose_name: "Fra\xE7\xE3o das cadeiras na UF"
+  is_dttm: false
+  is_active: true
+  type: DOUBLE
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: "Dentro de ano \xD7 cargo \xD7 UF: n\xE3o some nem tire a m\xE9dia\
+    \ entre UFs."
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: seats_total
+  verbose_name: Cadeiras na UF
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: Repete em cada partido da UF.
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: votes_total
+  verbose_name: Votos na UF
+  is_dttm: false
+  is_active: true
+  type: BIGINT
+  advanced_data_type: null
+  groupby: false
+  filterable: true
+  expression: ''
+  description: Repete em cada partido da UF.
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: office_label
+  verbose_name: Cargo
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: office_name
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: uf
+  verbose_name: UF
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: state
+  description: "UF, com BR para a Presid\xEAncia."
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: party_current
+  verbose_name: Partido
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: party
+  description: "Sigla atual do partido: renomea\xE7\xF5es unificadas, fus\xF5es n\xE3\
+    o."
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41

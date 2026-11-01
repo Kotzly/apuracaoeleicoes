@@ -1,0 +1,1212 @@
+dashboard_title: "Mudan\xE7a entre elei\xE7\xF5es"
+description: null
+css: null
+slug: mudanca-entre-eleicoes
+certified_by: null
+certification_details: null
+published: true
+uuid: e6e376f1-8d7c-4edc-9ea9-223520eaca2e
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-note
+    - TABS-main
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: "Mudan\xE7a entre elei\xE7\xF5es"
+  ROW-note:
+    type: ROW
+    id: ROW-note
+    children:
+    - MARKDOWN-note
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-note:
+    type: MARKDOWN
+    id: MARKDOWN-note
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-note
+    meta:
+      width: 12
+      height: 40
+      code: "**Como ler.** Para cada unidade (UF, cidade, zona ou se\xE7\xE3o) e para\
+        \ o partido escolhido, a fatia dos votos v\xE1lidos na elei\xE7\xE3o de destino\
+        \ menos a fatia na elei\xE7\xE3o anterior **do mesmo cargo** (Presidente 2014\u2192\
+        2018\u21922022\u21922026; Prefeito 2016\u21922020\u21922024), em pontos percentuais\
+        \ (p.p.). Cada linha dos dados j\xE1 \xE9 uma unidade \xD7 partido: as fatias\
+        \ nunca s\xE3o somadas entre unidades. **Fus\xF5es n\xE3o s\xE3o unificadas**:\
+        \ DEM e PSL continuam separados de UNI\xC3O, ent\xE3o a mudan\xE7a DEM/PSL\u2192\
+        UNI\xC3O aparece como queda de um e alta do outro. Partido que n\xE3o disputou\
+        \ conta 0%, n\xE3o falta. Em elei\xE7\xE3o presidencial a troca de candidatura\
+        \ entre partidos (por exemplo PSL em 2018 \u2192 PL em 2022) aparece como\
+        \ deslocamento entre partidos, e n\xE3o como continuidade do eleitorado. **Filtros:**\
+        \ Cargo e Transi\xE7\xE3o s\xE3o obrigat\xF3rios e se encadeiam: ao trocar o Cargo, escolha a Transi\xE7\xE3o de novo (cargos federais\
+        \ e municipais t\xEAm anos diferentes); Transi\xE7\xE3o termina em T1 (vota\xE7\
+        \xE3o principal) ou T2 (revers\xE3o, s\xF3 onde o cargo teve segundo turno\
+        \ nos dois anos: prefeito em poucas cidades, governador em parte dos estados).\
+        \ Partido vale nas abas que comparam um partido; UF tem sele\xE7\xE3o inversa;\
+        \ Munic\xEDpio depende da UF e s\xF3 vale onde h\xE1 cidade (n\xE3o vale para\
+        \ UF e zona)."
+  ROW-TAB-map-note:
+    type: ROW
+    id: ROW-TAB-map-note
+    children:
+    - MARKDOWN-TAB-map
+    parents: &id001
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-map
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-map:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-map
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-map
+    - ROW-TAB-map-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Mapa por UF.** \xC0 esquerda, a varia\xE7\xE3o da fatia do partido\
+        \ escolhido na UF (azul = ganhou, vermelho = perdeu); o mapa pinta de forma\
+        \ linear do menor ao maior valor, ent\xE3o o zero s\xF3 fica na cor do meio\
+        \ se o maior ganho e a maior perda forem sim\xE9tricos: este mapa n\xE3o tem legenda: leia o\
+        \ sinal e o valor pelo tooltip (passe o mouse) e pela tabela da aba Estados e cidades. \xC0 direita, a volatilidade (Pedersen) da UF para\
+        \ o cargo e a transi\xE7\xE3o. O exterior (ZZ) n\xE3o tem geometria no mapa\
+        \ e \xE9 filtrado; ele continua nos rankings. O mapa por cidade est\xE1 abaixo."
+  CHART-map_shift:
+    type: CHART
+    id: CHART-map_shift
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-map
+    - ROW-TAB-map-0
+    meta:
+      width: 6
+      height: 80
+      chartId: 1
+      uuid: 389eef2f-79d0-4d1d-bf42-840f356fdc04
+      sliceName: "Varia\xE7\xE3o por UF (mapa)"
+  CHART-map_ped:
+    type: CHART
+    id: CHART-map_ped
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-map
+    - ROW-TAB-map-0
+    meta:
+      width: 6
+      height: 80
+      chartId: 2
+      uuid: e969650a-1b9f-42f3-a895-9ad6a19e2f62
+      sliceName: Volatilidade por UF (mapa)
+  ROW-TAB-map-0:
+    type: ROW
+    id: ROW-TAB-map-0
+    children:
+    - CHART-map_shift
+    - CHART-map_ped
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-map_city:
+    type: CHART
+    id: CHART-map_city
+    children: []
+    parents: *id001
+    meta:
+      width: 12
+      height: 110
+      chartId: 20
+      uuid: 5d0c7f3e-9a41-4b86-8c12-3f7e2a6b9d04
+      sliceName: "Varia\xE7\xE3o por cidade (mapa)"
+  MARKDOWN-map_city_legend:
+    type: MARKDOWN
+    id: MARKDOWN-map_city_legend
+    children: []
+    parents: *id001
+    meta:
+      width: 12
+      height: 18
+      code: "**Mapa por cidade \u2014 legenda (p.p.).** Cada cidade \xE9 pintada pela varia\xE7\xE3o\
+        \ da fatia do partido escolhido, em pontos percentuais; a escala \xE9 sim\xE9trica em torno de zero.\
+        \ **Vermelho** = perdeu: escuro abaixo de \u221210, m\xE9dio de \u221210 a \u22123, claro de \u22123 a \u22121.\
+        \ **Cinza** = entre \u22121 e +1. **Azul** = ganhou: claro de 1 a 3, m\xE9dio de 3 a 10, escuro acima de 10.\
+        \ Passe o mouse para ver a cidade e o valor. Fica sem cor a cidade fora da compara\xE7\xE3o (sem votos v\xE1lidos\
+        \ nos dois anos), a em que o partido n\xE3o disputou em nenhum dos dois anos e a que n\xE3o tem contorno (Boa Esperan\xE7a do Norte-MT, criada em 2025); o exterior\
+        \ n\xE3o aparece. N\xE3o h\xE1 mapa de fundo. Contornos: IBGE (malha municipal, qualidade m\xEDnima)."
+  ROW-TAB-map-1:
+    type: ROW
+    id: ROW-TAB-map-1
+    children:
+    - CHART-map_city
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  ROW-TAB-map-2:
+    type: ROW
+    id: ROW-TAB-map-2
+    children:
+    - MARKDOWN-map_city_legend
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  TAB-map:
+    type: TAB
+    id: TAB-map
+    children:
+    - ROW-TAB-map-note
+    - ROW-TAB-map-0
+    - ROW-TAB-map-1
+    - ROW-TAB-map-2
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Mapa
+  ROW-TAB-uf-city-note:
+    type: ROW
+    id: ROW-TAB-uf-city-note
+    children:
+    - MARKDOWN-TAB-uf-city
+    parents: &id002
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-uf-city:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-uf-city
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Estados e cidades.** Os 30 maiores ganhos e as 30 maiores quedas do\
+        \ partido escolhido, e a tabela com as 30 maiores varia\xE7\xF5es em m\xF3\
+        dulo (origem, destino, varia\xE7\xE3o e votos). Em cidades, as pequenas variam\
+        \ muito com poucos votos: confira os votos na tabela. As cidades do exterior\
+        \ contam como cidades (filtre por UF para retir\xE1-las)."
+  CHART-UF_gain:
+    type: CHART
+    id: CHART-UF_gain
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-0
+    meta:
+      width: 6
+      height: 90
+      chartId: 3
+      uuid: c2309a74-df64-47f7-92c0-e0d4c718e1f3
+      sliceName: 'UF: maiores altas'
+  CHART-UF_drop:
+    type: CHART
+    id: CHART-UF_drop
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-0
+    meta:
+      width: 6
+      height: 90
+      chartId: 4
+      uuid: 085ae8c6-9639-4735-bcb4-fc74c396af32
+      sliceName: 'UF: maiores quedas'
+  ROW-TAB-uf-city-0:
+    type: ROW
+    id: ROW-TAB-uf-city-0
+    children:
+    - CHART-UF_gain
+    - CHART-UF_drop
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-UF_table:
+    type: CHART
+    id: CHART-UF_table
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-1
+    meta:
+      width: 12
+      height: 80
+      chartId: 5
+      uuid: 3a970264-143f-47cc-ba82-ceb64541dbce
+      sliceName: "UF: maiores varia\xE7\xF5es (tabela)"
+  ROW-TAB-uf-city-1:
+    type: ROW
+    id: ROW-TAB-uf-city-1
+    children:
+    - CHART-UF_table
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  "CHART-Munic\xEDpio_gain":
+    type: CHART
+    id: "CHART-Munic\xEDpio_gain"
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-2
+    meta:
+      width: 6
+      height: 90
+      chartId: 6
+      uuid: c5db956e-2ec2-4fa5-b99d-b6559031fb3e
+      sliceName: 'Cidades: maiores altas'
+  "CHART-Munic\xEDpio_drop":
+    type: CHART
+    id: "CHART-Munic\xEDpio_drop"
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-2
+    meta:
+      width: 6
+      height: 90
+      chartId: 7
+      uuid: abdc9cc7-df83-4fa0-a0c4-d484f5ce5038
+      sliceName: 'Cidades: maiores quedas'
+  ROW-TAB-uf-city-2:
+    type: ROW
+    id: ROW-TAB-uf-city-2
+    children:
+    - "CHART-Munic\xEDpio_gain"
+    - "CHART-Munic\xEDpio_drop"
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  "CHART-Munic\xEDpio_table":
+    type: CHART
+    id: "CHART-Munic\xEDpio_table"
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-uf-city
+    - ROW-TAB-uf-city-3
+    meta:
+      width: 12
+      height: 80
+      chartId: 8
+      uuid: 3d581895-9d1f-4841-8daf-9df15c1216c8
+      sliceName: "Cidades: maiores varia\xE7\xF5es (tabela)"
+  ROW-TAB-uf-city-3:
+    type: ROW
+    id: ROW-TAB-uf-city-3
+    children:
+    - "CHART-Munic\xEDpio_table"
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  TAB-uf-city:
+    type: TAB
+    id: TAB-uf-city
+    children:
+    - ROW-TAB-uf-city-note
+    - ROW-TAB-uf-city-0
+    - ROW-TAB-uf-city-1
+    - ROW-TAB-uf-city-2
+    - ROW-TAB-uf-city-3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Estados e cidades
+  ROW-TAB-zone-section-note:
+    type: ROW
+    id: ROW-TAB-zone-section-note
+    children:
+    - MARKDOWN-TAB-zone-section
+    parents: &id003
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-zone-section:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-zone-section
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Zonas e se\xE7\xF5es.** Zonas s\xE3o identificadas por UF e n\xFAmero;\
+        \ se\xE7\xF5es por cidade, zona e n\xFAmero. Se\xE7\xE3o existe s\xF3 para\
+        \ Presidente, Governador, Senador e Prefeito. Zonas e n\xFAmeros de se\xE7\
+        \xE3o podem ter sido redesenhados entre elei\xE7\xF5es: a parcela dos n\xFA\
+        meros de se\xE7\xE3o que existe no ciclo seguinte \xE9 82% (2014\u219218),\
+        \ 75% (2016\u219220), 96% (2018\u219222), 97% (2020\u219224) e 98% (2022\u2192\
+        26). Comparar a mesma se\xE7\xE3o entre anos vale como aproxima\xE7\xE3o,\
+        \ n\xE3o como medida exata. H\xE1 milh\xF5es de se\xE7\xF5es: os gr\xE1ficos\
+        \ de se\xE7\xE3o mostram s\xF3 as 30 maiores varia\xE7\xF5es e ficam bem mais\
+        \ r\xE1pidos com UF e Munic\xEDpio escolhidos."
+  CHART-Zona_gain:
+    type: CHART
+    id: CHART-Zona_gain
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-0
+    meta:
+      width: 6
+      height: 90
+      chartId: 9
+      uuid: 28c9ad96-6c67-4ad3-8abd-5d711b2641b3
+      sliceName: 'Zonas: maiores altas'
+  CHART-Zona_drop:
+    type: CHART
+    id: CHART-Zona_drop
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-0
+    meta:
+      width: 6
+      height: 90
+      chartId: 10
+      uuid: f928a468-7d40-43da-aa39-a63ea1fb9834
+      sliceName: 'Zonas: maiores quedas'
+  ROW-TAB-zone-section-0:
+    type: ROW
+    id: ROW-TAB-zone-section-0
+    children:
+    - CHART-Zona_gain
+    - CHART-Zona_drop
+    parents: *id003
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-Zona_table:
+    type: CHART
+    id: CHART-Zona_table
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-1
+    meta:
+      width: 12
+      height: 80
+      chartId: 11
+      uuid: 5d178e78-747a-44bf-94e0-a04389729c66
+      sliceName: "Zonas: maiores varia\xE7\xF5es (tabela)"
+  ROW-TAB-zone-section-1:
+    type: ROW
+    id: ROW-TAB-zone-section-1
+    children:
+    - CHART-Zona_table
+    parents: *id003
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  "CHART-Se\xE7\xE3o_gain":
+    type: CHART
+    id: "CHART-Se\xE7\xE3o_gain"
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-2
+    meta:
+      width: 6
+      height: 90
+      chartId: 12
+      uuid: 650be66f-a60d-4d38-9f99-7a216334579b
+      sliceName: "Se\xE7\xF5es: maiores altas"
+  "CHART-Se\xE7\xE3o_drop":
+    type: CHART
+    id: "CHART-Se\xE7\xE3o_drop"
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-2
+    meta:
+      width: 6
+      height: 90
+      chartId: 13
+      uuid: a43b868b-8cb7-4b96-9df3-13d95e29f180
+      sliceName: "Se\xE7\xF5es: maiores quedas"
+  ROW-TAB-zone-section-2:
+    type: ROW
+    id: ROW-TAB-zone-section-2
+    children:
+    - "CHART-Se\xE7\xE3o_gain"
+    - "CHART-Se\xE7\xE3o_drop"
+    parents: *id003
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  "CHART-Se\xE7\xE3o_table":
+    type: CHART
+    id: "CHART-Se\xE7\xE3o_table"
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-zone-section
+    - ROW-TAB-zone-section-3
+    meta:
+      width: 12
+      height: 80
+      chartId: 14
+      uuid: 6f0c0103-0b28-4bb3-af86-a3754073967c
+      sliceName: "Se\xE7\xF5es: maiores varia\xE7\xF5es (tabela)"
+  ROW-TAB-zone-section-3:
+    type: ROW
+    id: ROW-TAB-zone-section-3
+    children:
+    - "CHART-Se\xE7\xE3o_table"
+    parents: *id003
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  TAB-zone-section:
+    type: TAB
+    id: TAB-zone-section
+    children:
+    - ROW-TAB-zone-section-note
+    - ROW-TAB-zone-section-0
+    - ROW-TAB-zone-section-1
+    - ROW-TAB-zone-section-2
+    - ROW-TAB-zone-section-3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: "Zonas e se\xE7\xF5es"
+  ROW-TAB-volatility-note:
+    type: ROW
+    id: ROW-TAB-volatility-note
+    children:
+    - MARKDOWN-TAB-volatility
+    parents: &id004
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-volatility
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-volatility:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-volatility
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-volatility
+    - ROW-TAB-volatility-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Volatilidade (\xEDndice de Pedersen).** Em cada unidade, metade da\
+        \ soma das varia\xE7\xF5es absolutas da fatia de todos os partidos entre as\
+        \ duas elei\xE7\xF5es. 0% = mesma distribui\xE7\xE3o de votos; 100% = nenhum\
+        \ voto ficou no mesmo partido. Como as fus\xF5es n\xE3o s\xE3o unificadas,\
+        \ a mudan\xE7a DEM/PSL\u2192UNI\xC3O conta como volatilidade. O filtro Partido\
+        \ n\xE3o vale aqui: o \xEDndice considera todos os partidos."
+  CHART-ped_uf:
+    type: CHART
+    id: CHART-ped_uf
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-volatility
+    - ROW-TAB-volatility-0
+    meta:
+      width: 6
+      height: 90
+      chartId: 15
+      uuid: caf3e770-6092-4a33-8995-f6c713416dfb
+      sliceName: Volatilidade por UF
+  CHART-ped_city:
+    type: CHART
+    id: CHART-ped_city
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-volatility
+    - ROW-TAB-volatility-0
+    meta:
+      width: 6
+      height: 90
+      chartId: 16
+      uuid: e9f894f0-3d20-4ce3-9c71-e00e1da339d0
+      sliceName: Volatilidade nas cidades (maiores)
+  ROW-TAB-volatility-0:
+    type: ROW
+    id: ROW-TAB-volatility-0
+    children:
+    - CHART-ped_uf
+    - CHART-ped_city
+    parents: *id004
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-ped_hist:
+    type: CHART
+    id: CHART-ped_hist
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-volatility
+    - ROW-TAB-volatility-1
+    meta:
+      width: 12
+      height: 70
+      chartId: 17
+      uuid: 31ff256c-e571-4235-8bea-798da8074264
+      sliceName: "Distribui\xE7\xE3o da volatilidade nas cidades"
+  ROW-TAB-volatility-1:
+    type: ROW
+    id: ROW-TAB-volatility-1
+    children:
+    - CHART-ped_hist
+    parents: *id004
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  TAB-volatility:
+    type: TAB
+    id: TAB-volatility
+    children:
+    - ROW-TAB-volatility-note
+    - ROW-TAB-volatility-0
+    - ROW-TAB-volatility-1
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Volatilidade
+  ROW-TAB-flow-note:
+    type: ROW
+    id: ROW-TAB-flow-note
+    children:
+    - MARKDOWN-TAB-flow
+    parents: &id005
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-flow
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-flow:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-flow
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-flow
+    - ROW-TAB-flow-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Como ler.** Cada coluna \xE9 um turno, e cada n\xF3 conta as se\xE7\
+        \xF5es ou os munic\xEDpios em que aquele candidato foi o mais votado (s\xF3\
+        \ votos v\xE1lidos; n\xE3o \xE9 necessariamente maioria absoluta). Uma liga\xE7\
+        \xE3o conta se\xE7\xF5es ou munic\xEDpios, n\xE3o eleitores: ela n\xE3o diz\
+        \ quantos votos mudaram, e uma vit\xF3ria por 51% conta igual a uma por 90%.\
+        \ **Por se\xE7\xE3o:** entre turnos a se\xE7\xE3o \xE9 a mesma, mas entre\
+        \ elei\xE7\xF5es o mesmo n\xFAmero pode ter sido redistribu\xEDdo e reunir\
+        \ outros eleitores. **Por munic\xEDpio:** o munic\xEDpio \xE9 est\xE1vel entre\
+        \ elei\xE7\xF5es, mas cada um pesa igual, seja qual for o tamanho, e as cidades\
+        \ do exterior contam como munic\xEDpios (filtre por UF para retir\xE1-las).\
+        \ Os n\xF3s `nova`/`novo` e `encerrada`/`encerrado` existem em apenas um dos\
+        \ lados."
+  ROW-TAB-flow-sections:
+    type: ROW
+    id: ROW-TAB-flow-sections
+    children:
+    - CHART-sections
+    parents: *id005
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-sections:
+    type: CHART
+    id: CHART-sections
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-flow
+    - ROW-TAB-flow-sections
+    meta:
+      width: 12
+      height: 110
+      chartId: 18
+      uuid: e91b7f30-4c26-4a8d-8f15-0d2c6b7a9e52
+      sliceName: "Se\xE7\xF5es por candidato mais votado"
+  ROW-TAB-flow-municipalities:
+    type: ROW
+    id: ROW-TAB-flow-municipalities
+    children:
+    - CHART-municipalities
+    parents: *id005
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-municipalities:
+    type: CHART
+    id: CHART-municipalities
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-flow
+    - ROW-TAB-flow-municipalities
+    meta:
+      width: 12
+      height: 110
+      chartId: 19
+      uuid: 6d3f8a14-92c7-4e6b-b1d0-58a7e2f4c963
+      sliceName: "Munic\xEDpios por candidato mais votado"
+  TAB-flow:
+    type: TAB
+    id: TAB-flow
+    children:
+    - ROW-TAB-flow-note
+    - ROW-TAB-flow-sections
+    - ROW-TAB-flow-municipalities
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Fluxo dos mais votados
+  TABS-main:
+    type: TABS
+    id: TABS-main
+    children:
+    - TAB-map
+    - TAB-uf-city
+    - TAB-zone-section
+    - TAB-volatility
+    - TAB-flow
+    parents:
+    - ROOT_ID
+    - GRID_ID
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-office
+    name: Cargo
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: office_name
+      datasetUuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: office_name
+          op: IN
+          val: &id006
+          - Presidente
+      filterState:
+        value: *id006
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 18
+      - 19
+    description: "Obrigat\xF3rio. Se\xE7\xE3o s\xF3 existe para Presidente, Governador,\
+      \ Senador e Prefeito."
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: level
+      operator: ==
+      operatorId: EQUALS
+      comparator: UF
+    time_range: No filter
+  - id: NATIVE_FILTER-transition
+    name: "Transi\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: transition_label
+      datasetUuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: transition_label
+          op: IN
+          val: ["2022 \u2192 2026 \xB7 vota\xE7\xE3o principal (T1)"]
+      filterState:
+        value: ["2022 \u2192 2026 \xB7 vota\xE7\xE3o principal (T1)"]
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-office
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 18
+      - 19
+    description: "Obrigat\xF3rio. T1 \xE9 a vota\xE7\xE3o principal; T2, a revers\xE3\
+      o (segundo turno nos dois anos)."
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: level
+      operator: ==
+      operatorId: EQUALS
+      comparator: UF
+    time_range: No filter
+  - id: NATIVE_FILTER-party
+    name: Partido
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: party
+      datasetUuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: party
+          op: IN
+          val: &id007
+          - PT
+      filterState:
+        value: *id007
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-office
+    - NATIVE_FILTER-transition
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 2
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+    description: "Obrigat\xF3rio nas abas que comparam um partido; n\xE3o vale em\
+      \ Volatilidade."
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: level
+      operator: ==
+      operatorId: EQUALS
+      comparator: UF
+    time_range: No filter
+  - id: NATIVE_FILTER-state
+    name: UF
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: state
+      datasetUuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: true
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 18
+      - 19
+    description: ''
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: level
+      operator: ==
+      operatorId: EQUALS
+      comparator: UF
+    time_range: No filter
+  - id: NATIVE_FILTER-city
+    name: "Munic\xEDpio"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: label
+      datasetUuid: bbdc79ef-c388-417b-bdef-d3cf4e4665d2
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-state
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 9
+      - 10
+      - 11
+      - 15
+      - 18
+      - 19
+    description: "S\xF3 vale para cidades e se\xE7\xF5es; n\xE3o vale para UF e zona."
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: level
+      operator: ==
+      operatorId: EQUALS
+      comparator: "Munic\xEDpio"
+    time_range: No filter
+  - id: NATIVE_FILTER-flowTransition
+    name: "Transi\xE7\xE3o (fluxo)"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: transition
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 20
+    description: ''
+  - id: NATIVE_FILTER-flowState
+    name: UF (fluxo)
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: state
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 20
+    description: ''
+  - id: NATIVE_FILTER-flowCity
+    name: "Munic\xEDpio (fluxo)"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: municipality_name
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-flowState
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 20
+    description: ''
+  - id: NATIVE_FILTER-flowSource
+    name: Mais votado na origem
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: source_candidate
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 20
+    description: ''
+  - id: NATIVE_FILTER-flowTarget
+    name: Mais votado no destino
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: target_candidate
+      datasetUuid: a3d4c8e6-52f1-4e07-b9c2-6f10d7e8a421
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 20
+    description: ''
+  cross_filters_enabled: false
+  color_scheme: ''
+  refresh_frequency: 0
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  label_colors: {}
+  shared_label_colors: []
+  chart_configuration: {}
+  map_label_colors: {}
+  color_scheme_domain: []
+theme_uuid: null
+version: 1.0.0

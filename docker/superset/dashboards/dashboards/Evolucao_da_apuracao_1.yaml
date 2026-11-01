@@ -17,10 +17,7 @@ position:
     type: GRID
     id: GRID_ID
     children:
-    - ROW-0
-    - ROW-1
-    - ROW-2
-    - ROW-3
+    - TABS-main
     parents:
     - ROOT_ID
   HEADER_ID:
@@ -36,6 +33,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     meta:
       background: BACKGROUND_TRANSPARENT
   MARKDOWN-note:
@@ -45,6 +44,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-0
     meta:
       width: 12
@@ -65,6 +66,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     meta:
       background: BACKGROUND_TRANSPARENT
   CHART-turnout:
@@ -74,6 +77,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-1
     meta:
       width: 3
@@ -88,6 +93,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-1
     meta:
       width: 3
@@ -102,6 +109,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-1
     meta:
       width: 6
@@ -117,6 +126,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     meta:
       background: BACKGROUND_TRANSPARENT
   CHART-evolution:
@@ -126,6 +137,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-2
     meta:
       width: 12
@@ -142,6 +155,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     meta:
       background: BACKGROUND_TRANSPARENT
   CHART-results:
@@ -151,6 +166,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-3
     meta:
       width: 6
@@ -165,6 +182,8 @@ position:
     parents:
     - ROOT_ID
     - GRID_ID
+    - TABS-main
+    - TAB-candidate
     - ROW-3
     meta:
       width: 6
@@ -172,6 +191,123 @@ position:
       chartId: 2
       uuid: 5aa6f75b-8862-4963-9154-fc5048ce3486
       sliceName: Comparecimento por UF
+  TABS-main:
+    type: TABS
+    id: TABS-main
+    children:
+    - TAB-candidate
+    - TAB-party
+    parents:
+    - ROOT_ID
+    - GRID_ID
+  TAB-candidate:
+    type: TAB
+    id: TAB-candidate
+    children:
+    - ROW-0
+    - ROW-1
+    - ROW-2
+    - ROW-3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Por candidato
+      defaultText: Tab title
+      placeholder: Tab title
+  TAB-party:
+    type: TAB
+    id: TAB-party
+    children:
+    - ROW-note2
+    - ROW-party
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Por partido
+      defaultText: Tab title
+      placeholder: Tab title
+  ROW-note2:
+    type: ROW
+    id: ROW-note2
+    children:
+    - MARKDOWN-note2
+    parents: &id001
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-party
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-note2:
+    type: MARKDOWN
+    id: MARKDOWN-note2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-party
+    - ROW-note2
+    meta:
+      width: 12
+      height: 22
+      code: "**Como ler esta aba.** Votos somados por partido, para o ano, turno,\
+        \ cargo e \xE1rea escolhidos nos filtros. Siglas renomeadas aparecem com o\
+        \ nome atual (PMDB \xE9 MDB, PC do B \xE9 PCDOB); fus\xF5es n\xE3o s\xE3o\
+        \ unificadas (DEM e PSL continuam separados do Uni\xE3o Brasil). Votos de\
+        \ legenda contam para o partido; brancos e nulos ficam de fora, assim como\
+        \ o cargo 25 (siglas fict\xEDcias P17 e PCA1). **2014 e 2018 n\xE3o t\xEA\
+        m hor\xE1rio de recebimento**: a curva fica vazia e as barras s\xF3 funcionam\
+        \ sem filtro de hor\xE1rio. Cada se\xE7\xE3o tem um \xFAnico hor\xE1rio de\
+        \ recebimento, ent\xE3o a curva de uma s\xF3 se\xE7\xE3o \xE9 um degrau. Recebimento\
+        \ n\xE3o \xE9 divulga\xE7\xE3o: o hor\xE1rio \xE9 o de chegada do boletim\
+        \ \xE0 Justi\xE7a Eleitoral, n\xE3o o de publica\xE7\xE3o do resultado. Zonas\
+        \ e se\xE7\xF5es podem ter sido redesenhadas entre os anos."
+  ROW-party:
+    type: ROW
+    id: ROW-party
+    children:
+    - CHART-party_total
+    - CHART-party_curve
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-party_total:
+    type: CHART
+    id: CHART-party_total
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-party
+    - ROW-party
+    meta:
+      width: 5
+      height: 70
+      chartId: 10
+      uuid: 677c0699-a4a0-4c9b-8cc1-ed8e099848c1
+      sliceName: Votos por partido
+  CHART-party_curve:
+    type: CHART
+    id: CHART-party_curve
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-party
+    - ROW-party
+    meta:
+      width: 7
+      height: 70
+      chartId: 11
+      uuid: 57e92c33-8a94-44dd-8b98-459d3ca2b1ce
+      sliceName: Votos acumulados por partido
 metadata:
   native_filter_configuration:
   - id: NATIVE_FILTER-IoAjkTb0o6
@@ -184,14 +320,19 @@ metadata:
       datasetUuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6
     controlValues:
       enableEmptyFilter: true
-      defaultToFirstItem: true
+      defaultToFirstItem: false
       multiSelect: false
       searchAllOptions: false
       inverseSelection: false
       sortAscending: false
     defaultDataMask:
-      extraFormData: {}
-      filterState: {}
+      extraFormData:
+        filters:
+        - col: election_year
+          op: IN
+          val: [2026]
+      filterState:
+        value: [2026]
       ownState: {}
     cascadeParentIds: []
     scope:
@@ -206,7 +347,11 @@ metadata:
     - 4
     - 5
     - 6
-    tabsInScope: []
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
   - id: NATIVE_FILTER-zjDDce1a8w
     name: Turno
     filterType: filter_select
@@ -217,14 +362,19 @@ metadata:
       datasetUuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6
     controlValues:
       enableEmptyFilter: true
-      defaultToFirstItem: true
+      defaultToFirstItem: false
       multiSelect: false
       searchAllOptions: false
       inverseSelection: false
       sortAscending: true
     defaultDataMask:
-      extraFormData: {}
-      filterState: {}
+      extraFormData:
+        filters:
+        - col: round_number
+          op: IN
+          val: [1]
+      filterState:
+        value: [1]
       ownState: {}
     cascadeParentIds: []
     scope:
@@ -239,7 +389,11 @@ metadata:
     - 4
     - 5
     - 6
-    tabsInScope: []
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
   - id: NATIVE_FILTER-VzJaZW0gXU
     name: Cargo
     filterType: filter_select
@@ -250,14 +404,19 @@ metadata:
       datasetUuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6
     controlValues:
       enableEmptyFilter: true
-      defaultToFirstItem: true
+      defaultToFirstItem: false
       multiSelect: false
       searchAllOptions: false
       inverseSelection: false
       sortAscending: true
     defaultDataMask:
-      extraFormData: {}
-      filterState: {}
+      extraFormData:
+        filters:
+        - col: office_name
+          op: IN
+          val: ["Presidente"]
+      filterState:
+        value: ["Presidente"]
       ownState: {}
     cascadeParentIds: []
     scope:
@@ -272,7 +431,11 @@ metadata:
     - 4
     - 5
     - 6
-    tabsInScope: []
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
   - id: NATIVE_FILTER-OL2GoDdX9s
     name: UF
     filterType: filter_select
@@ -305,7 +468,11 @@ metadata:
     - 4
     - 5
     - 6
-    tabsInScope: []
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
   - id: NATIVE_FILTER-K5cj3qDKKm
     name: "Munic\xEDpio"
     filterType: filter_select
@@ -339,7 +506,11 @@ metadata:
     - 4
     - 5
     - 6
-    tabsInScope: []
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
   - id: NATIVE_FILTER-3lq8B582uN
     name: Zona
     filterType: filter_select
@@ -373,9 +544,81 @@ metadata:
     - 4
     - 5
     - 6
-    tabsInScope: []
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
+  - id: NATIVE_FILTER-Secao0001
+    name: "Se\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: section
+      datasetUuid: cef468f8-9c61-48fb-8a9b-c2bdfaf7eca6
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-3lq8B582uN
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+    chartsInScope:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
+  - id: NATIVE_FILTER-Tempo0001
+    name: Recebimento do BU
+    filterType: filter_time
+    type: NATIVE_FILTER
+    targets:
+    - {}
+    controlValues: {}
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: "Intervalo de hor\xE1rio de recebimento do BU (n\xE3o existe em 2014\
+      \ e 2018)."
+    chartsInScope:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 10
+    - 11
+    tabsInScope:
+    - TAB-candidate
+    - TAB-party
   cross_filters_enabled: false
-  color_scheme: supersetColors
+  color_scheme: ''
   refresh_frequency: 0
   timed_refresh_immune_slices: []
   expanded_slices: {}

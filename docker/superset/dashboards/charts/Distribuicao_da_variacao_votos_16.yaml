@@ -1,0 +1,28 @@
+slice_name: "Distribui\xE7\xE3o da varia\xE7\xE3o (votos)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: histogram_v2
+params:
+  viz_type: histogram_v2
+  column: votes_change
+  groupby: []
+  adhoc_filters: []
+  bins: 60
+  normalize: false
+  cumulative: false
+  color_scheme: supersetColors
+  show_value: false
+  show_legend: false
+  x_axis_title: "Varia\xE7\xE3o de votos do candidato, T2 menos T1"
+  y_axis_title: "Munic\xEDpios"
+  x_axis_title_margin: 30
+  y_axis_title_margin: 30
+  row_limit: 50000
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: 30e6d72b-afab-451c-b7fd-5fa812e26608
+version: 1.0.0
+dataset_uuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9

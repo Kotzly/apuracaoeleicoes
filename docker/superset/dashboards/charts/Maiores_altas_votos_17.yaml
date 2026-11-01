@@ -1,0 +1,45 @@
+slice_name: Maiores altas (votos)
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  x_axis: label
+  xAxisForceCategorical: true
+  x_axis_sort: "Varia\xE7\xE3o em votos"
+  x_axis_sort_asc: false
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: votes_change
+    aggregate: MAX
+    label: "Varia\xE7\xE3o em votos"
+    hasCustomLabel: true
+    optionName: metric_votes_change
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: votes_change > 0
+  orientation: horizontal
+  row_limit: 30
+  show_legend: false
+  show_value: true
+  y_axis_format: ',.0f'
+  color_scheme: supersetColors
+  stack: null
+  order_desc: true
+  truncate_metric: true
+  rich_tooltip: true
+  x_axis_title: ''
+  y_axis_title: ''
+  y_axis_title_margin: 40
+  zoomable: false
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: efdd2c89-41ee-4a61-b7ef-9fb6f1862361
+version: 1.0.0
+dataset_uuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9

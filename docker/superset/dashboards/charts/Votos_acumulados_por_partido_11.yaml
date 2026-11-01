@@ -1,0 +1,44 @@
+slice_name: Votos acumulados por partido
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  datasource: 2__table
+  viz_type: echarts_timeseries_line
+  x_axis: bu_received_at
+  time_grain_sqla: PT1M
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(vote_count)
+    label: Votos
+    optionName: metric_e904f5c8576e
+  groupby:
+  - party_current
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: party IS NOT NULL AND office_code <> 25 AND bu_received_at IS NOT
+      NULL
+  order_desc: true
+  rolling_type: cumsum
+  row_limit: 50000
+  truncate_metric: true
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  x_axis_title: "Recebimento do BU (hor\xE1rio de Bras\xEDlia)"
+  rich_tooltip: true
+  y_axis_format: SMART_NUMBER
+  comparison_type: values
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 57e92c33-8a94-44dd-8b98-459d3ca2b1ce
+version: 1.0.0
+dataset_uuid: 77bc8f05-1e0f-4821-ab9e-df74c03a66fa

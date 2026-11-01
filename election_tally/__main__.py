@@ -6,6 +6,7 @@
   python -m election_tally inspect --year 2018 file.zip
   python -m election_tally validate --cycle ele2022 --election 544 --office 1
   python -m election_tally download-municipalities  refresh the TSE -> IBGE code table
+  python -m election_tally download-municipality-shapes  refresh the IBGE municipality outlines
   python -m election_tally build-derived            build derived tables (see the README)
 """
 
@@ -67,6 +68,11 @@ def main(argv: list[str] | None = None) -> int:
     mu.add_argument("--output", type=Path,
                     help="where to write it (default: the copy kept in the package)")
 
+    sh = sub.add_parser("download-municipality-shapes",
+                        help="refresh the IBGE municipality outlines used by the maps")
+    sh.add_argument("--output", type=Path,
+                    help="where to write it (default: the copy kept in the package)")
+
     de = sub.add_parser("build-derived",
                         help="build the tables computed from the loaded data, if out of date")
     de.add_argument("--db", type=Path, default=Path("elections.duckdb"))
@@ -97,13 +103,21 @@ def main(argv: list[str] | None = None) -> int:
     elif a.cmd == "download-municipalities":
         from .municipalities import download as download_municipalities
         download_municipalities(a.output)
+    elif a.cmd == "download-municipality-shapes":
+        from .shapes import download as download_shapes
+        download_shapes(a.output)
     elif a.cmd == "build-derived":
         # docker compose runs this before Superset starts; add new derived tables here.
-        from . import leader_flows, lookups, results, tse_tables
+        from . import elected, leader_flows, lookups, parties, results, shapes, shifts, tse_tables
         leader_flows.build(a.db, force=a.force)
         tse_tables.build(a.db, force=a.force)
         lookups.build(a.db, force=a.force)
         results.build(a.db, force=a.force)
+        shapes.build(a.db, force=a.force)
+        # These depend on the results (and on candidates), so they come last.
+        parties.build(a.db, force=a.force)
+        shifts.build(a.db, force=a.force)
+        elected.build(a.db, force=a.force)
     elif a.cmd == "validate":
         from .validate import validate
         return 0 if validate(a.db, a.cycle, a.election, a.office, a.scope, a.json) else 1

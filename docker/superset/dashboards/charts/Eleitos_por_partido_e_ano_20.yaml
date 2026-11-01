@@ -1,0 +1,51 @@
+slice_name: Eleitos por partido e ano
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  orientation: vertical
+  row_limit: 10000
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  color_scheme: supersetColors
+  rich_tooltip: true
+  truncate_metric: true
+  zoomable: false
+  xAxisForceCategorical: true
+  order_desc: true
+  x_axis_title: ''
+  y_axis_title: Eleitos
+  y_axis_title_margin: 40
+  xAxisLabelRotation: 90
+  xAxisLabelInterval: 0
+  x_axis_title_margin: 30
+  x_axis: party_current
+  groupby:
+  - election_year
+  metrics:
+  - expressionType: SIMPLE
+    column:
+      column_name: elected
+    aggregate: SUM
+    label: Eleitos
+    hasCustomLabel: true
+    optionName: metric_elected_sum
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: elected > 0
+  x_axis_sort: Eleitos
+  x_axis_sort_asc: false
+  stack: null
+  show_value: false
+  y_axis_format: ',d'
+  datasource: 0__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 61cfd921-069f-47ae-863d-9f344e793291
+version: 1.0.0
+dataset_uuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b

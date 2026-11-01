@@ -1,0 +1,429 @@
+dashboard_title: Entre turnos
+description: null
+css: null
+slug: entre-turnos
+certified_by: null
+certification_details: null
+published: true
+uuid: dac6b6fa-eb1e-40b3-aed0-7f3bcfe8e9c2
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-note
+    - TABS-main
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: Entre turnos
+  ROW-note:
+    type: ROW
+    id: ROW-note
+    children:
+    - MARKDOWN-note
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-note:
+    type: MARKDOWN
+    id: MARKDOWN-note
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-note
+    meta:
+      width: 12
+      height: 34
+      code: "**Como ler.** Cada linha \xE9 uma cidade e um finalista da elei\xE7\xE3o presidencial; os\
+        \ gr\xE1ficos mostram o finalista escolhido no filtro **Candidato**, e a varia\xE7\xE3o \xE9 o\
+        \ 2\xBA turno menos o 1\xBA, na pr\xF3pria cidade (nada \xE9 somado entre cidades). No 1\xBA turno\
+        \ h\xE1 muitos candidatos e no 2\xBA s\xF3 dois, ent\xE3o os finalistas quase sempre ganham participa\xE7\
+        \xE3o ao herdar votos dos eliminados: a alta m\xE9dia medida \xE9 de 3 a 10 pontos percentuais\
+        \ por ano, e \xE9 essa a refer\xEAncia para julgar uma cidade, n\xE3o o zero. Cidades pequenas\
+        \ dominam a varia\xE7\xE3o em pontos percentuais e cidades grandes dominam a varia\xE7\xE3o em\
+        \ votos; por isso h\xE1 o filtro **M\xEDnimo de votos no 1\xBA turno**, j\xE1 que cidades min\xFA\
+        sculas e o exterior costumam encabe\xE7ar o ranking em %. A participa\xE7\xE3o \xE9 sobre votos\
+        \ v\xE1lidos. O exterior \xE9 a UF `ZZ`: para tirar estados (inclusive `ZZ`), use o filtro **UF**\
+        \ com a op\xE7\xE3o de excluir selecionados (\"Inverse selection\"). N\xE3o h\xE1 ajuste pela\
+        \ m\xE9dia nacional. \"Maiores quedas\" s\xF3 lista cidades em que o candidato realmente perdeu\
+        \ (pode ficar vazio)."
+  TABS-main:
+    type: TABS
+    id: TABS-main
+    children:
+    - TAB-pct
+    - TAB-abs
+    parents:
+    - ROOT_ID
+    - GRID_ID
+  TAB-pct:
+    type: TAB
+    id: TAB-pct
+    children:
+    - ROW-P1
+    - ROW-P2
+    - ROW-P3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Em porcentagem
+  ROW-P1:
+    type: ROW
+    id: ROW-P1
+    children:
+    - CHART-P0
+    parents: &id001
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-pct
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-P0:
+    type: CHART
+    id: CHART-P0
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-pct
+    - ROW-P1
+    meta:
+      width: 12
+      height: 70
+      chartId: 1
+      uuid: 6cdf2586-4c36-41d3-b58e-d348f50df5c6
+      sliceName: "Distribui\xE7\xE3o da varia\xE7\xE3o (p.p.)"
+  ROW-P2:
+    type: ROW
+    id: ROW-P2
+    children:
+    - CHART-P1
+    - CHART-P2
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-P1:
+    type: CHART
+    id: CHART-P1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-pct
+    - ROW-P2
+    meta:
+      width: 6
+      height: 100
+      chartId: 2
+      uuid: 5fa9446e-eca8-492e-a9dc-90e0786f088e
+      sliceName: Maiores altas (p.p.)
+  CHART-P2:
+    type: CHART
+    id: CHART-P2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-pct
+    - ROW-P2
+    meta:
+      width: 6
+      height: 100
+      chartId: 3
+      uuid: 8e91048e-f0c4-4b95-80bf-a56da26c270c
+      sliceName: Maiores quedas (p.p.)
+  ROW-P3:
+    type: ROW
+    id: ROW-P3
+    children:
+    - CHART-P3
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-P3:
+    type: CHART
+    id: CHART-P3
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-pct
+    - ROW-P3
+    meta:
+      width: 12
+      height: 70
+      chartId: 4
+      uuid: 4b08e548-cea4-446a-a215-a4a4b189370a
+      sliceName: "Cidades por varia\xE7\xE3o (p.p.)"
+  TAB-abs:
+    type: TAB
+    id: TAB-abs
+    children:
+    - ROW-A1
+    - ROW-A2
+    - ROW-A3
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: "Em n\xFAmeros absolutos"
+  ROW-A1:
+    type: ROW
+    id: ROW-A1
+    children:
+    - CHART-A0
+    parents: &id002
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-abs
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-A0:
+    type: CHART
+    id: CHART-A0
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-abs
+    - ROW-A1
+    meta:
+      width: 12
+      height: 70
+      chartId: 5
+      uuid: 30e6d72b-afab-451c-b7fd-5fa812e26608
+      sliceName: "Distribui\xE7\xE3o da varia\xE7\xE3o (votos)"
+  ROW-A2:
+    type: ROW
+    id: ROW-A2
+    children:
+    - CHART-A1
+    - CHART-A2
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-A1:
+    type: CHART
+    id: CHART-A1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-abs
+    - ROW-A2
+    meta:
+      width: 6
+      height: 100
+      chartId: 6
+      uuid: efdd2c89-41ee-4a61-b7ef-9fb6f1862361
+      sliceName: Maiores altas (votos)
+  CHART-A2:
+    type: CHART
+    id: CHART-A2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-abs
+    - ROW-A2
+    meta:
+      width: 6
+      height: 100
+      chartId: 7
+      uuid: dc844118-0107-4671-b7ab-aa0e4f19f7f6
+      sliceName: Maiores quedas (votos)
+  ROW-A3:
+    type: ROW
+    id: ROW-A3
+    children:
+    - CHART-A3
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-A3:
+    type: CHART
+    id: CHART-A3
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-abs
+    - ROW-A3
+    meta:
+      width: 12
+      height: 70
+      chartId: 8
+      uuid: 63ffbd26-8553-421d-be5d-cd86f7205dc9
+      sliceName: "Cidades por varia\xE7\xE3o (votos)"
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-shiftYear
+    name: Ano
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: election_year
+      datasetUuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: election_year
+          op: IN
+          val: [2026]
+      filterState:
+        value: [2026]
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-shiftCandidate
+    name: Candidato
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: candidate_name
+      datasetUuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: candidate_name
+          op: IN
+          val: ["LULA"]
+      filterState:
+        value: ["LULA"]
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-shiftYear
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-shiftState
+    name: UF
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: state
+      datasetUuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: true
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-shiftCity
+    name: "Munic\xEDpio"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: label
+      datasetUuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-shiftState
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-shiftMinVotes
+    name: "M\xEDnimo de votos no 1\xBA turno"
+    filterType: filter_range
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: votes_round1
+      datasetUuid: e5e3b5c0-f8bc-42b4-b061-57ca411749c9
+    controlValues:
+      enableEmptyFilter: false
+      inverseSelection: false
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  cross_filters_enabled: false
+  color_scheme: supersetColors
+  refresh_frequency: 0
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  label_colors: {}
+  shared_label_colors: []
+  chart_configuration: {}
+  map_label_colors: {}
+theme_uuid: null
+version: 1.0.0

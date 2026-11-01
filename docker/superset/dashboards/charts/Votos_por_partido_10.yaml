@@ -1,0 +1,40 @@
+slice_name: Votos por partido
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  datasource: 2__table
+  viz_type: echarts_timeseries_bar
+  x_axis: party_current
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(vote_count)
+    label: Votos
+    optionName: metric_e904f5c8576e
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: bu_received_at
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  - clause: WHERE
+    expressionType: SQL
+    sqlExpression: party IS NOT NULL AND office_code <> 25
+  order_desc: true
+  x_axis_sort: Votos
+  x_axis_sort_asc: false
+  row_limit: 50000
+  show_legend: false
+  show_value: true
+  x_axis_title: Partido
+  y_axis_format: SMART_NUMBER
+  rich_tooltip: true
+  comparison_type: values
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 677c0699-a4a0-4c9b-8cc1-ed8e099848c1
+version: 1.0.0
+dataset_uuid: 77bc8f05-1e0f-4821-ab9e-df74c03a66fa

@@ -128,6 +128,65 @@ comando avisa e o Superset sobe mesmo assim.
 fica vazia para branco e nulo. `state_results` não traz prefeito nem vereador, e `national_results`
 só traz presidente, porque o mesmo número pertence a candidatos diferentes em cada local.
 
+**Comparações entre eleições**, calculadas a partir dos resultados, de `votes` e de `candidates`
+(refeitas também quando `election_tally/data/party_renames.csv` muda):
+
+| Tabela | Uma linha por | Para que serve |
+|---|---|---|
+| `party_names` | nome antigo | Renomeações de partidos (o CSV); `final_name` segue a cadeia até o nome atual |
+| `round_shifts` | ano × município × finalista, só presidente | Votos e percentual de cada finalista no 1º e no 2º turno; o exterior é `ZZ` |
+| `party_shifts` | nível × cargo × turno × par de eleições × unidade × partido | Votos e percentual do partido na eleição anterior e na atual do mesmo cargo, e a variação |
+| `unit_volatility` | nível × cargo × turno × par de eleições × unidade | Índice de Pedersen: metade da soma das variações absolutas de percentual |
+| `elected_party` | ano × cargo × UF × partido | Eleitos e votos do 1º turno por partido |
+| `mayor_flows` | transição × município × partido do prefeito na origem e no destino | Sankey do partido dos prefeitos entre 2016, 2020 e 2024 |
+| `municipality_shapes` | município × parte do contorno | Contorno de cada município (lista JSON de pares `[longitude, latitude]`) para o mapa por cidade; sem o exterior |
+
+`party_shifts` e `unit_volatility` comparam o mesmo cargo com o ciclo anterior (presidente, governador,
+senador e deputados: 2014 → 2018 → 2022 → 2026; prefeito e vereador: 2016 → 2020 → 2024), com
+`transition` como `2018 → 2022 T1`. O `level` é `Brasil`, `UF`, `Município`, `Zona` ou `Seção`, e as
+colunas `state`, `state_iso` (`BR-SP`, como no mapa do Superset), `municipality_*`, `zone` e `section`
+ficam vazias onde não se aplicam. Zonas são identificadas por (`state`, `zone`) e seções por
+(`municipality_code`, `zone`, `section`). O percentual é dos votos válidos (nominais e de legenda) da
+unidade naquele cargo e turno. Um partido que concorreu em só um dos lados aparece nos dois, com
+0 votos onde não concorreu, e votos de candidatos sem partido contam no total mas não têm linha.
+A unidade precisa ter votos válidos nos dois lados: seção nova ou município criado não entra, e o
+2º turno só compara locais que votaram nos dois. Consultas populares e o cargo 25 ficam de fora.
+Seção e zona podem ter sido redesenhadas entre eleições: o número é mantido como está.
+
+**Seção só existe para presidente, governador, senador e prefeito** (cargos 1, 3, 5 e 11). Com todos os
+cargos a tabela passaria de 150 milhões de linhas e de 4 GB (estimativa; com estes quatro são
+50 milhões e cerca de 1,5 GB, e o `build-derived` leva cerca de 6 minutos). Os demais cargos chegam
+até zona, e `SECTION_OFFICES` em `election_tally/shifts.py` muda isso.
+
+`elected_party`: eleito é `result LIKE 'ELEITO%'`. Em governador e prefeito, onde há uma vaga, vale o
+eleito da última eleição do local (a suplementar vence a ordinária; entre iguais, o maior código da
+eleição e do turno). O presidente tem `state = 'BR'`. `vote_share` e `seat_share` são relativos à UF,
+então **não os some nem os tire a média entre UFs**. Para o total nacional, some `elected` e `votes`
+e divida pelo total (`seats_total` e `votes_total` se repetem em todos os partidos da UF), ou use no
+Superset a visão de contribuição sobre `elected`.
+
+`mayor_flows`: cidade sem prefeito eleito de um lado vai para o nó `Sem eleito`. Os partidos fora dos
+12 com mais prefeitos nas três eleições viram `Outros` em `source` e `target`; `source_party` e
+`target_party` guardam o partido real. Os nós levam o ano (`2016 · PT`), então o gráfico não faz ciclos.
+
+`municipality_shapes`: vem de [`election_tally/data/municipality_shapes.csv`](election_tally/data/municipality_shapes.csv)
+(0,9 MB; 5.570 municípios em 5.598 anéis, e cada anel é uma polilinha codificada), que acompanha o repositório,
+então **não há download no `build-derived`**: se o arquivo faltar ou estiver quebrado, o comando só avisa e o
+Superset sobe sem o mapa por cidade. O arquivo é a malha municipal do IBGE, na qualidade mínima, obtida de
+`https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?intrarregiao=municipio&formato=application/vnd.geo+json&qualidade=minima`
+(só o contorno externo de cada parte; enclaves são descartados). A página da API não informa a licença; trate como
+dado aberto do IBGE e cite a fonte (IBGE, Malha Municipal). `python -m election_tally download-municipality-shapes`
+baixa a versão mais nova e regrava o arquivo; o `build-derived` refaz a tabela quando o arquivo muda. Ao
+construir, o comando imprime, por ano, quantos municípios têm contorno: a malha do IBGE não traz
+Boa Esperança do Norte (MT, código 5101837, criado em 2025), que aparece em 2024 e 2026 sem contorno; em 2014–2022 os
+5.568 a 5.570 municípios de cada ano casam todos. O exterior (`ZZ`) não tem contorno.
+
+**Nomes de partidos.** Nestas tabelas o partido que só mudou de nome tem sempre o nome atual
+(PMDB é MDB, PTN é PODE, PEN é PATRIOTA etc.; veja `party_renames.csv`). **Fusões e incorporações não
+são juntadas**: os gráficos mantêm separados DEM e PSL (hoje UNIÃO), PRP (incorporado ao PATRIOTA), PATRIOTA e
+PTB (hoje PRD), PHS e PSC (hoje PODE), PPL (hoje PCdoB) e PROS (hoje SOLIDARIEDADE), para mostrar o
+que estava na urna. Os nomes são comparados como escritos nos arquivos do TSE.
+
 **Arquivos do TSE**, além dos boletins:
 
 | Tabela | Uma linha por | Para que serve |
@@ -175,14 +234,31 @@ cp .env.example .env                               # defina SUPERSET_SECRET_KEY
 docker compose up --build                          # http://localhost:8088 (admin / admin)
 ```
 
-O painel **Evolução da apuração** tem filtros de ano, turno, cargo, UF, município e
-zona, e mostra:
+Os painéis são quatro:
+
+- **Evolução da apuração**: votos por candidato e por partido, com filtro de recebimento do BU;
+- **Entre turnos**: cidades em que cada finalista à presidência mais mudou, em % e em votos;
+- **Eleitos e bancadas**: eleitos por partido, fluxo de prefeitos, bancadas e votos × cadeiras;
+- **Mudança entre eleições**: variação por partido em UF, cidade, zona e seção, mapas, volatilidade e fluxo dos mais votados.
+
+A importação nunca apaga: os antigos painéis **Candidatos eleitos** e **Fluxo dos mais votados**, hoje dentro
+dos painéis acima, continuam numa instalação existente até serem excluídos na interface. Antes disso,
+`export-dashboards.sh` os traria de volta para o repositório.
+
+O painel **Evolução da apuração** tem filtros de ano, turno, cargo, UF, município, zona e seção, e mostra:
 
 - os votos acumulados por candidato ao longo do recebimento dos BUs (a curva da apuração);
 - as seções recebidas, acumuladas;
 - o resultado consolidado com percentuais, o comparecimento e o número de seções;
 - um mapa do comparecimento por UF (gráfico "Country Map" do Superset, que já traz o
   contorno dos estados; não usa mapa de fundo nem chave de serviço externo).
+
+O painel **Mudança entre eleições** traz, na aba Mapa, um mapa por cidade da variação da fatia do partido
+(gráfico "deck.gl Polygon" sobre o dataset virtual `party_shift_map`, que junta `party_shifts` ao
+`municipality_shapes`). O "Country Map" do Superset 6.1 só tem mapas de países e de estados, nenhum de municípios do
+Brasil. O mapa por cidade **não usa mapa de fundo**: não precisa de `MAPBOX_API_KEY` nem altera
+`superset_config.py`, e o navegador não contata serviço de mapas algum. A cor vem de faixas fixas simétricas em torno de
+zero (vermelho perde, azul ganha), definidas no próprio gráfico, sem JavaScript.
 
 Como as peças se encaixam:
 

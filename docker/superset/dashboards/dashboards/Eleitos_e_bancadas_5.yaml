@@ -1,0 +1,778 @@
+dashboard_title: Eleitos e bancadas
+description: null
+css: null
+slug: eleitos-e-bancadas
+certified_by: null
+certification_details: null
+published: true
+uuid: 4920cd94-e224-4a98-a3fd-571e5e7a0c86
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-note
+    - TABS-main
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: Eleitos e bancadas
+  ROW-note:
+    type: ROW
+    id: ROW-note
+    children:
+    - MARKDOWN-note
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-note:
+    type: MARKDOWN
+    id: MARKDOWN-note
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-note
+    meta:
+      width: 12
+      height: 40
+      code: "**Como ler.** Cada aba mostra um recorte de quem foi eleito. Elei\xE7\
+        \xF5es federais (Presidente, Governador, Senador e deputados) acontecem em\
+        \ 2014, 2018, 2022 e 2026; as municipais (Prefeito e Vereador), em 2016, 2020\
+        \ e 2024. Os nomes de partidos s\xE3o unificados quando s\xF3 mudaram de nome\
+        \ (PMDB e MDB, PR e PL), mas **fus\xF5es n\xE3o s\xE3o unificadas**: DEM e\
+        \ PSL continuam separados de UNI\xC3O, ent\xE3o somem do gr\xE1fico a partir\
+        \ de 2022 sem que isso signifique perda de cadeiras. Os filtros valem s\xF3\
+        \ para as abas em que a coluna existe: **Cargo** e **Ano** na aba Eleitos,\
+        \ **Cargo (proporcional)** e **Ano** em Bancadas, **Cargo (proporcional)**\
+        \ e **Ano da compara\xE7\xE3o** em Votos \xD7 cadeiras, **Munic\xEDpio** e\
+        \ **Transi\xE7\xE3o** em Prefeitos; **UF** vale para todas, e **Partido**\
+        \ para Eleitos e Bancadas. Em Governador e Prefeito, onde h\xE1 uma vaga s\xF3\
+        , quem assumiu por \xFAltimo na elei\xE7\xE3o (inclusive em elei\xE7\xE3o\
+        \ suplementar) \xE9 o eleito contado. A tabela de candidatos eleitos vem direto\
+        \ da situa\xE7\xE3o final do TSE e, por padr\xE3o, s\xF3 mostra as elei\xE7\
+        \xF5es ordin\xE1rias."
+  TABS-main:
+    type: TABS
+    id: TABS-main
+    children:
+    - TAB-elected
+    - TAB-mayors
+    - TAB-seats
+    - TAB-votes
+    parents:
+    - ROOT_ID
+    - GRID_ID
+  ROW-bars:
+    type: ROW
+    id: ROW-bars
+    children:
+    - CHART-bars
+    parents: &id001
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-elected
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-bars:
+    type: CHART
+    id: CHART-bars
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-elected
+    - ROW-bars
+    meta:
+      width: 12
+      height: 70
+      chartId: 1
+      uuid: 61cfd921-069f-47ae-863d-9f344e793291
+      sliceName: Eleitos por partido e ano
+  ROW-table:
+    type: ROW
+    id: ROW-table
+    children:
+    - CHART-table
+    parents: *id001
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-table:
+    type: CHART
+    id: CHART-table
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-elected
+    - ROW-table
+    meta:
+      width: 12
+      height: 90
+      chartId: 2
+      uuid: 7ab1d3c5-0e68-4f29-93d7-1b4e6c8f2a50
+      sliceName: Candidatos eleitos
+  TAB-elected:
+    type: TAB
+    id: TAB-elected
+    children:
+    - ROW-bars
+    - ROW-table
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Eleitos
+  ROW-TAB-mayors-note:
+    type: ROW
+    id: ROW-TAB-mayors-note
+    children:
+    - MARKDOWN-TAB-mayors
+    parents: &id002
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-mayors
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-mayors:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-mayors
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-mayors
+    - ROW-TAB-mayors-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Como ler.** Cada coluna \xE9 uma elei\xE7\xE3o municipal (2016, 2020,\
+        \ 2024; 2012 n\xE3o foi carregada) e cada faixa leva as cidades do partido\
+        \ do prefeito de uma elei\xE7\xE3o ao partido do prefeito da seguinte. **Conta\
+        \ cidades, n\xE3o eleitores.** Se houve mais de um eleito na mesma cidade\
+        \ e elei\xE7\xE3o, vale quem assumiu por \xFAltimo, inclusive de elei\xE7\xE3\
+        o suplementar. Cidade sem prefeito eleito aparece como **Sem eleito**. Os\
+        \ 12 partidos com mais prefeitos nas tr\xEAs elei\xE7\xF5es t\xEAm n\xF3 pr\xF3\
+        prio; os demais formam **Outros**: a tabela abaixo traz os fluxos partido\
+        \ a partido, sem esse agrupamento, para ver quem est\xE1 dentro de Outros.\
+        \ Fus\xF5es n\xE3o s\xE3o unificadas (DEM e PSL n\xE3o viram UNI\xC3O)."
+  ROW-sankey:
+    type: ROW
+    id: ROW-sankey
+    children:
+    - CHART-sankey
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-sankey:
+    type: CHART
+    id: CHART-sankey
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-mayors
+    - ROW-sankey
+    meta:
+      width: 12
+      height: 90
+      chartId: 3
+      uuid: 2d065457-fdc3-40fb-aa24-5d7270a88b45
+      sliceName: "Partido dos prefeitos entre elei\xE7\xF5es"
+  ROW-flows:
+    type: ROW
+    id: ROW-flows
+    children:
+    - CHART-flows
+    parents: *id002
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-flows:
+    type: CHART
+    id: CHART-flows
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-mayors
+    - ROW-flows
+    meta:
+      width: 12
+      height: 70
+      chartId: 4
+      uuid: 487ae774-466c-4489-91c8-c54e90dd31cd
+      sliceName: Fluxos entre partidos (sem agrupar em Outros)
+  TAB-mayors:
+    type: TAB
+    id: TAB-mayors
+    children:
+    - ROW-TAB-mayors-note
+    - ROW-sankey
+    - ROW-flows
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Prefeitos
+  ROW-TAB-seats-note:
+    type: ROW
+    id: ROW-TAB-seats-note
+    children:
+    - MARKDOWN-TAB-seats
+    parents: &id003
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-seats
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-seats:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-seats
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-seats
+    - ROW-TAB-seats-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Como ler.** N\xFAmero de cadeiras de cada partido em cada elei\xE7\xE3\
+        o de deputados (federal, estadual, distrital) e de vereadores, somado entre\
+        \ as UFs selecionadas. A C\xE2mara dos Deputados tem 513 cadeiras em todas\
+        \ as elei\xE7\xF5es. **Por que n\xE3o \xE9 um Sankey:** uma cadeira n\xE3\
+        o passa de uma elei\xE7\xE3o para a outra, pois o mandato acaba e disputa-se\
+        \ de novo; ligar partido a partido seria inventar fluxos que os dados n\xE3\
+        o t\xEAm. Partidos que se fundiram (DEM e PSL em UNI\xC3O) aparecem separados\
+        \ e somem das barras depois de 2018: n\xE3o \xE9 perda de cadeiras. O gr\xE1\
+        fico de linhas mostra os 25 partidos com mais cadeiras no recorte."
+  ROW-stacked:
+    type: ROW
+    id: ROW-stacked
+    children:
+    - CHART-stacked
+    parents: *id003
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-stacked:
+    type: CHART
+    id: CHART-stacked
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-seats
+    - ROW-stacked
+    meta:
+      width: 12
+      height: 70
+      chartId: 5
+      uuid: c3c0a54e-8bd5-42af-b00e-65d8fb29d5b2
+      sliceName: Cadeiras por partido em cada ano
+  ROW-line:
+    type: ROW
+    id: ROW-line
+    children:
+    - CHART-line
+    parents: *id003
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-line:
+    type: CHART
+    id: CHART-line
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-seats
+    - ROW-line
+    meta:
+      width: 12
+      height: 70
+      chartId: 6
+      uuid: 69927cf2-6a0f-4552-b695-9fdff8cbe7ca
+      sliceName: "Evolu\xE7\xE3o das cadeiras por partido"
+  TAB-seats:
+    type: TAB
+    id: TAB-seats
+    children:
+    - ROW-TAB-seats-note
+    - ROW-stacked
+    - ROW-line
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: Bancadas
+  ROW-TAB-votes-note:
+    type: ROW
+    id: ROW-TAB-votes-note
+    children:
+    - MARKDOWN-TAB-votes
+    parents: &id004
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-votes
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-TAB-votes:
+    type: MARKDOWN
+    id: MARKDOWN-TAB-votes
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-votes
+    - ROW-TAB-votes-note
+    meta:
+      width: 12
+      height: 30
+      code: "**Como ler.** Para o ano e o cargo escolhidos, compara a fatia dos votos\
+        \ de cada partido com a fatia das cadeiras que ele conseguiu, no total nacional\
+        \ (ou das UFs selecionadas). Os percentuais s\xE3o calculados somando votos\
+        \ e cadeiras de cada partido e dividindo pelo total de todos os partidos,\
+        \ nunca pela m\xE9dia de percentuais das UFs. S\xF3 faz sentido nos cargos\
+        \ proporcionais (deputados e vereadores); a dist\xE2ncia entre as barras mostra\
+        \ quanto o sistema (quociente, coliga\xE7\xF5es, sobras) distorce votos em\
+        \ cadeiras. Votos s\xE3o do 1\xBA turno. O filtro **Partido** n\xE3o vale\
+        \ nesta aba, porque os percentuais precisam do total de todos os partidos."
+  ROW-paired:
+    type: ROW
+    id: ROW-paired
+    children:
+    - CHART-paired
+    parents: *id004
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-paired:
+    type: CHART
+    id: CHART-paired
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-votes
+    - ROW-paired
+    meta:
+      width: 12
+      height: 70
+      chartId: 7
+      uuid: bb05d982-3e07-49fa-898b-99a7e468d69c
+      sliceName: '% dos votos e % das cadeiras por partido'
+  ROW-vtable:
+    type: ROW
+    id: ROW-vtable
+    children:
+    - CHART-vtable
+    parents: *id004
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-vtable:
+    type: CHART
+    id: CHART-vtable
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    - TAB-votes
+    - ROW-vtable
+    meta:
+      width: 12
+      height: 70
+      chartId: 8
+      uuid: b0fa55b1-3db4-4d2a-ba10-447a437a6340
+      sliceName: Votos e cadeiras por partido
+  TAB-votes:
+    type: TAB
+    id: TAB-votes
+    children:
+    - ROW-TAB-votes-note
+    - ROW-paired
+    - ROW-vtable
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-main
+    meta:
+      text: "Votos \xD7 cadeiras"
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-office
+    name: Cargo
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: office_label
+      datasetUuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: office_label
+          op: IN
+          val: &id005
+          - Deputado federal
+      filterState:
+        value: *id005
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+    description: ''
+  - id: NATIVE_FILTER-year
+    name: Ano
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: election_year
+      datasetUuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 3
+      - 4
+      - 7
+      - 8
+    description: ''
+  - id: NATIVE_FILTER-officeProp
+    name: Cargo (proporcional)
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: office_label
+      datasetUuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: office_label
+          op: IN
+          val: &id006
+          - Deputado federal
+      filterState:
+        value: *id006
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+    description: ''
+    adhoc_filters:
+    - expressionType: SIMPLE
+      clause: WHERE
+      subject: office_code
+      operator: IN
+      operatorId: IN
+      comparator:
+      - 6
+      - 7
+      - 8
+      - 13
+    time_range: No filter
+  - id: NATIVE_FILTER-yearCompare
+    name: "Ano da compara\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: election_year
+      datasetUuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+    controlValues:
+      enableEmptyFilter: true
+      defaultToFirstItem: false
+      multiSelect: false
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: false
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: election_year
+          op: IN
+          val: [2022]
+      filterState:
+        value: [2022]
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-officeProp
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    description: ''
+  - id: NATIVE_FILTER-state
+    name: UF
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: uf
+      datasetUuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    description: ''
+  - id: NATIVE_FILTER-party
+    name: Partido
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: party_current
+      datasetUuid: b92a5725-3a7e-425c-a7d4-c3352c23b05b
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 3
+      - 4
+      - 7
+      - 8
+    description: ''
+  - id: NATIVE_FILTER-city
+    name: "Munic\xEDpio"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: label
+      datasetUuid: 5447bd38-4a18-4ac5-84eb-c761858a7df3
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-state
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 5
+      - 6
+      - 7
+      - 8
+    description: ''
+  - id: NATIVE_FILTER-transition
+    name: "Transi\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: transition
+      datasetUuid: 5447bd38-4a18-4ac5-84eb-c761858a7df3
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 2
+      - 5
+      - 6
+      - 7
+      - 8
+    description: ''
+  - id: NATIVE_FILTER-unit
+    name: Local
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: electoral_unit
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds:
+    - NATIVE_FILTER-state
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+    description: "S\xF3 vale para a tabela de candidatos eleitos."
+  - id: NATIVE_FILTER-type
+    name: "Tipo de elei\xE7\xE3o"
+    filterType: filter_select
+    type: NATIVE_FILTER
+    targets:
+    - column:
+        name: election_type
+      datasetUuid: 2c8e5f71-3a94-4d06-8e1b-c7f2a9d04b36
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+      sortAscending: true
+    defaultDataMask:
+      extraFormData:
+        filters:
+        - col: election_type
+          op: IN
+          val: &id007
+          - "ELEI\xC7\xC3O ORDIN\xC1RIA"
+      filterState:
+        value: *id007
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded:
+      - 1
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+    description: ''
+  cross_filters_enabled: false
+  color_scheme: supersetColors
+  refresh_frequency: 0
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  label_colors: {}
+  shared_label_colors: []
+  chart_configuration: {}
+  map_label_colors: {}
+  color_scheme_domain: []
+theme_uuid: null
+version: 1.0.0

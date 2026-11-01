@@ -1,0 +1,34 @@
+slice_name: "Distribui\xE7\xE3o da volatilidade nas cidades"
+description: null
+certified_by: null
+certification_details: null
+viz_type: histogram_v2
+params:
+  viz_type: histogram_v2
+  column: pedersen_pp
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: level
+    operator: ==
+    operatorId: EQUALS
+    comparator: "Munic\xEDpio"
+  bins: 40
+  normalize: false
+  cumulative: false
+  color_scheme: supersetColors
+  show_value: false
+  show_legend: false
+  x_axis_title: Volatilidade da cidade (%)
+  y_axis_title: Cidades
+  x_axis_title_margin: 30
+  y_axis_title_margin: 30
+  row_limit: 50000
+  annotation_layers: []
+  datasource: 3__table
+query_context: null
+cache_timeout: null
+uuid: 31ff256c-e571-4235-8bea-798da8074264
+version: 1.0.0
+dataset_uuid: 0a765893-8334-4ba8-92a2-94bc602ab29c

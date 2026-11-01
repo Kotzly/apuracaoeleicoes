@@ -1,0 +1,28 @@
+slice_name: "Partido dos prefeitos entre elei\xE7\xF5es"
+description: null
+certified_by: null
+certification_details: null
+viz_type: sankey_v2
+params:
+  viz_type: sankey_v2
+  source: source
+  target: target
+  metric:
+    expressionType: SIMPLE
+    column:
+      column_name: units
+    aggregate: SUM
+    label: Cidades
+    hasCustomLabel: true
+    optionName: metric_units_sum
+  adhoc_filters: []
+  row_limit: 5000
+  sort_by_metric: true
+  color_scheme: supersetColors
+  datasource: 0__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 2d065457-fdc3-40fb-aa24-5d7270a88b45
+version: 1.0.0
+dataset_uuid: 5447bd38-4a18-4ac5-84eb-c761858a7df3
