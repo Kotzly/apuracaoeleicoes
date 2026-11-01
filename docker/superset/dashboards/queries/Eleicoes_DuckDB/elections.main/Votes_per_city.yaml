@@ -1,0 +1,17 @@
+catalog: null
+schema: elections.main
+label: Votes per city
+description: ''
+sql: "WITH total_votes AS (\n  SELECT\n    SUM(vote_count) as vote_count,\n    election_year,\n\
+  \    election_code,\n    round_number,\n    municipality_code,\n    office_code\n\
+  \  FROM\n    elections.main.votes\n  GROUP BY\n    election_year,\n    election_code,\n\
+  \    round_number,\n    municipality_code,\n    office_code\n),\nmunicipality AS\
+  \ (\n  SELECT DISTINCT\n    election_year,\n    round_number,\n    municipality_code,\n\
+  \    municipality_name,\n  FROM elections.main.section_locations\n)\n\nSELECT\n\
+  \  office_code, municipality_name, election_year, round_number, vote_count\nFROM\n\
+  \  total_votes\nLEFT JOIN\n  municipality\nUSING\n    election_year,\n    round_number,\n\
+  \    municipality_code\nWHERE\n  office_code = 1\n  AND election_year = 2026\n \
+  \ AND round_number = 2\nORDER BY vote_count DESC;"
+uuid: 2870e2c0-14a5-4e95-8468-53e14b8e1f16
+version: 1.0.0
+database_uuid: 3c2d8044-2ab8-463a-9f5e-98fcd0fd1f41
