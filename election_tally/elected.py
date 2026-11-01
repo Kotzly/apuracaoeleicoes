@@ -31,6 +31,11 @@ _NATIONAL = "BR"
 # seat lasts two elections, and everywhere else a merger stays a change of party.
 _SENATE_MERGERS = {"DEM": "UNIÃO", "PSL": "UNIÃO"}
 _MERGER_YEAR = 2022
+# Years of a general municipal election. A supplementary one can fall in any year, for a few cities:
+# in those years the flows would compare almost every city with nothing.
+_MAYOR_YEARS = f"""SELECT DISTINCT election_year FROM candidates
+                   WHERE office_code = {MAYOR} AND election_year IS NOT NULL
+                     AND coalesce(election_type, '') NOT LIKE '%SUPLEMENTAR%'"""
 
 
 def _create_elected_tables(con: derived.Connection) -> None:
@@ -78,18 +83,18 @@ def _create_elected_tables(con: derived.Connection) -> None:
 
 
 def _create_mayor_flows(con: derived.Connection) -> None:
-    years = [row[0] for row in con.execute(
-        f"SELECT DISTINCT election_year FROM candidates WHERE office_code = {MAYOR}").fetchall()]
+    years = [row[0] for row in con.execute(_MAYOR_YEARS).fetchall()]
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE top_parties AS
-        SELECT party FROM winners WHERE office_code = {MAYOR}
+        SELECT party FROM winners WHERE office_code = {MAYOR} AND election_year IN ({_MAYOR_YEARS})
         GROUP BY party ORDER BY count(*) DESC, party LIMIT {TOP_PARTIES}""")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE mayors AS
         SELECT cities.election_year, cities.state, cities.municipality_code,
                cities.municipality_name, coalesce(w.party, '{NO_MAYOR}') AS party
         FROM (SELECT election_year, state, municipality_code, any_value(municipality_name) AS municipality_name
-              FROM candidates WHERE office_code = {MAYOR} GROUP BY ALL) cities
+              FROM candidates WHERE office_code = {MAYOR} AND election_year IN ({_MAYOR_YEARS})
+              GROUP BY ALL) cities
         LEFT JOIN (SELECT * FROM winners WHERE office_code = {MAYOR}) w
              USING (election_year, state, municipality_code)""")
     side = "(SELECT * FROM mayors WHERE election_year = {})"

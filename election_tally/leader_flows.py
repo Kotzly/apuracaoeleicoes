@@ -62,7 +62,9 @@ def _source_state(con: derived.Connection, office: int) -> str:
 def _insert_links(con: derived.Connection, level: str, new: str, closed: str) -> None:
     rounds = con.execute("""SELECT DISTINCT election_year, round_number FROM leaders
                             ORDER BY 1, 2""").fetchall()
-    side = "(SELECT * FROM leaders WHERE election_year = {} AND round_number = {})"
+    if len(rounds) < 2:  # a link needs two rounds: early in a count, there may be only one
+        return
+    side ="(SELECT * FROM leaders WHERE election_year = {} AND round_number = {})"
     links = " UNION ALL ".join(f"""
         SELECT {start[0]} AS from_year, {start[1]} AS from_round,
                {end[0]} AS to_year, {end[1]} AS to_round,
@@ -100,5 +102,4 @@ def build(db: Path, office: int = 1, force: bool = False) -> int | None:
             _insert_links(con, level, new, closed)
         derived.mark_current(con, "leader_flows", _source_state(con, office))
     with derived.reading(db) as con:
-        derived.report_rows(con, "leader_flows")
-        return con.execute("SELECT count(*) FROM leader_flows").fetchone()[0]
+        return derived.report_rows(con, "leader_flows")

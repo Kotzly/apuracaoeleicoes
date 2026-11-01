@@ -263,12 +263,11 @@ def build(db: Path, force: bool = False) -> None:
             return
         _create_bases(con)
         _create_tables(con)
+        years = dict(con.execute("""SELECT office_code, list(DISTINCT election_year)
+                                    FROM municipality_results GROUP BY office_code""").fetchall())
         for level in _LEVELS:
             for office in _offices_of(level):
-                years = [row[0] for row in con.execute(
-                    "SELECT DISTINCT election_year FROM municipality_results WHERE office_code = ?",
-                    [office]).fetchall()]
-                for start, end in consecutive_elections(years):
+                for start, end in consecutive_elections(years.get(office, [])):
                     for round_number in (1, 2):
                         _build_pair(con, level, office, start, end, round_number)
         derived.mark_current(con, _STATE_TABLE, parties.source_state(con))

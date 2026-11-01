@@ -9,9 +9,9 @@ import pytest
 import requests
 import yaml
 
-from election_tally import blank_votes, derived, download, elected, load as load_module, repair, results, shifts, tse_tables
+from election_tally import blank_votes, derived, download, elected, leader_flows, load as load_module, repair, results, shifts, tse_tables
 from election_tally.__main__ import main
-from election_tally.domain import consecutive_elections
+from election_tally.domain import VOTES_WITH_PARTY, consecutive_elections
 from election_tally.load import create_schema
 
 DASHBOARDS = Path(__file__).parent.parent / "docker" / "superset" / "dashboards"
@@ -296,3 +296,75 @@ def test_blank_votes_still_builds_after_the_results(tmp_path):
     blank_votes.build(path)
     with duckdb.connect(str(path), read_only=True) as con:
         assert con.execute("SELECT count(*) FROM blank_null_votes").fetchone()[0] == 4
+
+
+# --- Found by the review of the derived-table changes
+
+
+@pytest.mark.parametrize("rounds", [(), (1,)])
+def test_leader_flows_builds_with_fewer_than_two_rounds(tmp_path, rounds):
+    path = tmp_path / "e.duckdb"
+    con = duckdb.connect(str(path))
+    create_schema(con)
+    for round_number in rounds:  # one round: a count in progress
+        _insert_president(con, 2026, "SP", 100, 13, "PT", 10, rnd=round_number)
+        con.execute("""INSERT INTO sections (election_year, round_number, state, municipality_code,
+                       municipality_name, zone, section, office_code)
+                       VALUES (2026, ?, 'SP', 100, 'C100', 1, 1, 1)""", [round_number])
+    con.close()
+    assert leader_flows.build(path) == 0
+    assert derived.is_current(path, "leader_flows", lambda c: leader_flows._source_state(c, 1))
+
+
+def test_report_rows_returns_the_total(capsys):
+    con = duckdb.connect()
+    con.execute("CREATE TABLE a AS SELECT 1 AS x UNION ALL SELECT 2")
+    con.execute("CREATE TABLE b AS SELECT 1 AS x")
+    assert derived.report_rows(con, "a", "b") == 3
+    assert "a: 2 rows" in capsys.readouterr().out
+
+
+def test_votes_with_party_fills_only_presidential_rows_and_keeps_every_row():
+    con = duckdb.connect()
+    create_schema(con)
+    con.execute("""INSERT INTO votes (election_year, round_number, state, municipality_code, zone, section,
+                   office_code, vote_type, candidate_number, party, vote_count) VALUES
+                   (2014, 1, 'SP', 1, 1, 1, 1, 'Nominal', 13, 'PT', 1),
+                   (2014, 1, 'ZZ', 2, 1, 1, 1, 'Nominal', 13, NULL, 2),
+                   (2014, 1, 'ZZ', 2, 1, 1, 1, 'Branco', 95, NULL, 3),
+                   (2014, 1, 'ZZ', 2, 1, 1, 3, 'Nominal', 13, NULL, 4),
+                   (2014, 1, 'SP', 1, 1, 1, 6, 'Nominal', 1313, 'PV', 5),
+                   (2014, 1, 'SP', 1, 1, 1, NULL, 'Nominal', 13, NULL, 6)""")
+    rows = con.execute(f"SELECT vote_count, party FROM {VOTES_WITH_PARTY} ORDER BY vote_count").fetchall()
+    assert rows == [(1, "PT"), (2, "PT"), (3, None), (4, None), (5, "PV"), (6, None)]
+    columns = con.execute(f"SELECT * FROM {VOTES_WITH_PARTY} LIMIT 0").description
+    assert [c[0] for c in columns] == [c[0] for c in con.execute("SELECT * FROM votes LIMIT 0").description]
+
+
+def test_supplementary_mayors_of_other_years_stay_out_of_the_flows(tmp_path, monkeypatch):
+    monkeypatch.setattr(elected, "TOP_PARTIES", 2)
+    path = tmp_path / "e.duckdb"
+    con = duckdb.connect(str(path))
+    create_schema(con)
+    _insert_president(con, 2018, "SP", 100, 13, "PT", 10)
+    con.execute("""CREATE TABLE candidates (election_year INTEGER, round_number INTEGER, election_code INTEGER,
+                   election_type VARCHAR, state VARCHAR, municipality_code INTEGER, municipality_name VARCHAR,
+                   office_code INTEGER, candidate_number INTEGER, party VARCHAR, result VARCHAR)""")
+    ordinary, supplementary = "ELEIÇÃO ORDINÁRIA", "ELEIÇÃO SUPLEMENTAR"
+    for year, kind, city, party in [
+            (2016, ordinary, 100, "PT"), (2016, ordinary, 200, "PT"),
+            (2020, ordinary, 100, "PL"), (2020, ordinary, 200, "PT"),
+            (2020, supplementary, 100, "PSD"),  # in a general-election year it replaces the winner
+            (2018, supplementary, 300, "NOVO"), (2022, supplementary, 300, "NOVO"),
+            (None, ordinary, 400, "NOVO")]:
+        con.execute("INSERT INTO candidates VALUES (?, 1, 1, ?, 'SP', ?, ?, 11, 13, ?, 'ELEITO')",
+                    [year, kind, city, f"C{city}", party])
+    con.close()
+    results.build(path)
+    elected.build(path)
+    con = duckdb.connect(str(path), read_only=True)
+    assert con.execute("""SELECT transition, municipality_name, source_party, target_party FROM mayor_flows
+                          ORDER BY municipality_name""").fetchall() == [
+        ("2016 → 2020", "C100", "PT", "PSD"), ("2016 → 2020", "C200", "PT", "PT")]
+    # NOVO's wins, more than PSD's one, are outside those years: PSD still has its own node.
+    assert {row[0] for row in con.execute("SELECT target FROM mayor_flows").fetchall()} == {"2020 · PSD", "2020 · PT"}

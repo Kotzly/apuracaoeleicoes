@@ -61,9 +61,12 @@ def mark_current(con: Connection, table: str, state: str) -> None:
     con.execute(f"COMMENT ON TABLE {table} IS '{state}'")
 
 
-def report_rows(con: Connection, *tables: str) -> None:
-    """Prints the row counts. For tables filled by many INSERTs, call it after the commit: on 65
-    million rows, `count(*)` within the transaction gave 1.1 million (DuckDB 1.5.6)."""
+def report_rows(con: Connection, *tables: str) -> int:
+    """Prints the row counts and returns their sum. For tables filled by many INSERTs, call it after
+    the commit: on 65 million rows, `count(*)` within the transaction gave 1.1 million (DuckDB 1.5.6)."""
+    total = 0
     for table in tables:
         n = con.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
         print(f"{table}: {n:,} rows", flush=True)
+        total += n
+    return total

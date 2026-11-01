@@ -26,14 +26,17 @@ SECTION_UNIT = "municipality_code * 100000000::BIGINT + zone * 100000 + section"
 
 # `votes` with the party of every presidential candidate: in 2014 the file of the sections abroad
 # has no party at all. A presidential number means one party per year, taken from the other states.
+# Only presidential rows go through the join: `votes` has hundreds of millions of the others.
 VOTES_WITH_PARTY = f"""(
+    SELECT * FROM votes WHERE office_code IS DISTINCT FROM {PRESIDENT}
+    UNION ALL
     SELECT v.* REPLACE (coalesce(v.party, p.party) AS party)
     FROM votes v
     LEFT JOIN (SELECT election_year, candidate_number, any_value(party) AS party
                FROM votes WHERE office_code = {PRESIDENT} AND party IS NOT NULL
                GROUP BY election_year, candidate_number) p
-      ON v.office_code = {PRESIDENT} AND v.election_year = p.election_year
-     AND v.candidate_number = p.candidate_number)"""
+      ON v.election_year = p.election_year AND v.candidate_number = p.candidate_number
+    WHERE v.office_code = {PRESIDENT})"""
 
 
 def consecutive_elections(years: list[int]) -> list[tuple[int, int]]:
