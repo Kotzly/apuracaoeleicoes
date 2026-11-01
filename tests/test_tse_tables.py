@@ -3,6 +3,7 @@
 import zipfile
 
 import duckdb
+import pytest
 
 from election_tally import lookups, results, tse_tables
 from election_tally.load import create_schema
@@ -166,3 +167,64 @@ def test_new_year_in_votes_is_fetched_alone(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(tse_tables, "_fetch", spy)
     tse_tables.build_table(path, table)
     assert [u.rsplit("_", 1)[1] for u in fetched] == ["2028.zip"]
+
+
+def test_a_year_that_fails_to_replace_keeps_its_old_rows(tmp_path):
+    source = tmp_path / "n.csv"
+    source.write_text("ANO_ELEICAO\n2022\n", encoding="utf-8")
+    con = duckdb.connect()
+    con.execute("CREATE TABLE t AS SELECT 2022 AS election_year, 'old' AS note")
+    # The rows of the year are deleted first; this column makes the insert after it fail.
+    table = tse_tables.Table("t", "f", {"election_year": (("ANO_ELEICAO",), "INTEGER")},
+                             "SELECT election_year, 1 AS column_the_table_lacks")
+    with pytest.raises(duckdb.Error):
+        tse_tables._load_year(con, table, source, 2022, False)
+    assert con.execute("SELECT * FROM t").fetchall() == [(2022, "old")]
+
+
+def test_a_zip_without_the_national_file_warns_and_keeps_the_old_table(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(tse_tables, "_fetch", _fake_fetch)
+    path = _db(tmp_path)
+    table = tse_tables.TABLES[1]
+    tse_tables.build_table(path, table)
+
+    def only_states(url, target):
+        with zipfile.ZipFile(target, "w") as z:
+            z.writestr("x_SP.csv", "a")
+            z.writestr("x_RJ.csv", "b")
+    monkeypatch.setattr(tse_tables, "_fetch", only_states)
+    assert tse_tables.build_table(path, table, force=True) == []
+    assert "no national file among 2 files" in capsys.readouterr().out
+    assert _all(path, "SELECT seats FROM seats") == [(70,)]
+
+
+class _Stream:
+    def __init__(self, error=None):
+        self.error = error
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def raise_for_status(self):
+        if self.error:
+            raise self.error
+
+    def iter_content(self, size):
+        yield from (b"first ", b"second")
+
+
+def test_fetch_writes_the_whole_body(tmp_path, monkeypatch):
+    monkeypatch.setattr(tse_tables.requests, "get", lambda url, stream, timeout: _Stream())
+    target = tmp_path / "f.zip"
+    tse_tables._fetch("http://x/f.zip", target)
+    assert target.read_bytes() == b"first second"
+
+
+def test_a_year_the_tse_has_not_published_warns_and_loads_nothing(tmp_path, monkeypatch, capsys):
+    error = tse_tables.requests.HTTPError("404")
+    monkeypatch.setattr(tse_tables.requests, "get", lambda url, stream, timeout: _Stream(error))
+    assert tse_tables.build_table(_db(tmp_path), tse_tables.TABLES[1]) == []
+    assert "seats of 2022 not loaded: 404" in capsys.readouterr().out

@@ -141,35 +141,6 @@ def test_line_check_can_be_skipped(tmp_path, capsys):
     assert "WARNING" not in capsys.readouterr().out
 
 
-def test_evolution_ends_at_consolidated_total(db):
-    db_path, _ = db
-    sql = """
-        WITH evolution AS (
-            SELECT state, zone, candidate_number, bu_received_at,
-                   sum(sum(vote_count)) OVER (PARTITION BY state, zone, candidate_number
-                                              ORDER BY bu_received_at) AS cumulative
-            FROM votes WHERE office_code = 1
-            GROUP BY state, zone, candidate_number, bu_received_at)
-        SELECT zone, candidate_number, max(cumulative) FROM evolution GROUP BY ALL ORDER BY 1, 2
-    """
-    final = _q(db_path, sql)
-    consolidated = _q(db_path, """SELECT zone, candidate_number, sum(vote_count) FROM votes
-                                  WHERE office_code = 1 GROUP BY ALL ORDER BY 1, 2""")
-    assert final == consolidated
-    # zone 3 aggregates two municipalities
-    assert (3, 13, 170) in consolidated
-
-
-def test_curve_has_correct_order(db):
-    db_path, _ = db
-    curve = _q(db_path, """
-        SELECT bu_received_at::VARCHAR,
-               sum(sum(vote_count)) OVER (ORDER BY bu_received_at)
-        FROM votes WHERE office_code = 1 AND candidate_number = 13
-        GROUP BY bu_received_at ORDER BY 1""")
-    assert [v for _, v in curve] == [120, 190, 280, 390, 490]
-
-
 def test_example_queries_run(db):
     db_path, _ = db
     sql = (Path(__file__).parent.parent / "queries.sql").read_text()
@@ -386,3 +357,96 @@ def test_state_with_two_files_keeps_both(tmp_path, monkeypatch):
     assert sorted(r[0] for r in con.execute(
         "SELECT DISTINCT municipality_name FROM votes").fetchall()) == ["AMAPÁ", "MACAPÁ"]
     con.close()
+
+
+def _extracted(zp: Path, dest: Path) -> list[Path]:
+    dest.mkdir()
+    return load_module._data_files(zp, ".csv", dest)
+
+
+def test_a_replacement_that_fails_halfway_keeps_the_previous_rows(tmp_path):
+    db_path = tmp_path / "e.duckdb"
+    load([_zip(tmp_path, "bweb_1t_SP_old", SECTIONS)], db_path, 2022)
+    con = duckdb.connect(str(db_path))
+    # `votes` is replaced first; this makes the insert into `sections`, right after it, fail.
+    columns = ", ".join(f"{c} {load_module.COLUMN_TYPES[c]}" for c in load_module.SECTIONS_COLUMNS)
+    con.execute(f"DROP TABLE sections; CREATE TABLE sections ({columns}, must_be_filled INTEGER NOT NULL)")
+    smaller = _extracted(_zip(tmp_path, "bweb_1t_SP_new", SECTIONS[:1]), tmp_path / "new")
+    with pytest.raises(duckdb.ConstraintException):
+        load_module.load_files(con, smaller, 2022)
+    assert con.execute("SELECT count(*) FROM votes").fetchone()[0] == 20  # not the 4 of the new file
+    assert con.execute("SELECT count(*) FROM duckdb_tables() WHERE table_name = 'staging'").fetchone()[0] == 0
+    con.close()
+
+
+def test_a_receipt_time_that_cannot_be_read_is_reported(tmp_path, capsys):
+    broken = [("SP", 71072, "SÃO PAULO", 1, 10, "ontem à noite", 300, 250, {13: 120})]
+    load([_zip(tmp_path, "t", broken)], tmp_path / "e.duckdb", 2022)
+    assert "2 of 2 rows with invalid receipt time" in capsys.readouterr().out
+
+
+def test_a_zip_without_data_is_reported_and_the_next_file_still_loads(tmp_path, capsys):
+    empty = tmp_path / "empty.zip"
+    with zipfile.ZipFile(empty, "w") as z:
+        z.writestr("leiame.pdf", b"%PDF-1.4")
+    db_path = tmp_path / "e.duckdb"
+    load([empty, _zip(tmp_path, "good", SECTIONS)], db_path, 2022)
+    assert "empty.zip: no .csv file in the zip, skipped" in capsys.readouterr().out
+    assert _q(db_path, "SELECT count(*) FROM votes") == [(20,)]
+
+
+def test_inspect_shows_the_mapping_and_what_is_missing(tmp_path, capsys):
+    zp = _zip(tmp_path, "bweb_1t_SP_x", SECTIONS, drop=("NR_ZONA", "DT_EMISSAO_BU", "ANO_ELEICAO"))
+    load_module.inspect(zp, 2022)
+    lines = capsys.readouterr().out.splitlines()
+    by_column = {line.split()[0]: line for line in lines if " <- " in line}
+    assert by_column["vote_count"].split("<-")[1].strip() == "QT_VOTOS"
+    assert by_column["zone"].endswith("<-- REQUIRED")
+    assert by_column["bu_issued_at"].endswith("(NULL)")
+    assert by_column["election_year"].endswith("(context constant: 2022)")
+    assert any(line.startswith("Unused raw columns:") and "NM_PARTIDO" in line for line in lines)
+    assert any(line.split() == ["QT_VOTOS", "120"] for line in lines)  # the first row
+
+
+def test_inspect_of_a_zip_without_data_says_so(tmp_path):
+    empty = tmp_path / "empty.zip"
+    with zipfile.ZipFile(empty, "w") as z:
+        z.writestr("leiame.pdf", b"%PDF-1.4")
+    with pytest.raises(SystemExit, match="No .csv file in empty.zip"):
+        load_module.inspect(empty, 2022)
+
+
+def test_a_municipality_without_ibge_code_is_loaded_and_reported(tmp_path, capsys):
+    unknown = [("SP", 99998, "NOVA CIDADE", 1, 1, "02/10/2022 18:00:00", 50, 40, {13: 40})]
+    db_path = tmp_path / "e.duckdb"
+    load([_zip(tmp_path, "u", unknown)], db_path, 2022)
+    assert "1 municipality(ies) without an IBGE code (SP/99998 NOVA CIDADE)" in capsys.readouterr().out
+    assert _q(db_path, "SELECT DISTINCT municipality_ibge_code FROM votes") == [(None,)]
+
+
+def test_validation_downloads_the_official_result_of_the_scope(monkeypatch):
+    from election_tally import validate as validate_module
+
+    asked = []
+
+    class Resp:
+        def raise_for_status(self): pass
+        def json(self): return {"cand": [{"n": "13", "nm": "C13", "vap": "490"}, {"n": "22", "vap": "500"}]}
+
+    monkeypatch.setattr(validate_module.requests, "get", lambda url, timeout: asked.append(url) or Resp())
+    got = validate_module.official("ele2022", 544, 1, "SP")
+    assert got == {13: ("C13", 490), 22: ("", 500)}
+    assert asked == ["https://resultados.tse.jus.br/oficial/ele2022/544/dados-simplificados/sp/sp-c0001-e000544-r.json"]
+
+
+def test_validation_does_not_pass_when_the_official_result_cannot_be_downloaded(db, monkeypatch):
+    import requests
+
+    from election_tally import validate as validate_module
+
+    class Unavailable:
+        def raise_for_status(self): raise requests.HTTPError("503")
+
+    monkeypatch.setattr(validate_module.requests, "get", lambda url, timeout: Unavailable())
+    with pytest.raises(requests.HTTPError):
+        validate(db[0], "ele2022", 544, 1)

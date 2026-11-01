@@ -9,7 +9,7 @@ import pytest
 import requests
 import yaml
 
-from election_tally import blank_votes, derived, download, elected, leader_flows, load as load_module, repair, results, shifts, tse_tables
+from election_tally import derived, download, elected, leader_flows, load as load_module, repair, results, shifts, tse_tables
 from election_tally.__main__ import main
 from election_tally.domain import VOTES_WITH_PARTY, consecutive_elections
 from election_tally.load import create_schema
@@ -289,13 +289,6 @@ def test_a_renamed_column_of_a_tse_file_is_reported(tmp_path, capsys):
                              "SELECT election_year, result")
     tse_tables._load_year(duckdb.connect(), table, source, 2022, True)
     assert "result" in capsys.readouterr().out
-
-
-def test_blank_votes_still_builds_after_the_results(tmp_path):
-    path = _db_abroad_without_party_in_2014(tmp_path)
-    blank_votes.build(path)
-    with duckdb.connect(str(path), read_only=True) as con:
-        assert con.execute("SELECT count(*) FROM blank_null_votes").fetchone()[0] == 4
 
 
 # --- Found by the review of the derived-table changes

@@ -150,3 +150,65 @@ def test_packaged_municipality_table_is_complete():
     assert len(rows) > 5500
     assert len({r["municipality_code"] for r in rows}) == len(rows)
     assert all(r["ibge_code"].isdigit() and len(r["ibge_code"]) == 7 for r in rows)
+
+
+def test_only_the_chosen_rounds_and_states_are_downloaded(portal, tmp_path):
+    portal()
+    files = download.download(2022, tmp_path, rounds=[1], states=["ac", "BA"])
+    assert [f.name for f in files] == ["bweb_1t_AC_051020221321.zip", "bweb_1t_BA_051020221321.zip"]
+    assert sorted(f.name for f in (tmp_path / "2022").iterdir()) == [f.name for f in files]
+
+
+def test_filters_matching_nothing_download_nothing(portal, tmp_path, capsys):
+    portal()
+    assert download.download(2022, tmp_path, rounds=[2]) == []
+    assert "No file matched" in capsys.readouterr().out
+    assert list((tmp_path / "2022").iterdir()) == []
+
+
+def test_files_already_on_disk_are_still_returned_to_be_loaded(portal, tmp_path):
+    fake = portal()
+    (tmp_path / "2022").mkdir()
+    for url in fake.files:
+        (tmp_path / "2022" / url.rsplit("/", 1)[-1]).write_bytes(b"already here")
+    files = download.download(2022, tmp_path)
+    assert len(files) == len(STATES) and all(f.read_bytes() == b"already here" for f in files)
+    assert fake.peak == 0  # nothing was fetched
+
+
+def test_a_file_without_a_published_hash_is_kept(portal, tmp_path):
+    fake = portal()
+    url = next(iter(fake.files))
+    target = download._fetch(url, tmp_path / "f.zip", None)
+    assert target.read_bytes() == fake.files[url]
+
+
+def test_a_dataset_missing_from_the_portal_says_how_to_fix_it(monkeypatch):
+    class NotFound:
+        status_code = 404
+
+    monkeypatch.setattr(download.requests, "get", lambda *a, **k: NotFound())
+    with pytest.raises(SystemExit, match="--package"):
+        download.list_resources(2022, "no-such-dataset")
+
+
+def test_an_empty_municipality_file_does_not_replace_the_table(monkeypatch, tmp_path):
+    import io
+    import zipfile
+
+    from election_tally import municipalities
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("m.csv", '"DT_GERACAO";"SG_UF";"CD_MUNICIPIO_TSE";"NM_MUNICIPIO_TSE";"CD_MUNICIPIO_IBGE"\n')
+
+    class Resp:
+        content = buf.getvalue()
+        def raise_for_status(self): pass
+
+    monkeypatch.setattr(municipalities.requests, "get", lambda url, timeout: Resp())
+    target = tmp_path / "m.csv"
+    target.write_text("keep", encoding="utf-8")
+    with pytest.raises(ValueError, match="no rows"):
+        municipalities.download(target)
+    assert target.read_text(encoding="utf-8") == "keep"

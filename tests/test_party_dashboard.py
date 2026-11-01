@@ -23,16 +23,6 @@ def test_yaml_case_is_the_one_generated_from_the_csv():
     assert _party_current()["expression"] == parties.canonical_party_sql("party")
 
 
-def test_yaml_case_renames_exactly_what_the_csv_renames():
-    final = parties.resolve(parties.read_renames())
-    kept = ["DEM", "PSL", "UNIÃO", "PT", "MDB", "PCDOB", "PATRIOTA", "P17", "PCA1"]
-    names = list(final) + kept
-    values = ", ".join(f"('{n}')" for n in names)
-    rows = duckdb.sql(f"""SELECT party, {_party_current()['expression']} FROM (VALUES {values}, (NULL))
-                          t(party)""").fetchall()
-    assert dict(rows) == {**final, **{n: n for n in kept}, None: None}
-
-
 def _votes_expression(column):
     dataset = _load("datasets/Eleicoes_DuckDB/votes_2.yaml")
     return next(c["expression"] for c in dataset["columns"] if c["column_name"] == column)

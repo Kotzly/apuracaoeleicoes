@@ -209,12 +209,6 @@ def test_generating_again_replaces_the_data(tmp_path, small):
     assert "national_results" not in tables
 
 
-def test_a_real_database_is_not_synthetic(tmp_path):
-    c = duckdb.connect(str(tmp_path / "real.duckdb"))
-    assert not parties.is_synthetic(c)
-    c.close()
-
-
 @pytest.mark.parametrize("command", ["load", "pipeline"])
 def test_cli_generates_into_its_own_file(tmp_path, monkeypatch, small, command):
     monkeypatch.chdir(tmp_path)

@@ -378,7 +378,7 @@ com `NULL` nos anos antigos.
 ## Testes
 
 ```bash
-pip install pytest && python -m pytest
+pip install -e ".[dev]" && python -m pytest
 ```
 
 Os testes usam dados sintéticos e amostras reais (AC, 1º turno) de 2016, 2018, 2020,

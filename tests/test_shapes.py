@@ -124,3 +124,15 @@ def test_the_shipped_copy_has_every_brazilian_municipality_with_valid_rings():
     for r in rows[:200]:
         ring = shapes.decode_polyline(r["polyline"])
         assert len(ring) >= 3 and all(-35 < lat < 6 and -75 < lon < -30 for lat, lon in ring)
+
+
+def test_download_writes_the_mesh_sorted_by_municipality(tmp_path, monkeypatch):
+    class Resp:
+        content = _mesh().encode()
+        def raise_for_status(self): pass
+
+    monkeypatch.setattr(shapes.requests, "get", lambda url, timeout: Resp())
+    target = tmp_path / "s.csv"
+    assert shapes.download(target) == target
+    rows = list(csv.DictReader(open(target, encoding="utf-8")))
+    assert [(r["municipality_ibge_code"], r["part"]) for r in rows] == [("2900207", "1"), ("2900207", "2"), ("3500105", "1")]
