@@ -271,9 +271,9 @@ def reelection_line(key: str = "reelection") -> Chart:
     """Of those elected last time who ran again, how many won; and how many of the elected are returning."""
     return line(key, "Reeleição", CANDIDATE_RESULTS, "election_year",
                 [metric("100.0 * COUNT(*) FILTER (WHERE elected AND elected_before) / NULLIF(COUNT(*) FILTER (WHERE elected_before), 0)",
-                        "% dos que tentaram e venceram"),
+                        "% de reeleitos entre os que tentaram"),
                  metric("100.0 * COUNT(*) FILTER (WHERE elected AND elected_before) / NULLIF(COUNT(*) FILTER (WHERE elected), 0)",
-                        "% dos eleitos que já tinham o cargo")],
+                        "% de reeleitos do total de eleitos")],
                 filters=[where("elected_before IS NOT NULL")], description=REELECTION_NOTE, ignore=("turno",))
 
 
