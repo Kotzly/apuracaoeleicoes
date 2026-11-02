@@ -204,3 +204,22 @@ def test_mayor_share_distribution_has_one_point_per_candidacy_and_answers_to_the
 
 def _load_datasets(chart):
     return [d for d in map(_load, (_assets() / "datasets" / "Eleicoes_DuckDB").glob("*.yaml")) if d["uuid"] == chart["dataset_uuid"]]
+
+
+def test_winner_maps_give_each_party_its_own_color_and_answer_to_year_and_state():
+    charts = [_load(path) for path in (_assets() / "charts").glob("Cargos__*.yaml")]
+    maps = {c["slice_name"]: c for c in charts if "Partido eleito por" in c["slice_name"]}
+    assert set(maps) == {"Governador · Partido eleito por estado (mapa)", "Prefeito · Partido eleito por município (mapa)"}
+    for chart in maps.values():
+        points = chart["params"]["color_breakpoints"]
+        assert [p["minValue"] for p in points] == [p["maxValue"] for p in points] == list(range(1, len(points) + 1))
+        colors = [(p["color"]["r"], p["color"]["g"], p["color"]["b"]) for p in points]
+        assert len(set(colors)) == len(colors)
+    chart_id = {c["meta"]["uuid"]: c["meta"]["chartId"] for c in _dashboard()["position"].values()
+                if isinstance(c, dict) and c.get("type") == "CHART"}
+    filters = {f["name"]: f for f in _dashboard()["metadata"]["native_filter_configuration"]}
+    for chart in maps.values():
+        for name in ("UF", "Partido"):
+            assert chart_id[chart["uuid"]] not in filters[name]["scope"]["excluded"]
+        assert chart_id[chart["uuid"]] in filters["Turno"]["scope"]["excluded"]
+

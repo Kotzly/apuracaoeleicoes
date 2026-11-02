@@ -295,6 +295,10 @@ Brasil. O mapa por cidade **não usa mapa de fundo**: não precisa de `MAPBOX_AP
 `superset_config.py`, e o navegador não contata serviço de mapas algum. A cor vem de faixas fixas simétricas em torno de
 zero (vermelho perde, azul ganha), definidas no próprio gráfico, sem JavaScript.
 
+No painel **Cargos**, a aba Resultado de Governador e de Prefeito traz um mapa do partido eleito, sobre o dataset virtual `winner_map`.
+As cores por partido ficam em `PARTY_COLORS` (`office_specs/common.py`); um partido fora dessa lista aparece em cinza. A legenda é uma nota em markdown,
+e `superset_config.py` libera `style` em `span` para colorir os quadrados dela.
+
 Como as peças se encaixam:
 
 - `docker/superset/Dockerfile` acrescenta `duckdb` e `duckdb-engine` à imagem oficial.

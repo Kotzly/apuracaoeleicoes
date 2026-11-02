@@ -26,6 +26,7 @@ RUNOFF_SHIFTS = "74708069-0d64-5a36-8660-da0cb48b46e5"
 SENATE_SEATS = "c5a2813a-0a69-552d-92cc-aad1b8aa9be8"
 STATE_RESULTS = "2a100bdc-ae38-5a39-9c19-05be0082dbed"
 UNIT_WINNERS = "9cdb4b61-6e63-5675-8d23-7a0ebca406ff"
+WINNER_MAP = "6b1f0c52-3d7e-4a9b-9e21-5c8a7d40f1e3"
 
 # Offices that come with the office holder's running mates in the ticket table.
 _TICKET = {1: (1, 2), 3: (3, 4), 5: (5, 9, 10), 11: (11, 12)}
@@ -185,6 +186,49 @@ def _elected_table(municipal: bool) -> Chart:
     return clone("elected_table", "Candidatos_eleitos", width=12, height=70, ignore=("turno",), **options)
 
 
+# The deck.gl polygon only colors by number, so each party gets one, and the map's legend is this note.
+PARTY_COLORS = {
+    "MDB": "#1f9e4a", "PSD": "#f2a900", "PP": "#4aa8e0", "PSDB": "#0b3d91", "PL": "#14213d", "PSB": "#e8590c",
+    "PDT": "#c2185b", "REPUBLICANOS": "#00838f", "DEM": "#7cb342", "PT": "#d90429", "UNIÃO": "#3949ab", "PTB": "#8d6e63",
+    "CIDADANIA": "#ec407a", "PODE": "#00bfa5", "AVANTE": "#9ccc65", "SOLIDARIEDADE": "#ff8a65", "PSC": "#5e35b1",
+    "PV": "#2e7d32", "PCDOB": "#b71c1c", "PSL": "#ffd54f", "PROS": "#ab47bc", "PRD": "#6d4c41", "PATRIOTA": "#558b2f",
+    "MOBILIZA": "#26a69a", "PHS": "#90a4ae", "NOVO": "#ff6f00", "AGIR": "#7e57c2", "PRP": "#afb42b", "PRTB": "#546e7a",
+    "REDE": "#004d40", "DC": "#29b6f6", "DEMOCRATA": "#ce93d8", "PSOL": "#fbc02d", "PPL": "#bcaaa4",
+}
+
+
+_WINNER_MAP_PLACES = {3: ("estado", False), 11: ("município", True)}
+
+
+def _rgb(color: str) -> dict:
+    return {"r": int(color[1:3], 16), "g": int(color[3:5], 16), "b": int(color[5:7], 16), "a": 1}
+
+
+def _winner_map_legend() -> str:
+    squares = " &nbsp; ".join(f'<span style="color:{color}">■</span> {party}' for party, color in PARTY_COLORS.items())
+    return f"**Partido eleito.** Passe o mouse para ver o nome; cinza é sem dado.<br>{squares}"
+
+
+def winner_map_rows(places: str, outlines: bool, **options) -> list:
+    """Each municipality is painted, as the only outlines are theirs; a state's cities share its color."""
+    numbers = {party: i for i, party in enumerate(PARTY_COLORS, 1)}
+    cases = " ".join(f"WHEN '{party}' THEN {i}" for party, i in numbers.items())
+    gray = {"r": 200, "g": 200, "b": 200, "a": 1}
+    params = {"line_column": "polygon", "line_type": "json", "reverse_long_lat": False,
+              "metric": metric(f"MAX(CASE party_current {cases} END)", "Partido"), "row_limit": 10000,
+              "tooltip_contents": [{"item_type": "column", "column_name": c} for c in ("label", "party_current", "winner_name")],
+              "filled": True, "stroked": outlines, "extruded": False, "line_width": 1, "line_width_unit": "pixels",
+              "fill_color_picker": gray, "stroke_color_picker": {"r": 90, "g": 90, "b": 90, "a": 0.2},
+              "color_scheme_type": "color_breakpoints", "default_breakpoint_color": gray, "legend_position": None,
+              "color_breakpoints": [{"minValue": numbers[party], "maxValue": numbers[party], "color": _rgb(color)}
+                                    for party, color in PARTY_COLORS.items()],
+              "opacity": 90, "autozoom": False, "mapbox_style": "", "annotation_layers": [],
+              "viewport": {"longitude": -52.5, "latitude": -14.5, "zoom": 3.6, "bearing": 0, "pitch": 0}}
+    chart = Chart(key="winner_map", title=f"Partido eleito por {places} (mapa)", dataset=WINNER_MAP, viz="deck_polygon",
+                  params=params, width=12, height=90, **options)
+    return [note("winner_map_legend", _winner_map_legend(), height=10), [chart]]
+
+
 def result_block(code: int) -> list:
     municipal = code in _MUNICIPAL_CODES
     rows = [
@@ -198,6 +242,8 @@ def result_block(code: int) -> list:
                order=[("votes", False)], filters=[where("votes IS NOT NULL")], ignore=("partido",))],
         [_elected_table(municipal)],
     ]
+    if code in _WINNER_MAP_PLACES:
+        rows[1:1] = winner_map_rows(*_WINNER_MAP_PLACES[code])
     if code in _TICKET:
         offices = ", ".join(map(str, _TICKET[code]))
         rows.append([table("tickets", "Chapas", CANDIDATES,

@@ -29,3 +29,6 @@ NATIVE_FILTER_DEFAULT_ROW_LIMIT = 10000
 
 # Single container: keep rate-limit counters in memory (silences Flask-Limiter's warning).
 RATELIMIT_STORAGE_URI = "memory://"
+
+# The legend of the winner maps colors its squares inline; Markdown would otherwise strip that.
+HTML_SANITIZATION_SCHEMA_EXTENSIONS = {"attributes": {"span": ["style"]}}
