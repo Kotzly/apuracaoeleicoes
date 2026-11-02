@@ -24,6 +24,9 @@ CANDIDATES = [
     (2020, 1, 5, ORD, 11, "SP", 1, 45, "EVA", "PSDB", "ELEITO", "FEMININO"),
     # A namesake of EVA, in another city, is not her re-election.
     (2020, 1, 5, ORD, 11, "SP", 2, 15, "EVA", "PMDB", "ELEITO", "FEMININO"),
+    # Mayor of city 3: a tie, won by the candidate with the higher number.
+    (2024, 1, 8, ORD, 11, "SP", 3, 13, "MIA", "PT", "NÃO ELEITO", "FEMININO"),
+    (2024, 1, 8, ORD, 11, "SP", 3, 45, "NOA", "PSDB", "ELEITO", "FEMININO"),
     # Federal deputies, with an old party name.
     (2018, 1, 1, ORD, 6, "SP", None, 1501, "GIL", "PMDB", "ELEITO POR QP", "MASCULINO"),
     (2022, 1, 2, ORD, 6, "SP", None, 1501, "GIL", "MDB", "ELEITO POR MÉDIA", "MASCULINO"),
@@ -48,6 +51,7 @@ VOTES = [
     (2016, 1, 11, "SP", 1, 1, N, 13, "PT", 60), (2016, 1, 11, "SP", 1, 1, N, 45, "PSDB", 40),
     (2020, 1, 11, "SP", 1, 1, N, 45, "PSDB", 80), (2020, 1, 11, "SP", 1, 1, N, 13, "PT", 20),
     (2020, 1, 11, "SP", 2, 2, N, 15, "PMDB", 10),
+    (2024, 1, 11, "SP", 3, 3, N, 13, "PT", 50), (2024, 1, 11, "SP", 3, 3, N, 45, "PSDB", 50),
     (2018, 1, 6, "SP", 1, 1, N, 1501, "PMDB", 90), (2018, 1, 6, "SP", 1, 1, "Legenda", 15, "PMDB", 10),
     (2022, 1, 6, "SP", 1, 1, N, 1501, "MDB", 70), (2022, 1, 6, "SP", 1, 1, N, 1302, "PT", 30),
     (2022, 1, 1, "SP", 1, 1, N, 13, "PT", 40), (2022, 1, 1, "SP", 1, 1, N, 22, "PL", 60),
@@ -149,6 +153,11 @@ def test_unit_winners_shows_flips_margin_and_continuity(db):
 def test_unit_winners_of_the_president_are_the_most_voted_of_each_state(db):
     assert _rows(db, """SELECT state, party, flipped FROM unit_winners WHERE office_code = 1 ORDER BY 1""") == [
         ("MG", "PT", False), ("SP", "PL", False)]
+
+
+def test_a_tie_goes_to_the_candidate_declared_elected_and_the_margin_is_zero(db):
+    assert _rows(db, """SELECT party, runner_up_party, margin_pp FROM unit_winners
+                        WHERE office_code = 11 AND election_year = 2024""") == [("PSDB", "PT", 0.0)]
 
 
 def test_unit_winners_continuity_follows_the_seat_holder_and_cities_get_a_size(db):

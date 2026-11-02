@@ -117,11 +117,19 @@ def _create_unit_winners(con: duckdb.DuckDBPyConnection) -> None:
             SELECT election_year, round_number, office_code, state, municipality_code, municipality_name,
                    candidate_number, candidate_name, {party}, votes, share_of_valid
             FROM municipality_results WHERE vote_type = 'Nominal' AND office_code = {_MAYOR}),
+        winners AS (
+            SELECT DISTINCT election_year, round_number, office_code, state, municipality_code, candidate_number
+            FROM candidate_results WHERE elected AND office_code IN ({_GOVERNOR}, {_MAYOR})),
         ranked AS (
-            SELECT *, row_number() OVER (PARTITION BY election_year, round_number, office_code, state, municipality_code
-                                         ORDER BY votes DESC, candidate_number) AS position,
-                   max(round_number) OVER (PARTITION BY election_year, office_code, state, municipality_code) AS last_round
-            FROM ballots),
+            -- A tie goes to whoever the TSE declared elected (by law, the oldest), which the votes cannot tell.
+            SELECT b.*, row_number() OVER (PARTITION BY b.election_year, b.round_number, b.office_code, b.state, b.municipality_code
+                                           ORDER BY b.votes DESC, e.candidate_number IS NOT NULL DESC, b.candidate_number) AS position,
+                   max(b.round_number) OVER (PARTITION BY b.election_year, b.office_code, b.state, b.municipality_code) AS last_round
+            FROM ballots b
+            LEFT JOIN winners e ON e.election_year = b.election_year AND e.round_number = b.round_number
+                 AND e.office_code = b.office_code AND e.state = b.state
+                 AND e.municipality_code IS NOT DISTINCT FROM b.municipality_code
+                 AND e.candidate_number = b.candidate_number),
         holders AS (
             SELECT DISTINCT election_year, office_code, state, municipality_code, party_current AS holder_party
             FROM candidate_results WHERE elected AND office_code IN ({_GOVERNOR}, {_MAYOR})),
