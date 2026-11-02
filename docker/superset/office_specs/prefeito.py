@@ -1,6 +1,6 @@
 """Prefeito: base spec plus the mayor flows, city size, the runoff in big cities, flips and continuity."""
 
-from .common import (UNIT_WINNERS, aggregated_table, bar, candidates_block, change_block, flips_table, line, metric, note,
+from .common import (CANDIDATE_RESULTS, UNIT_WINNERS, Chart, aggregated_table, bar, candidates_block, change_block, flips_table, line, metric, note,
                      office, reelection_line, result_block, reuse, round_blank_block, runoff_block, subtab, table,
                      territory_block, where)
 
@@ -45,11 +45,26 @@ CHANGE_NOTE = (
     "em pontos percentuais entre o 1º e o 2º colocado no último turno. Reeleição é aproximada: cruza-se o nome "
     "completo no mesmo cargo e município, pois o TSE muda o identificador a cada eleição e não há CPF.")
 
+def _share_by_party():
+    """One point per candidacy, so the box shows how the party does across cities, not its total."""
+    params = {"columns": ["municipality_code", "candidate_number"], "groupby": ["party_current"],
+              "metrics": [metric("MAX(100.0 * share_of_valid)", "% dos votos válidos")], "whiskerOptions": "Tukey",
+              "x_ticks_layout": "45°", "number_format": ".1f", "row_limit": 50000, "annotation_layers": [],
+              "color_scheme": "supersetColors"}
+    return Chart(key="share_by_party", title="Distribuição do % de votos dos candidatos, por partido",
+                 dataset=CANDIDATE_RESULTS, viz="box_plot", params=params, filters=[where("share_of_valid IS NOT NULL")],
+                 width=12, height=70, description=SHARE_NOTE)
+
+
+SHARE_NOTE = ("Cada ponto da distribuição é uma candidatura, com seu % dos votos válidos no município. A caixa vai do "
+              "1º ao 3º quartil, a linha é a mediana e os pontos isolados são candidaturas atípicas.")
+
+
 OFFICE = office("Prefeito", CODE, 7000, [
     subtab("Resultado", *result_block(CODE)),
     subtab("Território", *territory_block()),
     subtab("Mudança", *change_block()),
-    subtab("Candidatos", *candidates_block(seat_competition=False)),
+    subtab("Candidatos", *candidates_block(seat_competition=False), [_share_by_party()]),
     subtab("Fluxo de prefeitos",
            note("flow_note", FLOW_NOTE, height=6),
            [reuse("Prefeitos_de_um_partido_para_outro")],

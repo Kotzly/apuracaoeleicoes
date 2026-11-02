@@ -191,3 +191,16 @@ def test_check_rejects_a_municipal_chart_outside_the_city_filter():
     assert "Vereador · X" in builder._check_city_filter({"u": chart}, facts, datasets)[0]
     facts[1]["spec"] = Chart(key="x", ignore=("municipio",))
     assert builder._check_city_filter({"u": chart}, facts, datasets) == []
+
+
+def test_mayor_share_distribution_has_one_point_per_candidacy_and_answers_to_the_state_filter():
+    charts = [_load(path) for path in (_assets() / "charts").glob("Cargos__*.yaml")]
+    chart = next(c for c in charts if c["slice_name"] == "Prefeito · Distribuição do % de votos dos candidatos, por partido")
+    assert chart["viz_type"] == "box_plot"
+    assert chart["params"]["groupby"] == ["party_current"]
+    assert chart["params"]["columns"] == ["municipality_code", "candidate_number"]
+    assert "state" in {c["column_name"] for d in _load_datasets(chart) for c in d["columns"]}
+
+
+def _load_datasets(chart):
+    return [d for d in map(_load, (_assets() / "datasets" / "Eleicoes_DuckDB").glob("*.yaml")) if d["uuid"] == chart["dataset_uuid"]]
