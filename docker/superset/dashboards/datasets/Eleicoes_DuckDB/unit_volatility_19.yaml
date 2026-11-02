@@ -279,7 +279,7 @@ columns:
   groupby: true
   filterable: true
   expression: "from_year || ' \u2192 ' || to_year || CASE round_number WHEN 1 THEN\
-    \ ' \xB7 vota\xE7\xE3o principal (T1)' ELSE ' \xB7 revers\xE3o (T2)' END"
+    \ ' \xB7 vota\xE7\xE3o principal (T1)' ELSE ' \xB7 2\xBA turno (T2)' END"
   description: null
   python_date_format: null
   datetime_format: null

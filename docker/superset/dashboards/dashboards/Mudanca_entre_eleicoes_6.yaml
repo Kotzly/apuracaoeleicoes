@@ -60,7 +60,7 @@ position:
         \ deslocamento entre partidos, e n\xE3o como continuidade do eleitorado. **Filtros:**\
         \ Cargo e Transi\xE7\xE3o s\xE3o obrigat\xF3rios e se encadeiam: ao trocar o Cargo, escolha a Transi\xE7\xE3o de novo (cargos federais\
         \ e municipais t\xEAm anos diferentes); Transi\xE7\xE3o termina em T1 (vota\xE7\
-        \xE3o principal) ou T2 (revers\xE3o, s\xF3 onde o cargo teve segundo turno\
+        \xE3o principal) ou T2 (s\xF3 onde o cargo teve segundo turno\
         \ nos dois anos: prefeito em poucas cidades, governador em parte dos estados).\
         \ O filtro Base do percentual troca os votos v\xE1lidos por todos os votos, incluindo brancos e nulos, em percentuais, varia\xE7\xF5es e volatilidade; os n\xFAmeros de votos n\xE3o mudam. Branco e Nulo tamb\xE9m s\xE3o op\xE7\xF5es do filtro Partido: o percentual deles \xE9 sobre todos os votos do local, enquanto o dos partidos fica sobre a base escolhida; eles s\xF3 entram na volatilidade em Todos os votos. Partido vale nas abas que comparam um partido; UF tem sele\xE7\xE3o inversa;\
         \ Munic\xEDpio depende da UF e s\xF3 vale onde h\xE1 cidade (n\xE3o vale para\
@@ -128,7 +128,7 @@ position:
       height: 80
       chartId: 2
       uuid: e969650a-1b9f-42f3-a895-9ad6a19e2f62
-      sliceName: Volatilidade por UF (mapa)
+      sliceName: Volatilidade (Pedersen) por UF (mapa)
   ROW-TAB-map-0:
     type: ROW
     id: ROW-TAB-map-0
@@ -595,7 +595,7 @@ position:
       height: 90
       chartId: 15
       uuid: caf3e770-6092-4a33-8995-f6c713416dfb
-      sliceName: Volatilidade por UF
+      sliceName: Volatilidade (Pedersen) por UF
   CHART-ped_city:
     type: CHART
     id: CHART-ped_city
@@ -611,7 +611,7 @@ position:
       height: 90
       chartId: 16
       uuid: e9f894f0-3d20-4ce3-9c71-e00e1da339d0
-      sliceName: Volatilidade nas cidades (maiores)
+      sliceName: Volatilidade (Pedersen) nas cidades (maiores)
   ROW-TAB-volatility-0:
     type: ROW
     id: ROW-TAB-volatility-0
@@ -636,7 +636,7 @@ position:
       height: 70
       chartId: 17
       uuid: 31ff256c-e571-4235-8bea-798da8074264
-      sliceName: "Distribui\xE7\xE3o da volatilidade nas cidades"
+      sliceName: "Distribui\xE7\xE3o da volatilidade (Pedersen) nas cidades"
   ROW-TAB-volatility-1:
     type: ROW
     id: ROW-TAB-volatility-1
@@ -884,8 +884,8 @@ metadata:
       excluded:
       - 18
       - 19
-    description: "Obrigat\xF3rio. T1 \xE9 a vota\xE7\xE3o principal; T2, a revers\xE3\
-      o (segundo turno nos dois anos)."
+    description: "Obrigat\xF3rio. T1 \xE9 a vota\xE7\xE3o principal; T2, o segundo\
+      \ turno (s\xF3 onde houve nos dois anos)."
     adhoc_filters:
     - expressionType: SIMPLE
       clause: WHERE

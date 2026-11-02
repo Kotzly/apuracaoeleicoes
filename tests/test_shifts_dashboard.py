@@ -205,9 +205,9 @@ def test_calculated_columns_compute_what_their_names_say():
     assert row[0] == 25
 
 
-def test_latest_transition_sorts_first_descending_with_the_main_vote_before_the_reversal():
-    labels = ["2022 → 2026 · reversão (T2)", "2022 → 2026 · votação principal (T1)",
-              "2018 → 2022 · votação principal (T1)", "2018 → 2022 · reversão (T2)"]
+def test_latest_transition_sorts_first_descending_with_the_main_vote_before_the_second_round():
+    labels = ["2022 → 2026 · 2º turno (T2)", "2022 → 2026 · votação principal (T1)",
+              "2018 → 2022 · votação principal (T1)", "2018 → 2022 · 2º turno (T2)"]
     assert sorted(labels, reverse=True)[0] == "2022 → 2026 · votação principal (T1)"
     expression = _expressions("party_shifts")["transition_label"]
     t1, t2 = (duckdb.sql(f"SELECT {expression} FROM (VALUES (2022, 2026, {n})) t(from_year, to_year, round_number)")
@@ -257,12 +257,12 @@ def test_filters_reach_exactly_the_charts_where_they_mean_something():
     assert _names(_scoped(filters["Cargo"])) - {"Municípios por candidato mais votado",
                                                 "Seções por candidato mais votado"} == everything
     assert _scoped(filters["Cargo"]) == _scoped(filters["Transição"]) == _scoped(filters["UF"])
-    volatility = {c["slice_name"] for c in _tab_charts()["Volatilidade"].values()} | {"Volatilidade por UF (mapa)"}
+    volatility = {c["slice_name"] for c in _tab_charts()["Volatilidade"].values()} | {"Volatilidade (Pedersen) por UF (mapa)"}
     assert not _names(_scoped(filters["Partido"])) & volatility  # unit_volatility has no party
     city = _names(_scoped(filters["Município"]))
     assert city == {"Cidades: maiores altas", "Cidades: maiores quedas", "Cidades: maiores variações (tabela)",
                     "Seções: maiores altas", "Seções: maiores quedas", "Seções: maiores variações (tabela)",
-                    "Volatilidade nas cidades (maiores)", "Distribuição da volatilidade nas cidades", "Variação por cidade (mapa)"}
+                    "Volatilidade (Pedersen) nas cidades (maiores)", "Distribuição da volatilidade (Pedersen) nas cidades", "Variação por cidade (mapa)"}
     assert filters["Município"]["cascadeParentIds"] == [filters["UF"]["id"]]
     assert filters["UF"]["controlValues"]["inverseSelection"] and filters["UF"]["controlValues"]["multiSelect"]
 
@@ -293,7 +293,7 @@ def test_notes_explain_the_caveats():
     for phrase in ("fusões não são unificadas", "uniÃo".lower(), "não disputou conta 0%", "psl em 2018 → pl",
                    "presidente, governador, senador e prefeito", "82%", "75%", "96%", "97%", "98%",
                    "redesenhados", "0% = mesma distribuição", "100% = nenhum voto ficou no mesmo partido",
-                   "reversão", "zz", "mapa por cidade"):
+                   "t2 (só onde", "zz", "mapa por cidade"):
         assert phrase in text, phrase
 
 
